@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#e8f0f7" />
+    <meta name="description" content="Program a robot with blocks and guide it through a colorful maze." />
+    <title>Circuit Maze — Level 01</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script defer src="./vendor/blockly_compressed.js"></script>
+    <script defer src="./vendor/en.js"></script>
+    <script defer src="./app.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="masthead">
+        <div class="brand">
+          <span class="brand-mark" aria-hidden="true"><span></span></span>
+          <div>
+            <p class="brand-name">Circuit Maze</p>
+            <p class="brand-subtitle">Robot programming playground</p>
+          </div>
+        </div>
+        <div class="level-badge"><span class="badge-dot"></span> Level 01 of 10 <span class="badge-note">prototype</span></div>
+      </header>
+
+      <div class="game-layout">
+        <section class="board-panel" aria-labelledby="board-title">
+          <div class="panel-heading">
+            <div>
+              <p class="section-label">The maze</p>
+              <h1 id="board-title">Reach the flag.</h1>
+              <p class="panel-description">Build a program, then watch your robot follow it.</p>
+            </div>
+            <div class="board-size">10 × 10</div>
+          </div>
+
+          <div class="board-frame">
+            <div class="board" id="board" role="grid" aria-label="Ten by ten robot maze"></div>
+          </div>
+
+          <div class="readout" aria-live="polite">
+            <span class="status-icon" id="status-icon" aria-hidden="true">●</span>
+            <div class="status-copy">
+              <strong id="status-title">Ready to program</strong>
+              <span id="status-detail">Drag blocks into the workspace and press Run program.</span>
+            </div>
+            <div class="stats" aria-label="Robot statistics">
+              <span><b id="health-value">10</b><small>Health</small></span>
+              <span><b id="steps-value">0</b><small>Steps</small></span>
+            </div>
+          </div>
+
+          <div class="legend" aria-label="Tile legend">
+            <div class="legend-item"><span class="legend-color grass"></span><span><b>Grass</b><small>Safe</small></span></div>
+            <div class="legend-item"><span class="legend-color acid"></span><span><b>Acid</b><small>−2 health</small></span></div>
+            <div class="legend-item"><span class="legend-color fire"></span><span><b>Fire</b><small>−4 health</small></span></div>
+            <div class="legend-item"><span class="legend-color rock"></span><span><b>Rock</b><small>Blocked</small></span></div>
+          </div>
+        </section>
+
+        <section class="program-panel" aria-labelledby="program-title">
+          <div class="panel-heading program-heading">
+            <div>
+              <p class="section-label">Your program</p>
+              <h2 id="program-title">Teach it to move.</h2>
+              <p class="panel-description">Drag blocks from the left and snap them below “when run.”</p>
+            </div>
+          </div>
+
+          <div class="workspace-frame">
+            <div id="blocklyDiv" aria-label="Visual programming workspace"></div>
+          </div>
+
+          <div class="controls">
+            <button class="run-button" id="run-button" type="button"><span aria-hidden="true">▶</span> Run program</button>
+            <button class="secondary-button" id="reset-button" type="button">Reset robot</button>
+            <button class="secondary-button" id="example-button" type="button">Load example</button>
+            <button class="text-button" id="clear-button" type="button">Clear blocks</button>
+          </div>
+          <p class="editor-tip"><span aria-hidden="true">↖</span> The robot starts facing up. Turn blocks change its direction by 90°.</p>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
