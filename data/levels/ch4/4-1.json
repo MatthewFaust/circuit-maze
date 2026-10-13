@@ -1,0 +1,81 @@
+{
+  "id": "4-1",
+  "title": "Hand on the Wall",
+  "concept": "Wall following",
+  "new_blocks": [],
+  "intro": "Put one hand on the wall and never let go: if you can turn toward that hand, do it; otherwise go straight; otherwise turn away. It works in any maze whose walls are all connected. Both hands work here, but one is cheaper.",
+  "cs_note": "In a maze with no loops, [b]wall following[/b] is really a depth-first traversal that walks every corridor at most twice. It's correct only because the walls are all connected; keep that assumption in mind.",
+  "hints": ["Right-hand rule: if path_right(): turn right and move; elif path_ahead(): move; else: turn left.", "For the stamina star, try the mirror image: the left-hand rule."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "while", "if", "if_else"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit"], "functions": [], "not": true},
+  "block_limit": 8,
+  "par": {"blocks": 7, "stamina": 105},
+  "robot": {"stamina": 60},
+  "solution": [
+    "while not at_exit():",
+    "    if path_left():",
+    "        turn_left()",
+    "        move()",
+    "    elif path_ahead():",
+    "        move()",
+    "    else:",
+    "        turn_right()"
+  ],
+  "alt_solutions": [
+    {"name": "right-hand rule", "program": [
+      "while not at_exit():",
+      "    if path_right():",
+      "        turn_right()",
+      "        move()",
+      "    elif path_ahead():",
+      "        move()",
+      "    else:",
+      "        turn_left()"
+    ]}
+  ],
+  "anti_solutions": [
+    {"name": "the 2-3 road follower", "program": [
+      "while not at_exit():",
+      "    if path_ahead():",
+      "        move()",
+      "    elif path_left():",
+      "        turn_left()",
+      "    else:",
+      "        turn_right()"
+    ]}
+  ],
+  "variants": [
+    {"name": "Maze 1", "facing": "E", "map": [
+      "#########",
+      "#S....#.#",
+      "#####.#.#",
+      "#.....#.#",
+      "#.#####.#",
+      "#...#E..#",
+      "###.###.#",
+      "#.......#",
+      "#########"
+    ]},
+    {"name": "Maze 2", "facing": "S", "map": [
+      "#########",
+      "#S#.....#",
+      "#.#.###.#",
+      "#...#.#.#",
+      "#####.#.#",
+      "#.....#.#",
+      "#.###.#.#",
+      "#..E#...#",
+      "#########"
+    ]},
+    {"name": "Maze 3", "facing": "S", "map": [
+      "#########",
+      "#S#.....#",
+      "#.###.#.#",
+      "#...#.#.#",
+      "###.#.#.#",
+      "#...#E#.#",
+      "#.#####.#",
+      "#.......#",
+      "#########"
+    ]}
+  ]
+}

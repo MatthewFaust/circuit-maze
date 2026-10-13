@@ -1,0 +1,38 @@
+{
+  "id": "2-5",
+  "title": "Spike Lanes",
+  "concept": "Decisions that depend on context",
+  "new_blocks": ["spike_ahead"],
+  "intro": "Two lanes, lots of spikes, one HP bar. Each lane alone has enough spikes to destroy you, so switch lanes whenever a spike is ahead. Which way is the other lane? That depends on which lane you're in.",
+  "cs_note": "Sometimes the right action depends on [b]context[/b] (here, your lane), so decisions nest. The robot has no memory of its lane, but it can sense it: that's state you sense rather than store.",
+  "hints": ["In the top lane the wall is on your left; in the bottom lane it's on your right.", "if spike_ahead(): if path_left(): change lane to the left, else: change lane to the right."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut", "while", "if", "if_else"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit", "bush_ahead", "stone_ahead", "spike_ahead"], "functions": [], "not": true},
+  "block_limit": 12,
+  "par": {"blocks": 10, "stamina": 70},
+  "robot": {"stamina": 30},
+  "solution": ["while not at_exit():", "    if spike_ahead():", "        if path_left():", "            turn_left()", "            move()", "            turn_right()", "        else:", "            turn_right()", "            move()", "            turn_left()", "    else:", "        move()"],
+  "anti_solutions": [
+    {"name": "plow straight through", "program": ["while not at_exit():", "    move()"], "expect_fail_code": "hp_zero"},
+    {"name": "always sidestep right", "program": ["while not at_exit():", "    if spike_ahead():", "        turn_right()", "        move()", "        turn_left()", "    else:", "        move()"]}
+  ],
+  "variants": [
+    {"name": "Map 1", "facing": "E", "map": [
+      "#################",
+      "#S.^^....^^....E#",
+      "#.....^^....^^..#",
+      "#################"
+    ]},
+    {"name": "Map 2", "facing": "E", "map": [
+      "##############",
+      "#...^^....^.E#",
+      "#S^....^^...^#",
+      "##############"
+    ]},
+    {"name": "Map 3", "facing": "E", "map": [
+      "############",
+      "#S..^...^^^#",
+      "#.^...^...E#",
+      "############"
+    ]}
+  ]
+}

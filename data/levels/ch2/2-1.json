@@ -1,0 +1,46 @@
+{
+  "id": "2-1",
+  "title": "Are We There Yet?",
+  "concept": "while loops",
+  "new_blocks": ["while", "path_ahead", "at_exit", "not"],
+  "intro": "Three corridors, one program. They have different lengths, so counting won't save you. [b]while[/b] keeps repeating its body as long as its condition is true. Your program has to pass all three maps.",
+  "cs_note": "A [b]while loop[/b] runs until its condition becomes false. Checking a sensor is free, but a loop whose condition never changes runs forever. Each map is a [b]test case[/b]: code that passes one test isn't necessarily correct.",
+  "hints": ["Use the tabs above the maze to look at every map before you write code.", "while path_ahead(): move() walks until the wall. Then turn and do it again."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut", "while"], "sensors": ["path_ahead", "at_exit"], "functions": [], "not": true},
+  "block_limit": 5,
+  "par": {"blocks": 5, "stamina": 31},
+  "robot": {"stamina": 20},
+  "solution": ["while path_ahead():", "    move()", "turn_left()", "while path_ahead():", "    move()"],
+  "anti_solutions": [
+    {"name": "counted for map 1", "program": ["for _ in range(3):", "    move()", "turn_left()", "for _ in range(5):", "    move()"]},
+    {"name": "never turns", "program": ["while not at_exit():", "    move()"], "expect_fail_code": "hp_zero"}
+  ],
+  "variants": [
+    {"name": "Map 1", "facing": "E", "map": [
+      "######",
+      "####E#",
+      "####.#",
+      "####.#",
+      "####.#",
+      "####.#",
+      "#S...#",
+      "######"
+    ]},
+    {"name": "Map 2", "facing": "E", "map": [
+      "#########",
+      "#######E#",
+      "#######.#",
+      "#S......#",
+      "#########"
+    ]},
+    {"name": "Map 3", "facing": "E", "map": [
+      "###########",
+      "#########E#",
+      "#########.#",
+      "#########.#",
+      "#########.#",
+      "#S........#",
+      "###########"
+    ]}
+  ]
+}

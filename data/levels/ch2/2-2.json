@@ -1,0 +1,35 @@
+{
+  "id": "2-2",
+  "title": "Shrubbery!",
+  "concept": "if / else",
+  "new_blocks": ["if", "if_else", "bush_ahead"],
+  "intro": "The bushes are in different places on every map. Look before you leap: [b]if/else[/b] checks a sensor and runs exactly one of its two branches.",
+  "cs_note": "A [b]conditional[/b] picks one branch. Cutting on every step would also clear the way, but it costs 4 stamina per tile; checking first is free. Conditions buy efficiency.",
+  "hints": ["Keep going until you're at the exit: while not at_exit().", "Inside the loop: if a bush is ahead, cut it, otherwise move."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut", "while", "if", "if_else"], "sensors": ["path_ahead", "at_exit", "bush_ahead"], "functions": [], "not": true},
+  "block_limit": 5,
+  "par": {"blocks": 4, "stamina": 53},
+  "robot": {"stamina": 25},
+  "solution": ["while not at_exit():", "    if bush_ahead():", "        cut()", "    else:", "        move()"],
+  "anti_solutions": [
+    {"name": "move only", "program": ["while not at_exit():", "    move()"], "expect_fail_code": "hp_zero"},
+    {"name": "cut every step", "program": ["while not at_exit():", "    cut()", "    move()"], "expect_fail_code": "no_stamina"}
+  ],
+  "variants": [
+    {"name": "Map 1", "facing": "E", "map": [
+      "#############",
+      "#S..B...B..E#",
+      "#############"
+    ]},
+    {"name": "Map 2", "facing": "E", "map": [
+      "############",
+      "#S.BB.....E#",
+      "############"
+    ]},
+    {"name": "Map 3", "facing": "E", "map": [
+      "#############",
+      "#SB.B.B.B..E#",
+      "#############"
+    ]}
+  ]
+}

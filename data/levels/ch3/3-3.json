@@ -1,0 +1,101 @@
+{
+  "id": "3-3",
+  "title": "Hedge Trimmer, Inc.",
+  "concept": "Procedural abstraction",
+  "new_blocks": [],
+  "intro": "Every hallway needs the same chore: clear the bushes and walk to the far wall. Write the chore once as a function. Careful: each junction has a wrong branch full of spikes, and your side sensors are offline.",
+  "cs_note": "A function can hide a loop and a decision behind one name. That's [b]procedural abstraction[/b]: the caller just says \"clear this hallway\" and trusts A to handle the details.",
+  "hints": ["Inside A: keep going until stone is ahead; cut bushes, otherwise move.", "Main: A, turn left, A, turn right, A, turn right, A."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut", "while", "if", "if_else"], "sensors": ["path_ahead", "at_exit", "bush_ahead", "stone_ahead", "spike_ahead"], "functions": ["A"], "not": true},
+  "block_limit": 14,
+  "par": {"blocks": 12, "stamina": 105},
+  "robot": {"stamina": 40},
+  "solution": [
+    "def A():",
+    "    while not stone_ahead():",
+    "        if bush_ahead():",
+    "            cut()",
+    "        else:",
+    "            move()",
+    "A()", "turn_left()", "A()", "turn_right()", "A()", "turn_right()", "A()"
+  ],
+  "anti_solutions": [
+    {"name": "probe by turning", "program": [
+      "def A():",
+      "    while not at_exit():",
+      "        if bush_ahead():",
+      "            cut()",
+      "        elif path_ahead():",
+      "            move()",
+      "        else:",
+      "            turn_left()",
+      "            if not path_ahead():",
+      "                turn_right()",
+      "                turn_right()",
+      "A()"
+    ], "expect_fail_code": "hp_zero"},
+    {"name": "stops at the first bush", "program": [
+      "def A():",
+      "    while path_ahead():",
+      "        move()",
+      "A()", "turn_left()", "A()", "turn_right()", "A()", "turn_right()", "A()"
+    ]}
+  ],
+  "checks": {"inline_must_fail": true},
+  "variants": [
+    {"name": "Map 1", "facing": "E", "map": [
+      "#################",
+      "##############.##",
+      "##############^##",
+      "##############^##",
+      "##############.##",
+      "####.^^...B.B..##",
+      "########.#####.##",
+      "########.#####.##",
+      "########.#####.##",
+      "########.#####E##",
+      "#S..B....########",
+      "########.########",
+      "########^########",
+      "########^########",
+      "########.########",
+      "#################"
+    ]},
+    {"name": "Map 2", "facing": "E", "map": [
+      "#################",
+      "##############.##",
+      "##############^##",
+      "##############^##",
+      "##############.##",
+      "####.^^........##",
+      "########.#####.##",
+      "########B#####B##",
+      "########.#####.##",
+      "########.#####E##",
+      "#S.B..B..########",
+      "########.########",
+      "########^########",
+      "########^########",
+      "########.########",
+      "#################"
+    ]},
+    {"name": "Map 3", "facing": "E", "map": [
+      "#################",
+      "##############.##",
+      "##############^##",
+      "##############^##",
+      "##############.##",
+      "####.^^..B.....##",
+      "########B#####.##",
+      "########.#####.##",
+      "########B#####.##",
+      "########.#####E##",
+      "#S.......########",
+      "########.########",
+      "########^########",
+      "########^########",
+      "########.########",
+      "#################"
+    ]}
+  ]
+}

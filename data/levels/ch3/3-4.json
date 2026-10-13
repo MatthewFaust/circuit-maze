@@ -1,0 +1,84 @@
+{
+  "id": "3-4",
+  "title": "Echo",
+  "concept": "Recursion as memory",
+  "new_blocks": [],
+  "intro": "Walk east until the wall, then north [i]the same distance[/i], then step into the exit on your right. The decoy pockets look exactly like the exit, you have no variables, and you can't afford to peek into every pocket.",
+  "cs_note": "Each pending function call is a [b]stack frame[/b]. If A moves and then calls itself, every step east leaves a frame waiting; when the calls return, each frame replays one move north. The call stack is memory.",
+  "hints": ["A function can call itself. What should A do when the way ahead is blocked? That's the base case.", "def A(): if path_ahead(): move, A, move; else: turn_left."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut", "while", "if", "if_else"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit", "bush_ahead", "stone_ahead", "spike_ahead"], "functions": ["A", "B"], "not": true},
+  "block_limit": 0,
+  "par": {"blocks": 9, "stamina": 33},
+  "robot": {"stamina": 16},
+  "solution": [
+    "def A():",
+    "    if path_ahead():",
+    "        move()",
+    "        A()",
+    "        move()",
+    "    else:",
+    "        turn_left()",
+    "A()", "turn_right()", "move()"
+  ],
+  "anti_solutions": [
+    {"name": "peek into every pocket", "program": [
+      "while path_ahead():",
+      "    move()",
+      "turn_left()",
+      "while not at_exit():",
+      "    move()",
+      "    if path_right():",
+      "        turn_right()",
+      "        move()",
+      "        turn_left()",
+      "        turn_left()",
+      "        move()",
+      "        turn_right()"
+    ], "expect_fail_code": "no_stamina"},
+    {"name": "no base case", "program": [
+      "def A():",
+      "    if path_ahead():",
+      "        move()",
+      "    A()",
+      "A()"
+    ], "expect_fail_code": "stack_overflow"}
+  ],
+  "variants": [
+    {"name": "N = 2", "facing": "E", "map": [
+      "##########",
+      "#######.##",
+      "#######..#",
+      "#######.##",
+      "#######..#",
+      "#######.##",
+      "#######.E#",
+      "#######.##",
+      "#####S..##",
+      "##########"
+    ]},
+    {"name": "N = 4", "facing": "E", "map": [
+      "##########",
+      "#######.##",
+      "#######..#",
+      "#######.##",
+      "#######.E#",
+      "#######.##",
+      "#######..#",
+      "#######.##",
+      "###S....##",
+      "##########"
+    ]},
+    {"name": "N = 6", "facing": "E", "map": [
+      "##########",
+      "#######.##",
+      "#######.E#",
+      "#######.##",
+      "#######..#",
+      "#######.##",
+      "#######..#",
+      "#######.##",
+      "#S......##",
+      "##########"
+    ]}
+  ]
+}

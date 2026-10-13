@@ -1,0 +1,46 @@
+{
+  "id": "2-3",
+  "title": "Winding Road",
+  "concept": "Nested decisions",
+  "new_blocks": ["path_left", "path_right"],
+  "intro": "Follow the road wherever it bends. Going straight when you can, and otherwise turning the way the road goes, works on every one of these maps.",
+  "cs_note": "[b]Nested conditionals[/b] form a decision tree: can I go straight? If not, can I go left? Every leaf of the tree needs an action, or the robot freezes.",
+  "hints": ["When the way ahead is blocked, there is exactly one open side.", "if path_ahead(): move(), else check path_left() to choose which way to turn."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut", "while", "if", "if_else"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit", "bush_ahead"], "functions": [], "not": true},
+  "block_limit": 6,
+  "par": {"blocks": 6, "stamina": 63},
+  "robot": {"stamina": 40},
+  "solution": ["while not at_exit():", "    if path_ahead():", "        move()", "    elif path_left():", "        turn_left()", "    else:", "        turn_right()"],
+  "anti_solutions": [
+    {"name": "always turns left", "program": ["while not at_exit():", "    if path_ahead():", "        move()", "    else:", "        turn_left()"], "expect_fail_code": "no_stamina"}
+  ],
+  "variants": [
+    {"name": "Map 1", "facing": "E", "map": [
+      "#########",
+      "#S..#####",
+      "###.#####",
+      "###....##",
+      "######.##",
+      "##E....##",
+      "#########"
+    ]},
+    {"name": "Map 2", "facing": "N", "map": [
+      "#########",
+      "##E...###",
+      "#####.###",
+      "#.....###",
+      "#.#######",
+      "#S#######",
+      "#########"
+    ]},
+    {"name": "Map 3", "facing": "E", "map": [
+      "###########",
+      "#S........#",
+      "#########.#",
+      "#.........#",
+      "#.#########",
+      "#........E#",
+      "###########"
+    ]}
+  ]
+}

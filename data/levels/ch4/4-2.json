@@ -1,0 +1,205 @@
+{
+  "id": "4-2",
+  "title": "Island Trap",
+  "concept": "Depth-first search",
+  "new_blocks": [
+    "backtrack",
+    "unvisited_ahead",
+    "unvisited_left",
+    "unvisited_right"
+  ],
+  "intro": "Your trusty wall-hugger just met an island: a wall that isn't connected to the outside. It will circle forever. The robot now drops breadcrumbs: [b]unvisited_ahead()[/b] tells you if a tile is new, and [b]backtrack()[/b] steps back along your trail.",
+  "cs_note": "Any rule that only looks at its surroundings can be trapped in a loop. [b]Depth-first search[/b] adds memory: a visited set, plus a stack of breadcrumbs. move() pushes, backtrack() pops; going as deep as possible and then backing up is exactly LIFO.",
+  "hints": [
+    "Remember where you've been: prefer tiles you have never visited.",
+    "If nothing new is ahead, left or right, backtrack()."
+  ],
+  "allowed": {
+    "blocks": [
+      "move",
+      "turn_left",
+      "turn_right",
+      "while",
+      "if",
+      "if_else",
+      "backtrack"
+    ],
+    "sensors": [
+      "path_ahead",
+      "path_left",
+      "path_right",
+      "at_exit",
+      "unvisited_ahead",
+      "unvisited_left",
+      "unvisited_right"
+    ],
+    "functions": [],
+    "not": true
+  },
+  "block_limit": 10,
+  "par": {
+    "blocks": 8,
+    "stamina": 65
+  },
+  "robot": {
+    "stamina": 50
+  },
+  "solution": [
+    "while not at_exit():",
+    "    if unvisited_left():",
+    "        turn_left()",
+    "    elif unvisited_ahead():",
+    "        move()",
+    "    elif unvisited_right():",
+    "        turn_right()",
+    "    else:",
+    "        backtrack()"
+  ],
+  "alt_solutions": [
+    {
+      "name": "ahead, left, right",
+      "program": [
+        "while not at_exit():",
+        "    if unvisited_ahead():",
+        "        move()",
+        "    elif unvisited_left():",
+        "        turn_left()",
+        "    elif unvisited_right():",
+        "        turn_right()",
+        "    else:",
+        "        backtrack()"
+      ]
+    },
+    {
+      "name": "ahead, right, left",
+      "program": [
+        "while not at_exit():",
+        "    if unvisited_ahead():",
+        "        move()",
+        "    elif unvisited_right():",
+        "        turn_right()",
+        "    elif unvisited_left():",
+        "        turn_left()",
+        "    else:",
+        "        backtrack()"
+      ]
+    },
+    {
+      "name": "right, ahead, left",
+      "program": [
+        "while not at_exit():",
+        "    if unvisited_right():",
+        "        turn_right()",
+        "    elif unvisited_ahead():",
+        "        move()",
+        "    elif unvisited_left():",
+        "        turn_left()",
+        "    else:",
+        "        backtrack()"
+      ]
+    },
+    {
+      "name": "left, right, ahead (turn and move)",
+      "program": [
+        "while not at_exit():",
+        "    if unvisited_left():",
+        "        turn_left()",
+        "        move()",
+        "    elif unvisited_right():",
+        "        turn_right()",
+        "        move()",
+        "    elif unvisited_ahead():",
+        "        move()",
+        "    else:",
+        "        backtrack()"
+      ]
+    },
+    {
+      "name": "right, left, ahead (turn and move)",
+      "program": [
+        "while not at_exit():",
+        "    if unvisited_right():",
+        "        turn_right()",
+        "        move()",
+        "    elif unvisited_left():",
+        "        turn_left()",
+        "        move()",
+        "    elif unvisited_ahead():",
+        "        move()",
+        "    else:",
+        "        backtrack()"
+      ]
+    }
+  ],
+  "anti_solutions": [
+    {
+      "name": "right-hand rule",
+      "program": [
+        "while not at_exit():",
+        "    if path_right():",
+        "        turn_right()",
+        "        move()",
+        "    elif path_ahead():",
+        "        move()",
+        "    else:",
+        "        turn_left()"
+      ],
+      "expect_fail_code": "no_stamina"
+    },
+    {
+      "name": "left-hand rule",
+      "program": [
+        "while not at_exit():",
+        "    if path_left():",
+        "        turn_left()",
+        "        move()",
+        "    elif path_ahead():",
+        "        move()",
+        "    else:",
+        "        turn_right()"
+      ],
+      "expect_fail_code": "no_stamina"
+    }
+  ],
+  "variants": [
+    {
+      "name": "Island 1",
+      "facing": "E",
+      "map": [
+        "############",
+        "#E........##",
+        "###.#####.##",
+        "###.#####.##",
+        "###.#####.##",
+        "###...S...##",
+        "############"
+      ]
+    },
+    {
+      "name": "Island 2",
+      "facing": "W",
+      "map": [
+        "############",
+        "##........E#",
+        "##.#####.###",
+        "##.#####.###",
+        "##.#####.###",
+        "##...S...###",
+        "############"
+      ]
+    },
+    {
+      "name": "Island 3",
+      "facing": "W",
+      "map": [
+        "############",
+        "######E#####",
+        "###.......##",
+        "###.#####.##",
+        "###.#####.##",
+        "###...S...##",
+        "############"
+      ]
+    }
+  ]
+}

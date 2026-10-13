@@ -1,0 +1,226 @@
+{
+  "id": "4-3",
+  "title": "Lights Out",
+  "concept": "DFS on an unknown map",
+  "new_blocks": [],
+  "intro": "Fog! You can only see the tiles right around the robot, so you can't plan a route by looking. Neither could Theseus. Trust the algorithm: your DFS from Island Trap works on any maze.",
+  "cs_note": "DFS always finds the exit if there is one, because it never visits a tile twice and backs up only when it's stuck. But it finds [i]an[/i] exit path, not the shortest one: watch how long the breadcrumb stack gets.",
+  "hints": [
+    "The same program as in Island Trap.",
+    "Try different orders of ahead/left/right for the stamina star."
+  ],
+  "allowed": {
+    "blocks": [
+      "move",
+      "turn_left",
+      "turn_right",
+      "while",
+      "if",
+      "if_else",
+      "backtrack"
+    ],
+    "sensors": [
+      "path_ahead",
+      "path_left",
+      "path_right",
+      "at_exit",
+      "unvisited_ahead",
+      "unvisited_left",
+      "unvisited_right"
+    ],
+    "functions": [],
+    "not": true
+  },
+  "fog": true,
+  "block_limit": 10,
+  "par": {
+    "blocks": 8,
+    "stamina": 142
+  },
+  "robot": {
+    "stamina": 150
+  },
+  "solution": [
+    "while not at_exit():",
+    "    if unvisited_ahead():",
+    "        move()",
+    "    elif unvisited_right():",
+    "        turn_right()",
+    "    elif unvisited_left():",
+    "        turn_left()",
+    "    else:",
+    "        backtrack()"
+  ],
+  "alt_solutions": [
+    {
+      "name": "ahead, left, right",
+      "program": [
+        "while not at_exit():",
+        "    if unvisited_ahead():",
+        "        move()",
+        "    elif unvisited_left():",
+        "        turn_left()",
+        "    elif unvisited_right():",
+        "        turn_right()",
+        "    else:",
+        "        backtrack()"
+      ]
+    },
+    {
+      "name": "left, ahead, right",
+      "program": [
+        "while not at_exit():",
+        "    if unvisited_left():",
+        "        turn_left()",
+        "    elif unvisited_ahead():",
+        "        move()",
+        "    elif unvisited_right():",
+        "        turn_right()",
+        "    else:",
+        "        backtrack()"
+      ]
+    },
+    {
+      "name": "right, ahead, left",
+      "program": [
+        "while not at_exit():",
+        "    if unvisited_right():",
+        "        turn_right()",
+        "    elif unvisited_ahead():",
+        "        move()",
+        "    elif unvisited_left():",
+        "        turn_left()",
+        "    else:",
+        "        backtrack()"
+      ]
+    },
+    {
+      "name": "left, right, ahead (turn and move)",
+      "program": [
+        "while not at_exit():",
+        "    if unvisited_left():",
+        "        turn_left()",
+        "        move()",
+        "    elif unvisited_right():",
+        "        turn_right()",
+        "        move()",
+        "    elif unvisited_ahead():",
+        "        move()",
+        "    else:",
+        "        backtrack()"
+      ]
+    },
+    {
+      "name": "right, left, ahead (turn and move)",
+      "program": [
+        "while not at_exit():",
+        "    if unvisited_right():",
+        "        turn_right()",
+        "        move()",
+        "    elif unvisited_left():",
+        "        turn_left()",
+        "        move()",
+        "    elif unvisited_ahead():",
+        "        move()",
+        "    else:",
+        "        backtrack()"
+      ]
+    }
+  ],
+  "anti_solutions": [
+    {
+      "name": "right-hand rule",
+      "program": [
+        "while not at_exit():",
+        "    if path_right():",
+        "        turn_right()",
+        "        move()",
+        "    elif path_ahead():",
+        "        move()",
+        "    else:",
+        "        turn_left()"
+      ]
+    },
+    {
+      "name": "left-hand rule",
+      "program": [
+        "while not at_exit():",
+        "    if path_left():",
+        "        turn_left()",
+        "        move()",
+        "    elif path_ahead():",
+        "        move()",
+        "    else:",
+        "        turn_right()"
+      ]
+    },
+    {
+      "name": "DFS without backtrack",
+      "program": [
+        "while not at_exit():",
+        "    if unvisited_ahead():",
+        "        move()",
+        "    elif unvisited_left():",
+        "        turn_left()",
+        "    elif unvisited_right():",
+        "        turn_right()",
+        "    else:",
+        "        turn_left()"
+      ],
+      "expect_fail_code": "no_stamina"
+    }
+  ],
+  "variants": [
+    {
+      "name": "Maze 1",
+      "facing": "E",
+      "map": [
+        "###########",
+        "#E....#...#",
+        "#.#.#.###.#",
+        "#...#.....#",
+        "#.#.#.###.#",
+        "#.#.#S....#",
+        "#.#.#.#####",
+        "#.#.#...#.#",
+        "#.#.#.#.#.#",
+        "#.........#",
+        "###########"
+      ]
+    },
+    {
+      "name": "Maze 2",
+      "facing": "W",
+      "map": [
+        "###########",
+        "#.......#E#",
+        "#.#####.#.#",
+        "#.....#...#",
+        "#.###.#.#.#",
+        "#.#..S#...#",
+        "#.#.#.#.###",
+        "#.#.......#",
+        "#.#.#####.#",
+        "#.........#",
+        "###########"
+      ]
+    },
+    {
+      "name": "Maze 3",
+      "facing": "E",
+      "map": [
+        "###########",
+        "#E......#.#",
+        "#.#####.#.#",
+        "#.....#...#",
+        "#.###.#.#.#",
+        "#.#S..#...#",
+        "#.#.#.#.###",
+        "#.#.......#",
+        "#.#.#####.#",
+        "#.........#",
+        "###########"
+      ]
+    }
+  ]
+}

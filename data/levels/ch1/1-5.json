@@ -1,0 +1,31 @@
+{
+  "id": "1-5",
+  "title": "Stairway",
+  "concept": "Nested loops",
+  "new_blocks": [],
+  "intro": "The same step, three times. And each step is itself a repeat. Put a repeat inside a repeat.",
+  "cs_note": "[b]Nested loops multiply[/b]: an outer repeat 3 around an inner repeat 4 runs the inner body 12 times. That's why two nested loops over n items cost about n² steps.",
+  "hints": ["One stair is: 4 moves east, turn left, 2 moves north, turn right.", "The robot wins the moment it reaches the exit, even halfway through a loop."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat"], "sensors": [], "functions": [], "not": false},
+  "block_limit": 7,
+  "par": {"blocks": 7, "stamina": 23},
+  "robot": {"stamina": 25},
+  "solution": ["for _ in range(3):", "    for _ in range(4):", "        move()", "    turn_left()", "    for _ in range(2):", "        move()", "    turn_right()"],
+  "anti_solutions": [
+    {"name": "flat loop body", "program": ["for _ in range(3):", "    move()", "    move()", "    move()", "    move()", "    turn_left()", "    move()", "    move()", "    turn_right()"]},
+    {"name": "two left turns", "program": ["for _ in range(3):", "    for _ in range(4):", "        move()", "    turn_left()", "    for _ in range(2):", "        move()", "    turn_left()"], "expect_fail_code": "hp_zero"}
+  ],
+  "variants": [
+    {"name": "Map 1", "facing": "E", "map": [
+      "###############",
+      "#############E#",
+      "#############.#",
+      "#########.....#",
+      "#########.#####",
+      "#####.....#####",
+      "#####.#########",
+      "#S....#########",
+      "###############"
+    ]}
+  ]
+}

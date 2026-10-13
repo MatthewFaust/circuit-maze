@@ -1,0 +1,30 @@
+{
+  "id": "1-4",
+  "title": "Loop de Loop",
+  "concept": "Loops (repeat)",
+  "new_blocks": ["repeat"],
+  "intro": "Twenty-six instructions, eight blocks. Do the math. [b]repeat[/b] runs the blocks inside it as many times as you say. The path also needs more stamina than you have, so grab the battery on the way.",
+  "cs_note": "A [b]loop[/b] says \"do this N times\" instead of writing it N times. Batteries refill stamina but never above the maximum, so picking one up when you're nearly full wastes some of it.",
+  "hints": ["Drop blocks inside the repeat block's mouth to loop them.", "Three straight runs: 10 east, 6 north, 8 west."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat"], "sensors": [], "functions": [], "not": false},
+  "block_limit": 8,
+  "par": {"blocks": 8, "stamina": 26},
+  "robot": {"stamina": 20},
+  "solution": ["for _ in range(10):", "    move()", "turn_left()", "for _ in range(6):", "    move()", "turn_left()", "for _ in range(8):", "    move()"],
+  "anti_solutions": [
+    {"name": "wrong first turn", "program": ["for _ in range(10):", "    move()", "turn_right()", "for _ in range(6):", "    move()", "turn_left()", "for _ in range(8):", "    move()"], "expect_fail_code": "hp_zero"}
+  ],
+  "variants": [
+    {"name": "Map 1", "facing": "E", "map": [
+      "#############",
+      "###E........#",
+      "###########.#",
+      "###########.#",
+      "###########+#",
+      "###########.#",
+      "###########.#",
+      "#S..........#",
+      "#############"
+    ]}
+  ]
+}

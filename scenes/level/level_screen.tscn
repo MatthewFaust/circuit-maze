@@ -1,0 +1,344 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/level/level_screen.gd" id="1_ls"]
+[ext_resource type="Script" path="res://scenes/level/run_controller.gd" id="2_rc"]
+[ext_resource type="Script" path="res://scenes/maze/maze_view.gd" id="3_mv"]
+[ext_resource type="Script" path="res://scenes/level/hud_bars.gd" id="4_hud"]
+[ext_resource type="Script" path="res://scenes/level/inspector_panel.gd" id="5_insp"]
+[ext_resource type="Script" path="res://scenes/level/log_line.gd" id="6_log"]
+[ext_resource type="PackedScene" path="res://scenes/editor/program_editor.tscn" id="7_pe"]
+[ext_resource type="PackedScene" path="res://scenes/level/intro_dialog.tscn" id="8_intro"]
+[ext_resource type="PackedScene" path="res://scenes/level/result_dialog.tscn" id="9_result"]
+[ext_resource type="Texture2D" path="res://art/ui/back.svg" id="10_back"]
+[ext_resource type="Texture2D" path="res://art/ui/heart.svg" id="11_heart"]
+[ext_resource type="Texture2D" path="res://art/ui/bolt.svg" id="12_bolt"]
+[ext_resource type="Texture2D" path="res://art/ui/info.svg" id="13_info"]
+[ext_resource type="Texture2D" path="res://art/ui/play.svg" id="14_play"]
+[ext_resource type="Texture2D" path="res://art/ui/pause.svg" id="15_pause"]
+[ext_resource type="Texture2D" path="res://art/ui/step.svg" id="16_step"]
+[ext_resource type="Texture2D" path="res://art/ui/reset.svg" id="17_reset"]
+[ext_resource type="Texture2D" path="res://art/ui/hint.svg" id="18_hint"]
+[ext_resource type="Texture2D" path="res://art/ui/code.svg" id="19_code"]
+[ext_resource type="Texture2D" path="res://art/ui/check_all.svg" id="20_check"]
+
+[node name="LevelScreen" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ls")
+
+[node name="Bg" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.078, 0.094, 0.141, 1)
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 10
+
+[node name="Layout" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="TopBar" type="PanelContainer" parent="Margin/Layout"]
+layout_mode = 2
+theme_type_variation = &"TopBar"
+
+[node name="HBox" type="HBoxContainer" parent="Margin/Layout/TopBar"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="BackButton" type="Button" parent="Margin/Layout/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Back to the level list"
+theme_type_variation = &"ToolButton"
+text = "Levels"
+icon = ExtResource("10_back")
+
+[node name="LevelTitle" type="Label" parent="Margin/Layout/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"TitleLabel"
+text = "1-1  Hello, World"
+text_overrun_behavior = 3
+
+[node name="HintButton" type="Button" parent="Margin/Layout/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Show a hint (H)"
+theme_type_variation = &"ToolButton"
+text = "Hint"
+icon = ExtResource("18_hint")
+
+[node name="CodeButton" type="Button" parent="Margin/Layout/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Show the program as Python code (C)"
+theme_type_variation = &"ToolButton"
+toggle_mode = true
+text = "Python"
+icon = ExtResource("19_code")
+
+[node name="Hud" type="HBoxContainer" parent="Margin/Layout/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 8
+script = ExtResource("4_hud")
+
+[node name="HPIcon" type="TextureRect" parent="Margin/Layout/TopBar/HBox/Hud"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Health. Bumping stone costs 15, a bush 5, a spike 25. At 0 the robot is destroyed."
+texture = ExtResource("11_heart")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HPBar" type="ProgressBar" parent="Margin/Layout/TopBar/HBox/Hud"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 28)
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Health"
+theme_type_variation = &"HPBar"
+value = 100.0
+show_percentage = false
+
+[node name="HPText" type="Label" parent="Margin/Layout/TopBar/HBox/Hud/HPBar"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.06, 0.1, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 15
+text = "100 / 100"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Gap" type="Control" parent="Margin/Layout/TopBar/HBox/Hud"]
+custom_minimum_size = Vector2(10, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="StaminaIcon" type="TextureRect" parent="Margin/Layout/TopBar/HBox/Hud"]
+custom_minimum_size = Vector2(26, 26)
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Stamina. Every action costs some; the program fails if there isn't enough for the next action."
+texture = ExtResource("12_bolt")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="StaminaBar" type="ProgressBar" parent="Margin/Layout/TopBar/HBox/Hud"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(190, 28)
+layout_mode = 2
+size_flags_vertical = 4
+tooltip_text = "Stamina"
+theme_type_variation = &"StaminaBar"
+value = 100.0
+show_percentage = false
+
+[node name="StaminaText" type="Label" parent="Margin/Layout/TopBar/HBox/Hud/StaminaBar"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_outline_color = Color(0.05, 0.06, 0.1, 1)
+theme_override_constants/outline_size = 6
+theme_override_font_sizes/font_size = 15
+text = "20 / 20"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="InfoButton" type="Button" parent="Margin/Layout/TopBar/HBox"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Show the level briefing again"
+theme_type_variation = &"ToolButton"
+text = "Briefing"
+icon = ExtResource("13_info")
+
+[node name="MainSplit" type="HSplitContainer" parent="Margin/Layout"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftColumn" type="VBoxContainer" parent="Margin/Layout/MainSplit"]
+custom_minimum_size = Vector2(560, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="VariantTabs" type="TabBar" parent="Margin/Layout/MainSplit/LeftColumn"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+
+[node name="MazeRow" type="HBoxContainer" parent="Margin/Layout/MainSplit/LeftColumn"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="MazeFrame" type="PanelContainer" parent="Margin/Layout/MainSplit/LeftColumn/MazeRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"MazeFrame"
+
+[node name="MazeView" type="Control" parent="Margin/Layout/MainSplit/LeftColumn/MazeRow/MazeFrame"]
+unique_name_in_owner = true
+clip_contents = true
+layout_mode = 2
+mouse_filter = 2
+script = ExtResource("3_mv")
+
+[node name="Inspector" type="PanelContainer" parent="Margin/Layout/MainSplit/LeftColumn/MazeRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 0)
+layout_mode = 2
+theme_type_variation = &"SidePanel"
+script = ExtResource("5_insp")
+
+[node name="LogLine" type="PanelContainer" parent="Margin/Layout/MainSplit/LeftColumn"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 36)
+layout_mode = 2
+theme_type_variation = &"LogBar"
+script = ExtResource("6_log")
+
+[node name="RunBar" type="HBoxContainer" parent="Margin/Layout/MainSplit/LeftColumn"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="RunButton" type="Button" parent="Margin/Layout/MainSplit/LeftColumn/RunBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(116, 46)
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Run the program on every map (Space)"
+theme_type_variation = &"PrimaryButton"
+text = "Run"
+icon = ExtResource("14_play")
+
+[node name="PauseButton" type="Button" parent="Margin/Layout/MainSplit/LeftColumn/RunBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(46, 46)
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Pause (Space)"
+icon = ExtResource("15_pause")
+
+[node name="StepButton" type="Button" parent="Margin/Layout/MainSplit/LeftColumn/RunBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(46, 46)
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Run one action, then pause (S)"
+icon = ExtResource("16_step")
+
+[node name="ResetButton" type="Button" parent="Margin/Layout/MainSplit/LeftColumn/RunBar"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(46, 46)
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Stop and put the robot back at the start (R)"
+icon = ExtResource("17_reset")
+
+[node name="SpeedGap" type="Control" parent="Margin/Layout/MainSplit/LeftColumn/RunBar"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Speed1" type="Button" parent="Margin/Layout/MainSplit/LeftColumn/RunBar"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Normal speed (1)"
+toggle_mode = true
+text = "1x"
+
+[node name="Speed2" type="Button" parent="Margin/Layout/MainSplit/LeftColumn/RunBar"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Double speed (2)"
+toggle_mode = true
+text = "2x"
+
+[node name="Speed4" type="Button" parent="Margin/Layout/MainSplit/LeftColumn/RunBar"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Quadruple speed (3)"
+toggle_mode = true
+text = "4x"
+
+[node name="SpeedMax" type="Button" parent="Margin/Layout/MainSplit/LeftColumn/RunBar"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "No animation (4)"
+toggle_mode = true
+text = "Max"
+
+[node name="Spacer" type="Control" parent="Margin/Layout/MainSplit/LeftColumn/RunBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="CheckButton" type="Button" parent="Margin/Layout/MainSplit/LeftColumn/RunBar"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Test the program on every map instantly, without animation"
+text = "Check"
+icon = ExtResource("20_check")
+
+[node name="ProgramEditor" parent="Margin/Layout/MainSplit" instance=ExtResource("7_pe")]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="RunController" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("2_rc")
+
+[node name="IntroDialog" parent="." instance=ExtResource("8_intro")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+
+[node name="ResultDialog" parent="." instance=ExtResource("9_result")]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1

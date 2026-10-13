@@ -1,0 +1,28 @@
+{
+  "id": "1-2",
+  "title": "Right Turn, Clyde",
+  "concept": "Relative turns",
+  "new_blocks": ["turn_left", "turn_right"],
+  "intro": "Someone left you a \"working\" program. Run it, watch the HP bar, then fix it. Hitting stone costs [b]15 HP[/b].",
+  "cs_note": "Turns are relative to the robot's facing, not to the screen. Most bugs aren't typos; they come from a wrong mental model. Debugging means comparing what you expected with what actually happened.",
+  "hints": ["Step through the program with [b]Step[/b] and watch which way the robot faces after each turn.", "Two of the blocks are swapped."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right"], "sensors": [], "functions": [], "not": false},
+  "block_limit": 0,
+  "par": {"blocks": 8, "stamina": 8},
+  "robot": {"stamina": 12},
+  "starter": ["move()", "turn_left()", "move()", "move()", "turn_right()", "move()", "move()", "move()"],
+  "solution": ["move()", "turn_right()", "move()", "move()", "turn_left()", "move()", "move()", "move()"],
+  "anti_solutions": [
+    {"name": "the starter (left and right swapped)", "program": ["move()", "turn_left()", "move()", "move()", "turn_right()", "move()", "move()", "move()"], "expect_fail_code": "program_ended"}
+  ],
+  "checks": {"hardcode_must_fail": false},
+  "variants": [
+    {"name": "Map 1", "facing": "E", "map": [
+      "#######",
+      "#S.####",
+      "##.####",
+      "##...E#",
+      "#######"
+    ]}
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "id": "2-4",
+  "title": "Overgrown",
+  "concept": "Covering every case",
+  "new_blocks": ["stone_ahead"],
+  "intro": "The road is back, and so is the shrubbery. A bush ahead is not the same as a wall ahead: one can be cut, the other can only be turned away from.",
+  "cs_note": "[b]Case analysis[/b]: path, bush, or wall. List every situation your inputs can produce and make sure each one has an action. Testing on several maps is how you find the case you forgot.",
+  "hints": ["Your 2-3 program treats a bush like a wall and turns around.", "Add one more case between \"path ahead\" and \"path to the left\": a bush ahead gets cut."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut", "while", "if", "if_else"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit", "bush_ahead", "stone_ahead"], "functions": [], "not": true},
+  "block_limit": 8,
+  "par": {"blocks": 8, "stamina": 90},
+  "robot": {"stamina": 50},
+  "solution": ["while not at_exit():", "    if path_ahead():", "        move()", "    elif bush_ahead():", "        cut()", "    elif path_left():", "        turn_left()", "    else:", "        turn_right()"],
+  "anti_solutions": [
+    {"name": "the 2-3 program", "program": ["while not at_exit():", "    if path_ahead():", "        move()", "    elif path_left():", "        turn_left()", "    else:", "        turn_right()"], "expect_fail_code": "no_stamina"}
+  ],
+  "variants": [
+    {"name": "Map 1", "facing": "E", "map": [
+      "#########",
+      "#SB.#####",
+      "###.#####",
+      "###..B.##",
+      "######.##",
+      "##E.B..##",
+      "#########"
+    ]},
+    {"name": "Map 2", "facing": "N", "map": [
+      "#########",
+      "##EB..###",
+      "#####.###",
+      "#..B..###",
+      "#.#######",
+      "#S#######",
+      "#########"
+    ]},
+    {"name": "Map 3", "facing": "E", "map": [
+      "###########",
+      "#S..B.....#",
+      "#########.#",
+      "#....B....#",
+      "#.#########",
+      "#..B.B...E#",
+      "###########"
+    ]}
+  ]
+}

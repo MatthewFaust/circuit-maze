@@ -1,0 +1,44 @@
+{
+  "id": "3-1",
+  "title": "Copy, Paste, Regret",
+  "concept": "Functions",
+  "new_blocks": ["call:A"],
+  "intro": "Four boulders, irregular gaps, and the sensors are offline. The dodge around each boulder is always the same, but the gaps between them aren't, so a single repeat can't do it. Teach the robot the dodge once in [b]define A[/b], then call [b]A[/b] wherever you need it.",
+  "cs_note": "Loops capture repetition in a row; [b]functions[/b] capture repetition anywhere. Naming a chunk of work once and reusing it is the heart of DRY: Don't Repeat Yourself.",
+  "hints": ["The dodge: step forward, go up, across two, back down, step forward.", "Put the whole 10-step move-dodge-move in A. Main is just moves and calls."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat"], "sensors": [], "functions": ["A"], "not": false},
+  "block_limit": 24,
+  "par": {"blocks": 20, "stamina": 45},
+  "robot": {"stamina": 48},
+  "solution": [
+    "def A():",
+    "    move()", "    turn_left()", "    move()", "    turn_right()", "    move()",
+    "    move()", "    turn_right()", "    move()", "    turn_left()", "    move()",
+    "move()", "A()", "move()", "A()", "A()", "move()", "move()", "A()", "move()"
+  ],
+  "alt_solutions": [
+    {"name": "dodge-only function", "program": [
+      "def A():",
+      "    turn_left()", "    move()", "    turn_right()", "    move()", "    move()", "    turn_right()", "    move()", "    turn_left()",
+      "move()", "move()", "A()", "for _ in range(3):", "    move()", "A()", "move()", "move()", "A()",
+      "for _ in range(4):", "    move()", "A()", "move()", "move()"
+    ]}
+  ],
+  "anti_solutions": [
+    {"name": "assumes evenly spaced boulders", "program": [
+      "move()",
+      "for _ in range(4):",
+      "    move()", "    turn_left()", "    move()", "    turn_right()", "    move()",
+      "    move()", "    turn_right()", "    move()", "    turn_left()", "    move()", "    move()"
+    ]}
+  ],
+  "checks": {"inline_must_fail": true},
+  "variants": [
+    {"name": "Map 1", "facing": "E", "map": [
+      "########################",
+      "###...##...#...###...###",
+      "#S..#....#...#.....#..E#",
+      "########################"
+    ]}
+  ]
+}

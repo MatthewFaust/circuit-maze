@@ -1,0 +1,90 @@
+class_name ProgramPrinter
+extends RefCounted
+## Prints a program as Python-like text: functions first, then main.
+## repeat prints as "for _ in range(N):", and an else that holds a single if
+## prints as "elif". ProgramParser reads this text back to the same program.
+
+const INDENT := "    "
+
+
+static func to_text(p: Dictionary) -> String:
+	return render(p)["text"]
+
+
+## {"text": String, "line_of": {node id: 0-based line}} so the code view can
+## highlight the line of the block that is running.
+static func render(p: Dictionary) -> Dictionary:
+	var lines := PackedStringArray()
+	var line_of := {}
+	var fns: Dictionary = p.get("functions", {})
+	var called: Dictionary = ProgramModel.usage(p)["calls"]
+	var names: Array = fns.keys()
+	names.sort()
+	for fname: String in names:
+		var body: Array = fns[fname]
+		if body.is_empty() and not called.has(fname):
+			continue
+		lines.append("def %s():" % fname)
+		_emit_list(body, 1, lines, line_of)
+		lines.append("")
+	_emit_list(p.get("main", []), 0, lines, line_of)
+	while lines.size() > 0 and lines[lines.size() - 1] == "":
+		lines.remove_at(lines.size() - 1)
+	return {"text": "\n".join(lines), "line_of": line_of}
+
+
+static func cond_text(c: Dictionary) -> String:
+	var negate: bool = c.get("negate", false)
+	return ("not " if negate else "") + str(c.get("sensor", "?")) + "()"
+
+
+static func _emit_list(list: Array, depth: int, lines: PackedStringArray, line_of: Dictionary) -> void:
+	if list.is_empty():
+		if depth > 0:
+			lines.append(INDENT.repeat(depth) + "pass")
+		return
+	for node: Dictionary in list:
+		_emit_node(node, depth, lines, line_of)
+
+
+static func _emit_node(node: Dictionary, depth: int, lines: PackedStringArray, line_of: Dictionary) -> void:
+	var prefix := INDENT.repeat(depth)
+	var id: int = node.get("id", -1)
+	if id >= 0:
+		line_of[id] = lines.size()
+	var t: String = node["type"]
+	match t:
+		"call":
+			lines.append(prefix + str(node["fn"]) + "()")
+		"repeat":
+			lines.append(prefix + "for _ in range(%d):" % int(node["count"]))
+			_emit_list(node["body"], depth + 1, lines, line_of)
+		"while":
+			lines.append(prefix + "while " + cond_text(node["cond"]) + ":")
+			_emit_list(node["body"], depth + 1, lines, line_of)
+		"if", "if_else":
+			lines.append(prefix + "if " + cond_text(node["cond"]) + ":")
+			_emit_list(node["body"], depth + 1, lines, line_of)
+			if t == "if_else":
+				_emit_else(node["else_body"], depth, lines, line_of)
+		_:
+			lines.append(prefix + t + "()")
+
+
+## Prints "elif" for an else that holds exactly one if, otherwise "else:".
+static func _emit_else(else_body: Array, depth: int, lines: PackedStringArray, line_of: Dictionary) -> void:
+	var prefix := INDENT.repeat(depth)
+	if else_body.size() == 1:
+		var inner: Dictionary = else_body[0]
+		var it: String = inner["type"]
+		if it == "if" or it == "if_else":
+			var id: int = inner.get("id", -1)
+			if id >= 0:
+				line_of[id] = lines.size()
+			lines.append(prefix + "elif " + cond_text(inner["cond"]) + ":")
+			_emit_list(inner["body"], depth + 1, lines, line_of)
+			if it == "if_else":
+				_emit_else(inner["else_body"], depth, lines, line_of)
+			return
+	lines.append(prefix + "else:")
+	_emit_list(else_body, depth + 1, lines, line_of)

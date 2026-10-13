@@ -1,0 +1,55 @@
+{
+  "id": "3-2",
+  "title": "Same Trick, Any Direction",
+  "concept": "Choosing the abstraction",
+  "new_blocks": ["call:B"],
+  "intro": "The same trick facing east, south, west and north. A function uses [i]relative[/i] moves, so it works whichever way the robot faces. Which chunk is worth naming?",
+  "cs_note": "Relative moves make a function [b]portable[/b]: it doesn't care which way you face. Picking the right chunk to abstract is the real skill: a slightly bigger chunk can make the rest of the program much simpler.",
+  "hints": ["The thing that repeats isn't just the dodge. Look one tile wider on each side.", "Each side of the square is A, A, then a right turn."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat"], "sensors": [], "functions": ["A", "B"], "not": false},
+  "block_limit": 21,
+  "par": {"blocks": 19, "stamina": 85},
+  "robot": {"stamina": 88},
+  "solution": [
+    "def A():",
+    "    move()", "    turn_left()", "    move()", "    turn_right()", "    move()",
+    "    move()", "    turn_right()", "    move()", "    turn_left()", "    move()",
+    "for _ in range(3):", "    A()", "    A()", "    turn_right()",
+    "A()", "turn_right()", "move()", "A()"
+  ],
+  "alt_solutions": [
+    {"name": "dodge in A, wrapped by B", "program": [
+      "def A():",
+      "    turn_left()", "    move()", "    turn_right()", "    move()", "    move()", "    turn_right()", "    move()", "    turn_left()",
+      "def B():", "    move()", "    A()", "    move()",
+      "for _ in range(3):", "    B()", "    B()", "    turn_right()",
+      "B()", "turn_right()", "move()", "B()"
+    ]}
+  ],
+  "anti_solutions": [
+    {"name": "dodge-only function with loops", "program": [
+      "def A():",
+      "    turn_left()", "    move()", "    turn_right()", "    move()", "    move()", "    turn_right()", "    move()", "    turn_left()",
+      "for _ in range(3):", "    move()", "    A()", "    move()", "    move()", "    A()", "    move()", "    turn_right()",
+      "move()", "A()", "move()", "turn_right()", "move()", "move()", "A()", "move()"
+    ]}
+  ],
+  "checks": {"inline_must_fail": true},
+  "variants": [
+    {"name": "Map 1", "facing": "E", "map": [
+      "#############",
+      "###...#...###",
+      "##S.#...#..##",
+      "##########..#",
+      "###########.#",
+      "####...###..#",
+      "##...#.E##.##",
+      "#..#######..#",
+      "#.#########.#",
+      "#..#######..#",
+      "##..#...#..##",
+      "###...#...###",
+      "#############"
+    ]}
+  ]
+}

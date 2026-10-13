@@ -1,0 +1,56 @@
+{
+  "id": "4-5",
+  "title": "Race the Clock",
+  "concept": "BFS vs. DFS",
+  "new_blocks": [],
+  "intro": "Two mirror-image mazes, one small battery. A three-way fork: only one arm leads out, and the first tiles of the left and right arms look identical. DFS has to guess. Thinking is cheaper than walking.",
+  "cs_note": "DFS's cost depends on luck: here about 11 or about 100 stamina, depending on which arm it tries first. BFS pays a fixed price to examine every tile, then walks the optimal route. Paying for computation to save movement is a classic trade-off.",
+  "hints": ["Run your DFS on both mazes and compare the costs.", "Use the program from Ripple."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "while", "if", "if_else", "backtrack", "scan"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit", "unvisited_ahead", "unvisited_left", "unvisited_right", "closer_ahead", "closer_left", "closer_right"], "functions": [], "not": true},
+  "block_limit": 12,
+  "par": {"blocks": 7, "stamina": 32},
+  "robot": {"stamina": 20},
+  "solution": [
+    "scan()",
+    "while not at_exit():",
+    "    if closer_ahead():",
+    "        move()",
+    "    elif closer_left():",
+    "        turn_left()",
+    "    else:",
+    "        turn_right()"
+  ],
+  "anti_solutions": [
+    {"name": "DFS ahead first", "program": ["while not at_exit():", "    if unvisited_ahead():", "        move()", "    elif unvisited_left():", "        turn_left()", "    elif unvisited_right():", "        turn_right()", "    else:", "        backtrack()"]},
+    {"name": "DFS left first", "program": ["while not at_exit():", "    if unvisited_left():", "        turn_left()", "    elif unvisited_ahead():", "        move()", "    elif unvisited_right():", "        turn_right()", "    else:", "        backtrack()"]},
+    {"name": "DFS right first", "program": ["while not at_exit():", "    if unvisited_right():", "        turn_right()", "    elif unvisited_ahead():", "        move()", "    elif unvisited_left():", "        turn_left()", "    else:", "        backtrack()"]},
+    {"name": "right-hand rule", "program": ["while not at_exit():", "    if path_right():", "        turn_right()", "        move()", "    elif path_ahead():", "        move()", "    else:", "        turn_left()"]},
+    {"name": "left-hand rule", "program": ["while not at_exit():", "    if path_left():", "        turn_left()", "        move()", "    elif path_ahead():", "        move()", "    else:", "        turn_right()"]}
+  ],
+  "variants": [
+    {"name": "Maze A", "facing": "N", "map": [
+      "###############",
+      "###.....#######",
+      "#######.....###",
+      "#######.#######",
+      "#####...##....#",
+      "#######.##.####",
+      "#E...##.##....#",
+      "####.##.##.####",
+      "####...S...##.#",
+      "###############"
+    ]},
+    {"name": "Maze B", "facing": "N", "map": [
+      "###############",
+      "#######.....###",
+      "###.....#######",
+      "#######.#######",
+      "#....##...#####",
+      "####.##.#######",
+      "#....##.##...E#",
+      "####.##.##.####",
+      "#.##...S...####",
+      "###############"
+    ]}
+  ]
+}

@@ -1,0 +1,159 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://scenes/editor/program_editor.gd" id="1_pe"]
+[ext_resource type="Script" path="res://scenes/editor/code_view.gd" id="2_cv"]
+[ext_resource type="Texture2D" path="res://art/ui/undo.svg" id="3_undo"]
+[ext_resource type="Texture2D" path="res://art/ui/redo.svg" id="4_redo"]
+[ext_resource type="Texture2D" path="res://art/ui/trash.svg" id="5_trash"]
+
+[node name="ProgramEditor" type="Control"]
+custom_minimum_size = Vector2(760, 0)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_pe")
+
+[node name="Columns" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="Palette" type="PanelContainer" parent="Columns"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(212, 0)
+layout_mode = 2
+mouse_filter = 1
+theme_type_variation = &"PalettePanel"
+
+[node name="PaletteScroll" type="ScrollContainer" parent="Columns/Palette"]
+layout_mode = 2
+horizontal_scroll_mode = 0
+
+[node name="PaletteList" type="VBoxContainer" parent="Columns/Palette/PaletteScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="ProgramPanel" type="PanelContainer" parent="Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_type_variation = &"ProgramPanel"
+
+[node name="VBox" type="VBoxContainer" parent="Columns/ProgramPanel"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Toolbar" type="HBoxContainer" parent="Columns/ProgramPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="BlockCount" type="Label" parent="Columns/ProgramPanel/VBox/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Blocks: 0"
+
+[node name="UndoButton" type="Button" parent="Columns/ProgramPanel/VBox/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Undo (Ctrl/Cmd+Z)"
+theme_type_variation = &"ToolButton"
+icon = ExtResource("3_undo")
+
+[node name="RedoButton" type="Button" parent="Columns/ProgramPanel/VBox/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Redo (Ctrl/Cmd+Shift+Z)"
+theme_type_variation = &"ToolButton"
+icon = ExtResource("4_redo")
+
+[node name="TrashButton" type="Button" parent="Columns/ProgramPanel/VBox/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Drop a block here (or back on the palette) to delete it"
+theme_type_variation = &"ToolButton"
+icon = ExtResource("5_trash")
+
+[node name="ClearButton" type="Button" parent="Columns/ProgramPanel/VBox/Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+focus_mode = 0
+tooltip_text = "Remove every block (you can undo this)"
+theme_type_variation = &"ToolButton"
+text = "Clear"
+
+[node name="LockBanner" type="PanelContainer" parent="Columns/ProgramPanel/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+mouse_filter = 2
+theme_type_variation = &"Chip"
+
+[node name="LockLabel" type="Label" parent="Columns/ProgramPanel/VBox/LockBanner"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.82, 0.4, 1)
+theme_override_font_sizes/font_size = 15
+text = "Running: the program is locked. Press Reset to edit."
+horizontal_alignment = 1
+
+[node name="ProgramScroll" type="ScrollContainer" parent="Columns/ProgramPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ProgramRoot" type="VBoxContainer" parent="Columns/ProgramPanel/VBox/ProgramScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 14
+
+[node name="CodePanel" type="VBoxContainer" parent="Columns/ProgramPanel/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.8
+
+[node name="CodeTitle" type="Label" parent="Columns/ProgramPanel/VBox/CodePanel"]
+layout_mode = 2
+theme_type_variation = &"SectionTitle"
+text = "THE SAME PROGRAM IN PYTHON"
+
+[node name="CodeView" type="CodeEdit" parent="Columns/ProgramPanel/VBox/CodePanel"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("2_cv")
+
+[node name="Overlay" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="DropLine" type="Panel" parent="Overlay"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_right = 240.0
+offset_bottom = 4.0
+mouse_filter = 2
+theme_type_variation = &"DropLine"
+

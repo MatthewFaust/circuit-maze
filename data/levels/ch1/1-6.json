@@ -1,0 +1,28 @@
+{
+  "id": "1-6",
+  "title": "Hedge Your Bets",
+  "concept": "Comparing costs",
+  "new_blocks": ["cut"],
+  "intro": "Shears cost [b]3[/b] stamina, legs cost [b]1[/b]. [b]cut[/b] clears the bush right in front of you. You have exactly enough stamina for the cheapest route, so shop around.",
+  "cs_note": "[b]Optimization[/b] means comparing the cost of the alternatives. Cutting through b bushes costs 4b + 1; walking around costs a few extra moves and turns. A greedy \"always cut\" or \"never cut\" rule loses here.",
+  "hints": ["Price each obstacle separately: the thick hedge and the single bush.", "Walk around the hedge, but cut the single bush."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut"], "sensors": [], "functions": [], "not": false},
+  "block_limit": 0,
+  "par": {"blocks": 14, "stamina": 20},
+  "robot": {"stamina": 20},
+  "solution": ["move()", "turn_left()", "move()", "turn_right()", "for _ in range(4):", "    move()", "turn_right()", "move()", "turn_left()", "for _ in range(2):", "    move()", "cut()", "for _ in range(4):", "    move()"],
+  "anti_solutions": [
+    {"name": "cut everything", "program": ["move()", "for _ in range(3):", "    cut()", "    move()", "for _ in range(3):", "    move()", "cut()", "for _ in range(4):", "    move()"], "expect_fail_code": "no_stamina"},
+    {"name": "never cut", "program": ["move()", "turn_left()", "move()", "turn_right()", "for _ in range(4):", "    move()", "turn_right()", "move()", "turn_left()", "for _ in range(2):", "    move()", "turn_left()", "for _ in range(2):", "    move()", "turn_right()", "for _ in range(2):", "    move()", "turn_right()", "for _ in range(2):", "    move()", "turn_left()", "for _ in range(2):", "    move()"], "expect_fail_code": "no_stamina"}
+  ],
+  "checks": {"hardcode_must_fail": false},
+  "variants": [
+    {"name": "Map 1", "facing": "E", "map": [
+      "###############",
+      "########...####",
+      "##.....#.#.####",
+      "#S.BBB...B..E##",
+      "###############"
+    ]}
+  ]
+}

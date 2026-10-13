@@ -1,0 +1,80 @@
+{
+  "id": "3-5",
+  "title": "Tiny Stack, Big Tree",
+  "concept": "Tree recursion",
+  "new_blocks": ["call:C"],
+  "intro": "Loops are offline and your call stack holds only [b]30[/b] frames. Somewhere in this tree of corridors is the exit. Explore smart: a call that goes one tile deeper must also bring you back.",
+  "cs_note": "[b]Tree recursion[/b] keeps only the current branch on the stack, so its depth is the height of the tree, not the length of the walk. A recursive wall follower (tail recursion) adds a frame for every step and overflows.",
+  "hints": ["Let A(): if there's a path ahead, step in, explore every direction from there, then step back out.", "B can be the step back: turn around, move, turn around."],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "if", "if_else"], "sensors": ["path_ahead"], "functions": ["A", "B", "C"], "not": true},
+  "rules": {"max_call_depth": 30},
+  "block_limit": 18,
+  "par": {"blocks": 18, "stamina": 110},
+  "robot": {"stamina": 130},
+  "solution": [
+    "def A():",
+    "    if path_ahead():",
+    "        move()",
+    "        A()",
+    "        turn_left()",
+    "        A()",
+    "        turn_right()",
+    "        turn_right()",
+    "        A()",
+    "        turn_left()",
+    "        B()",
+    "def B():",
+    "    turn_left()", "    turn_left()", "    move()", "    turn_left()", "    turn_left()",
+    "A()"
+  ],
+  "alt_solutions": [
+    {"name": "left, straight, right", "program": [
+      "def A():",
+      "    if path_ahead():",
+      "        move()",
+      "        turn_left()",
+      "        A()",
+      "        turn_right()",
+      "        A()",
+      "        turn_right()",
+      "        A()",
+      "        turn_left()",
+      "        B()",
+      "def B():",
+      "    turn_left()", "    turn_left()", "    move()", "    turn_left()", "    turn_left()",
+      "A()"
+    ]}
+  ],
+  "anti_solutions": [
+    {"name": "tail-recursive wall follower", "program": [
+      "def A():",
+      "    turn_right()",
+      "    C()",
+      "    move()",
+      "    A()",
+      "def C():",
+      "    if not path_ahead():",
+      "        turn_left()",
+      "        C()",
+      "A()"
+    ], "expect_fail_code": "stack_overflow"}
+  ],
+  "variants": [
+    {"name": "Map 1", "facing": "N", "map": [
+      "############",
+      "#######.####",
+      "#######.####",
+      "#######.####",
+      "####E...####",
+      "###.###....#",
+      "###.##..####",
+      "###.#.#.####",
+      "###........#",
+      "#...##.#####",
+      "###..#.#####",
+      "###.########",
+      "###S########",
+      "############"
+    ]}
+  ]
+}
