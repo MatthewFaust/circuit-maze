@@ -15,3 +15,6 @@ python3 run_local.py
 The game uses only files in this repository. It needs no ChatGPT account or internet connection. Your blocks are saved in the browser on this computer. **Load example** fills the workspace with a working route.
 
 The block editor includes Blockly. Its license is in `vendor/LICENSE.blockly`.
+
+
+readme created by codex
