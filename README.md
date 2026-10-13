@@ -4,6 +4,8 @@ A small browser game about programming a robot. Snap together movement, loop, an
 
 The game has a 10×10 level, a working example program, and browser-local saving. It uses [Blockly](https://developers.google.com/blockly) for the visual editor and runs entirely on your computer.
 
+**[Play in your browser](https://matthewfaust.github.io/circuit-maze/)**
+
 ## Play locally
 
 On macOS, double-click **Run Circuit Maze.command**. Or, with Python 3 installed, run:
