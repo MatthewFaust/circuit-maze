@@ -1,0 +1,127 @@
+# Credits
+
+This file lists every image in the project, where it came from, and its license.
+
+**Rule:** the project can't use AI-made art. Anything marked **AI-made, needs replacing** was created by Claude, an AI assistant, during development. Replace it with human-made or properly licensed art before release, then update its row here.
+
+## Summary
+
+| Source | Images | Status |
+|---|---|---|
+| Made by Claude (AI) | 42: every file in `art/` | AI-made, needs replacing |
+| Godot Engine | 1: `icon.svg` | Not AI-made |
+| Anywhere else | 0 | none |
+
+**How this was checked (2026-10-13):**
+- **Search:** I searched the whole project, outside Godot's `.godot/` cache, for image files of every common format.
+  - There are 43 image files, all SVG. Every one is used by the game.
+  - The `.svg.import` files beside them are Godot's import settings, not images.
+- **The 42 files in `art/`:** a Python script that Claude wrote generated all of them. The script is kept outside the repo. Running it again reproduces all 42 files byte for byte.
+- **`icon.svg`:**
+  - Its timestamp shows Godot created it with the new project, before Claude started working on the project.
+  - Its text is identical to the default project icon built into Godot 4.6.1.
+
+## From Godot Engine
+
+| File | What it is | Source | License | Status |
+|---|---|---|---|---|
+| `icon.svg` | Project icon: game window, macOS Dock, Godot project manager | Godot Engine 4.6.1, which writes this default icon into every new project | **Artwork:** the Godot logo by Andrea Calabró, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). **File:** ships with the Godot editor, [MIT license](https://godotengine.org/license/) | Not AI-made |
+
+- **If you keep it:** credit it as "Godot Engine logo © 2017 Andrea Calabró, licensed under CC BY 4.0".
+- **You'll probably want to replace it anyway:** it's Godot's logo, not art for this game.
+
+## Made by Claude (AI)
+
+**License:** none. No human artist made these, so there is no license to give. Every row has the same status.
+
+**Sizes:**
+- The tiles and the robot are 128×128 px.
+- The icons are 48×48 px.
+
+These are larger than the images appear on screen, so they stay sharp on high-resolution displays.
+
+**Replacing an image:**
+- Save the new image over the old file, at the same path.
+- If the new file has a different name or format (for example `floor.png`), also update the `res://art/...` path in the scripts and scenes that load it.
+
+### Tiles and robot
+
+| File | What it is | Used in | License | Status |
+|---|---|---|---|---|
+| `art/tiles/floor.svg` | Floor tile | maze board, main menu background | None (AI-made) | AI-made, needs replacing |
+| `art/tiles/stone.svg` | Stone wall tile | maze board, main menu background | None (AI-made) | AI-made, needs replacing |
+| `art/tiles/bush.svg` | Bush tile (can be cut) | maze board, main menu background | None (AI-made) | AI-made, needs replacing |
+| `art/tiles/exit.svg` | Exit tile | maze board | None (AI-made) | AI-made, needs replacing |
+| `art/tiles/spike.svg` | Spike tile | maze board | None (AI-made) | AI-made, needs replacing |
+| `art/tiles/battery.svg` | Battery pickup (+stamina) | maze board | None (AI-made) | AI-made, needs replacing |
+| `art/tiles/repair.svg` | Repair kit pickup (+HP) | maze board | None (AI-made) | AI-made, needs replacing |
+| `art/robot/robot.svg` | The robot, drawn facing east | maze board, main menu logo | None (AI-made) | AI-made, needs replacing |
+
+### Block icons
+
+These are shown on the blocks in the editor palette and in the program (`scenes/editor/block_catalog.gd`).
+
+| File | What it is | License | Status |
+|---|---|---|---|
+| `art/blocks/move.svg` | `move()` | None (AI-made) | AI-made, needs replacing |
+| `art/blocks/turn_left.svg` | `turn_left()` | None (AI-made) | AI-made, needs replacing |
+| `art/blocks/turn_right.svg` | `turn_right()` | None (AI-made) | AI-made, needs replacing |
+| `art/blocks/cut.svg` | `cut()` | None (AI-made) | AI-made, needs replacing |
+| `art/blocks/backtrack.svg` | `backtrack()` | None (AI-made) | AI-made, needs replacing |
+| `art/blocks/scan.svg` | `scan()` | None (AI-made) | AI-made, needs replacing |
+| `art/blocks/scan_weighted.svg` | `scan_weighted()` | None (AI-made) | AI-made, needs replacing |
+| `art/blocks/repeat.svg` | `repeat` loop | None (AI-made) | AI-made, needs replacing |
+| `art/blocks/while.svg` | `while` loop | None (AI-made) | AI-made, needs replacing |
+| `art/blocks/if.svg` | `if` | None (AI-made) | AI-made, needs replacing |
+| `art/blocks/if_else.svg` | `if / else` (same drawing as `if.svg`) | None (AI-made) | AI-made, needs replacing |
+| `art/blocks/call.svg` | `call A/B/C` (functions) | None (AI-made) | AI-made, needs replacing |
+
+### Interface icons
+
+| File | What it is | Used in | License | Status |
+|---|---|---|---|---|
+| `art/ui/play.svg` | Play / Run | main menu Play button, level Run button | None (AI-made) | AI-made, needs replacing |
+| `art/ui/pause.svg` | Pause | level Pause button | None (AI-made) | AI-made, needs replacing |
+| `art/ui/step.svg` | Step | level Step button | None (AI-made) | AI-made, needs replacing |
+| `art/ui/reset.svg` | Reset | level Reset button | None (AI-made) | AI-made, needs replacing |
+| `art/ui/check_all.svg` | Check every map | level Check button | None (AI-made) | AI-made, needs replacing |
+| `art/ui/back.svg` | Back arrow | level screen and level select Back buttons | None (AI-made) | AI-made, needs replacing |
+| `art/ui/hint.svg` | Light bulb | level Hint button | None (AI-made) | AI-made, needs replacing |
+| `art/ui/code.svg` | Code brackets | level Python button | None (AI-made) | AI-made, needs replacing |
+| `art/ui/info.svg` | Info | level Briefing button | None (AI-made) | AI-made, needs replacing |
+| `art/ui/heart.svg` | Heart | HP bar | None (AI-made) | AI-made, needs replacing |
+| `art/ui/bolt.svg` | Lightning bolt | stamina bar | None (AI-made) | AI-made, needs replacing |
+| `art/ui/dot.svg` | Dot | map tabs: map not tested yet | None (AI-made) | AI-made, needs replacing |
+| `art/ui/check.svg` | Check mark | map tabs: map passed | None (AI-made) | AI-made, needs replacing |
+| `art/ui/cross.svg` | Cross | map tabs: map failed | None (AI-made) | AI-made, needs replacing |
+| `art/ui/undo.svg` | Undo | block editor toolbar | None (AI-made) | AI-made, needs replacing |
+| `art/ui/redo.svg` | Redo | block editor toolbar | None (AI-made) | AI-made, needs replacing |
+| `art/ui/trash.svg` | Trash can | block editor toolbar (drop a block here to delete it) | None (AI-made) | AI-made, needs replacing |
+| `art/ui/close.svg` | × | delete button on every block | None (AI-made) | AI-made, needs replacing |
+| `art/ui/gear.svg` | Gear | main menu Settings button | None (AI-made) | AI-made, needs replacing |
+| `art/ui/lock.svg` | Padlock | level select: locked levels | None (AI-made) | AI-made, needs replacing |
+| `art/ui/star.svg` | Filled star | level select, result dialog | None (AI-made) | AI-made, needs replacing |
+| `art/ui/star_empty.svg` | Empty star | level select, result dialog | None (AI-made) | AI-made, needs replacing |
+
+## Not image files, but also made by Claude
+
+These have no image or sound files, but they are visuals and sounds that Claude created in code. They are listed so that nothing AI-made is missed.
+
+| What | Where | License | Status |
+|---|---|---|---|
+| **Board markers:** visited dots, breadcrumb trail, scan heat-map squares, fog | drawn with simple shapes by `scenes/maze/maze_view.gd` | None (AI-made) | AI-made, needs replacing |
+| **Particle bursts:** bump sparks, cut leaves, win burst, power-down smoke | `scenes/maze/maze_view.gd` (plain colored squares, no texture) | None (AI-made) | AI-made, needs replacing |
+| **Interface style:** colors, panel and button shapes, borders | `ui/theme/main_theme.tres` (flat colored boxes, no images) | None (AI-made) | AI-made, needs replacing |
+| **Sound effects** | synthesized when the game starts by `autoload/sfx.gd` (there are no audio files) | None (AI-made) | AI-made, needs replacing |
+
+The main menu background draws `floor.svg`, `stone.svg` and `bush.svg`, so it updates automatically when those tiles are replaced.
+
+## Fonts
+
+No font files ship with the game. The theme asks the player's operating system for fonts that are already installed:
+- **Text:** Avenir Next, Segoe UI, Helvetica Neue, Roboto, Arial or Sans-Serif.
+- **Code view:** Menlo, SF Mono, Consolas, DejaVu Sans Mono, Courier New or Monospace.
+
+## Engine
+
+Made with [Godot Engine](https://godotengine.org) 4.6.1, which is MIT-licensed. Godot's license notice has to be included with any released build; see Godot's [Complying with licenses](https://docs.godotengine.org/en/stable/about/complying_with_licenses.html) page.
