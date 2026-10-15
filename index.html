@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#e8f0f7" />
     <meta name="description" content="Program a robot with blocks and guide it through a colorful maze." />
-    <title>Circuit Maze — Level 01</title>
+    <title>Circuit Maze — Beginner levels</title>
     <link rel="stylesheet" href="./styles.css" />
     <script defer src="./vendor/blockly_compressed.js"></script>
     <script defer src="./vendor/en.js"></script>
-    <script defer src="./app.js"></script>
+    <script defer src="./levels.js"></script>
+    <script defer src="./game.js"></script>
   </head>
   <body>
     <main class="app-shell">
@@ -21,18 +22,23 @@
             <p class="brand-subtitle">Robot programming playground</p>
           </div>
         </div>
-        <div class="level-badge"><span class="badge-dot"></span> Level 01 of 10 <span class="badge-note">prototype</span></div>
+        <div class="level-badge"><span class="badge-dot"></span> Beginner course <span class="badge-note">5 lessons</span></div>
       </header>
+
+      <nav class="level-selector" aria-label="Choose a level">
+        <div class="selector-heading"><span>Choose a level</span><small>Pick any lesson · ✓ complete · ★ efficient</small></div>
+        <div class="level-list" id="level-list"></div>
+      </nav>
 
       <div class="game-layout">
         <section class="board-panel" aria-labelledby="board-title">
           <div class="panel-heading">
             <div>
               <p class="section-label">The maze</p>
-              <h1 id="board-title">Reach the flag.</h1>
-              <p class="panel-description">Build a program, then watch your robot follow it.</p>
+              <h1 id="board-title">First steps</h1>
+              <p class="panel-description" id="board-description">Move the robot forward twice to reach the flag.</p>
             </div>
-            <div class="board-size">10 × 10</div>
+            <button class="task-button" id="task-button" type="button">View task</button>
           </div>
 
           <div class="board-frame">
@@ -45,17 +51,12 @@
               <strong id="status-title">Ready to program</strong>
               <span id="status-detail">Drag blocks into the workspace and press Run program.</span>
             </div>
-            <div class="stats" aria-label="Robot statistics">
-              <span><b id="health-value">10</b><small>Health</small></span>
-              <span><b id="steps-value">0</b><small>Steps</small></span>
-            </div>
+            <div class="stats" aria-label="Robot statistics"><span><b id="steps-value">0</b><small>Steps</small></span></div>
           </div>
 
           <div class="legend" aria-label="Tile legend">
-            <div class="legend-item"><span class="legend-color grass"></span><span><b>Grass</b><small>Safe</small></span></div>
-            <div class="legend-item"><span class="legend-color acid"></span><span><b>Acid</b><small>−2 health</small></span></div>
-            <div class="legend-item"><span class="legend-color fire"></span><span><b>Fire</b><small>−4 health</small></span></div>
-            <div class="legend-item"><span class="legend-color rock"></span><span><b>Rock</b><small>Blocked</small></span></div>
+            <div class="legend-item"><span class="legend-color grass"></span><span><b>Floor</b><small>Safe to cross</small></span></div>
+            <div class="legend-item"><span class="legend-color rock"></span><span><b>Wall</b><small>Cannot cross</small></span></div>
           </div>
         </section>
 
@@ -63,8 +64,8 @@
           <div class="panel-heading program-heading">
             <div>
               <p class="section-label">Your program</p>
-              <h2 id="program-title">Teach it to move.</h2>
-              <p class="panel-description">Drag blocks from the left and snap them below “when run.”</p>
+              <h2 id="program-title">Build the route.</h2>
+              <p class="panel-description" id="program-description">Drag the available blocks into your program.</p>
             </div>
           </div>
 
@@ -75,12 +76,23 @@
           <div class="controls">
             <button class="run-button" id="run-button" type="button"><span aria-hidden="true">▶</span> Run program</button>
             <button class="secondary-button" id="reset-button" type="button">Reset robot</button>
-            <button class="secondary-button" id="example-button" type="button">Load example</button>
+            <button class="next-button" id="next-button" type="button" hidden>Next level →</button>
             <button class="text-button" id="clear-button" type="button">Clear blocks</button>
           </div>
-          <p class="editor-tip"><span aria-hidden="true">↖</span> The robot starts facing up. Turn blocks change its direction by 90°.</p>
+          <p class="editor-tip" id="editor-tip"></p>
         </section>
       </div>
     </main>
+
+    <dialog class="task-dialog" id="task-dialog" aria-labelledby="task-title">
+      <div class="dialog-inner">
+        <p class="dialog-eyebrow" id="task-level">LEVEL 01</p>
+        <h2 id="task-title">First steps</h2>
+        <p class="dialog-objective" id="task-objective"></p>
+        <div class="dialog-lesson"><strong>What to do</strong><p id="task-lesson"></p></div>
+        <p class="dialog-tip" id="task-tip"></p>
+        <button class="run-button dialog-button" id="start-level-button" type="button">Start level →</button>
+      </div>
+    </dialog>
   </body>
 </html>
