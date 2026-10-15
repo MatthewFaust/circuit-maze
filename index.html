@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#e8f0f7" />
+    <meta name="theme-color" content="#f3f4f0" />
     <meta name="description" content="Program a robot with blocks and guide it through a colorful maze." />
     <title>Circuit Maze — Beginner levels</title>
     <link rel="stylesheet" href="./styles.css" />
@@ -19,10 +19,10 @@
           <span class="brand-mark" aria-hidden="true"><span></span></span>
           <div>
             <p class="brand-name">Circuit Maze</p>
-            <p class="brand-subtitle">Robot programming playground</p>
+            <p class="brand-subtitle">A game about programming a robot</p>
           </div>
         </div>
-        <div class="level-badge"><span class="badge-dot"></span> Beginner course <span class="badge-note">5 lessons</span></div>
+        <div class="level-badge">Beginner course <span class="badge-note">5 lessons</span></div>
       </header>
 
       <nav class="level-selector" aria-label="Choose a level">
@@ -34,7 +34,6 @@
         <section class="board-panel" aria-labelledby="board-title">
           <div class="panel-heading">
             <div>
-              <p class="section-label">The maze</p>
               <h1 id="board-title">First steps</h1>
               <p class="panel-description" id="board-description">Move the robot forward twice to reach the flag.</p>
             </div>
@@ -55,15 +54,14 @@
           </div>
 
           <div class="legend" aria-label="Tile legend">
-            <div class="legend-item"><span class="legend-color grass"></span><span><b>Floor</b><small>Safe to cross</small></span></div>
-            <div class="legend-item"><span class="legend-color rock"></span><span><b>Wall</b><small>Cannot cross</small></span></div>
+            <div class="legend-item"><span class="legend-color grass"></span><span><b>Floor</b></span></div>
+            <div class="legend-item"><span class="legend-color rock"></span><span><b>Wall</b></span></div>
           </div>
         </section>
 
         <section class="program-panel" aria-labelledby="program-title">
           <div class="panel-heading program-heading">
             <div>
-              <p class="section-label">Your program</p>
               <h2 id="program-title">Build the route.</h2>
               <p class="panel-description" id="program-description">Drag the available blocks into your program.</p>
             </div>
@@ -74,9 +72,9 @@
           </div>
 
           <div class="controls">
-            <button class="run-button" id="run-button" type="button"><span aria-hidden="true">▶</span> Run program</button>
+            <button class="run-button" id="run-button" type="button">Run program</button>
             <button class="secondary-button" id="reset-button" type="button">Reset robot</button>
-            <button class="next-button" id="next-button" type="button" hidden>Next level →</button>
+            <button class="next-button" id="next-button" type="button" hidden>Next level</button>
             <button class="text-button" id="clear-button" type="button">Clear blocks</button>
           </div>
           <p class="editor-tip" id="editor-tip"></p>
@@ -86,12 +84,12 @@
 
     <dialog class="task-dialog" id="task-dialog" aria-labelledby="task-title">
       <div class="dialog-inner">
-        <p class="dialog-eyebrow" id="task-level">LEVEL 01</p>
+        <p class="dialog-eyebrow" id="task-level">Level 01 / 05</p>
         <h2 id="task-title">First steps</h2>
         <p class="dialog-objective" id="task-objective"></p>
-        <div class="dialog-lesson"><strong>What to do</strong><p id="task-lesson"></p></div>
+        <div class="dialog-lesson"><p id="task-lesson"></p></div>
         <p class="dialog-tip" id="task-tip"></p>
-        <button class="run-button dialog-button" id="start-level-button" type="button">Start level →</button>
+        <button class="run-button dialog-button" id="start-level-button" type="button">Start level</button>
       </div>
     </dialog>
   </body>

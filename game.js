@@ -89,11 +89,11 @@
 
   function defineBlocks() {
     Blockly.defineBlocksWithJsonArray([
-      { type: "maze_start", message0: "when run", nextStatement: null, colour: "#345a77", tooltip: "Blocks connected below run from top to bottom." },
-      { type: "maze_move", message0: "move forward", previousStatement: null, nextStatement: null, colour: "#438cc5", tooltip: "Move one tile in the direction the robot faces." },
-      { type: "maze_turn_left", message0: "turn left", previousStatement: null, nextStatement: null, colour: "#438cc5", tooltip: "Rotate 90 degrees left." },
-      { type: "maze_turn_right", message0: "turn right", previousStatement: null, nextStatement: null, colour: "#438cc5", tooltip: "Rotate 90 degrees right." },
-      { type: "maze_repeat", message0: "repeat %1 times", args0: [{ type: "field_number", name: "COUNT", value: 3, min: 1, max: 50, precision: 1 }], message1: "do %1", args1: [{ type: "input_statement", name: "DO" }], previousStatement: null, nextStatement: null, colour: "#a678d6", tooltip: "Run the enclosed blocks this many times." },
+      { type: "maze_start", message0: "when run", nextStatement: null, colour: "#39453f", tooltip: "Blocks connected below run from top to bottom." },
+      { type: "maze_move", message0: "move forward", previousStatement: null, nextStatement: null, colour: "#4f755e", tooltip: "Move one tile in the direction the robot faces." },
+      { type: "maze_turn_left", message0: "turn left", previousStatement: null, nextStatement: null, colour: "#4f755e", tooltip: "Rotate 90 degrees left." },
+      { type: "maze_turn_right", message0: "turn right", previousStatement: null, nextStatement: null, colour: "#4f755e", tooltip: "Rotate 90 degrees right." },
+      { type: "maze_repeat", message0: "repeat %1 times", args0: [{ type: "field_number", name: "COUNT", value: 3, min: 1, max: 50, precision: 1 }], message1: "do %1", args1: [{ type: "input_statement", name: "DO" }], previousStatement: null, nextStatement: null, colour: "#806f55", tooltip: "Run the enclosed blocks this many times." },
     ]);
   }
 
@@ -164,7 +164,7 @@
   }
 
   function showTask() {
-    document.getElementById("task-level").textContent = `LEVEL ${String(level.id).padStart(2, "0")} OF ${String(levels.length).padStart(2, "0")}`;
+    document.getElementById("task-level").textContent = `Level ${String(level.id).padStart(2, "0")} / ${String(levels.length).padStart(2, "0")}`;
     document.getElementById("task-title").textContent = level.name;
     document.getElementById("task-objective").textContent = level.objective;
     document.getElementById("task-lesson").textContent = level.id === 1 ? firstLessonCopy() : level.lesson;
