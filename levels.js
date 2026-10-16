@@ -2,7 +2,7 @@
   "use strict";
 
   // These first lessons use only ordinary floor and walls. Coordinates are [x, y].
-  window.CircuitMazeLevels = [
+  const introLevels = [
     {
       id: 1, name: "First steps", objective: "Move the robot forward twice to reach the flag.",
       lesson: "One move block is already connected. Drag one more move forward block underneath it, then press Run program.",
@@ -39,4 +39,12 @@
       floor: [[2, 3], [3, 3], [3, 4], [4, 4], [4, 5]], blocks: ["maze_move", "maze_turn_right", "maze_turn_left", "maze_repeat"], ideal: 5,
     },
   ];
+  window.CircuitMazeCollections = [{
+    id: "intro",
+    name: "Intro",
+    description: "Learn to move, turn, and repeat a route.",
+    levels: introLevels,
+  }];
+  // Keep the original level list and storage IDs so existing progress carries over.
+  window.CircuitMazeLevels = introLevels;
 })();

@@ -25,10 +25,14 @@ button[hidden] { display: none !important; }
 .brand-mark span { width: 10px; height: 10px; border: 2px solid white; border-radius: 50%; }
 .brand-name { margin: 0; font-size: 19px; line-height: 1.1; font-weight: 700; letter-spacing: -.02em; }
 .brand-subtitle { margin: 3px 0 0; color: var(--muted); font-size: 12px; line-height: 1.2; }
-.level-badge { color: var(--muted); font-size: 12px; font-weight: 600; white-space: nowrap; }
-.badge-note { display: inline-block; margin-left: 10px; padding-left: 12px; border-left: 1px solid var(--line); font-weight: 400; }
 
-.level-selector { margin: 15px 0 20px; }
+.collection-overview { display: flex; align-items: end; justify-content: space-between; gap: 24px; padding: 23px 0 15px; border-bottom: 1px solid var(--line); }
+.collection-kicker { margin: 0 0 5px; color: var(--muted); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.collection-overview h1 { font-size: 26px; }
+.collection-description { margin: 5px 0 0; color: var(--muted); font-size: 13px; }
+.collection-progress { flex: 0 0 auto; margin: 0 0 2px; color: var(--accent-dark); font-size: 12px; font-weight: 700; }
+
+.level-selector { margin: 13px 0 20px; }
 .selector-heading { display: flex; justify-content: space-between; gap: 12px; margin-bottom: 7px; color: var(--muted); font-size: 12px; font-weight: 600; }
 .selector-heading small { color: var(--muted); font-size: 11px; font-weight: 400; }
 .level-list { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); border-bottom: 1px solid var(--line); }
@@ -121,8 +125,11 @@ h1, h2 { margin: 0; font-size: clamp(24px, 2.1vw, 29px); line-height: 1.15; lett
 @media (max-width: 580px) {
   .app-shell { padding: 0 12px 24px; }
   .masthead { min-height: 64px; }
-  .brand-subtitle, .badge-note, .selector-heading small { display: none; }
-  .level-badge { font-size: 11px; }
+  .brand-subtitle, .selector-heading small { display: none; }
+  .collection-overview { align-items: start; gap: 12px; padding-top: 18px; }
+  .collection-overview h1 { font-size: 24px; }
+  .collection-description { max-width: 230px; font-size: 12px; line-height: 1.35; }
+  .collection-progress { margin-top: 20px; font-size: 11px; white-space: nowrap; }
   .level-list { grid-template-columns: repeat(5, 120px); }
   .board-panel, .program-panel { padding: 14px; }
   .panel-heading { min-height: 76px; }

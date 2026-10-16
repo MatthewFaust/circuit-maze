@@ -1,6 +1,6 @@
 # Circuit Maze
 
-A local robot maze game with five beginner levels. Build a program by snapping together blocks, then run it to guide the robot to the flag. Use the level selector at the top to switch lessons; the task popup explains each new objective. These early levels use only safe floor and walls, introducing moves, turns, and repeats one step at a time.
+A local robot maze game. Its first collection, **Intro**, has five beginner levels. Build a program by snapping together blocks, then run it to guide the robot to the flag. Use the level selector at the top to switch lessons; the task popup explains each new objective. These early levels use only safe floor and walls, introducing moves, turns, and repeats one step at a time.
 
 The game uses [Blockly](https://developers.google.com/blockly) for its visual editor. Each maze is 10×10, and your programs and completed levels are saved in your browser.
 

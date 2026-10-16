@@ -1,7 +1,8 @@
 (() => {
   "use strict";
 
-  const levels = window.CircuitMazeLevels;
+  const collection = window.CircuitMazeCollections[0];
+  const levels = collection.levels;
   const DELTAS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
   const DIR_NAMES = ["north", "east", "south", "west"];
   const MAX_COMMANDS = 500;
@@ -18,6 +19,7 @@
   const nextButton = document.getElementById("next-button");
   const taskDialog = document.getElementById("task-dialog");
   const levelList = document.getElementById("level-list");
+  const collectionProgress = document.getElementById("collection-progress");
   const cells = new Map();
   let level = null;
   let floor = new Set();
@@ -131,6 +133,8 @@
 
   function renderLevelSelector() {
     levelList.replaceChildren();
+    const completed = levels.filter(option => Boolean(completions[option.id])).length;
+    collectionProgress.textContent = `${completed} of ${levels.length} complete`;
     for (const option of levels) {
       const button = document.createElement("button");
       button.type = "button";
@@ -164,7 +168,7 @@
   }
 
   function showTask() {
-    document.getElementById("task-level").textContent = `Level ${String(level.id).padStart(2, "0")} / ${String(levels.length).padStart(2, "0")}`;
+    document.getElementById("task-level").textContent = `${collection.name} — Level ${String(level.id).padStart(2, "0")} / ${String(levels.length).padStart(2, "0")}`;
     document.getElementById("task-title").textContent = level.name;
     document.getElementById("task-objective").textContent = level.objective;
     document.getElementById("task-lesson").textContent = level.id === 1 ? firstLessonCopy() : level.lesson;
@@ -194,7 +198,7 @@
     level = chosen;
     floor = new Set(level.floor.map(([x, y]) => key(x, y)));
     try { localStorage.setItem(LAST_LEVEL_KEY, String(level.id)); } catch (_) { /* Storage is optional. */ }
-    document.title = `Circuit Maze — Level ${String(level.id).padStart(2, "0")}`;
+    document.title = `Circuit Maze — ${collection.name} Level ${String(level.id).padStart(2, "0")}`;
     document.getElementById("board-title").textContent = level.name;
     document.getElementById("board-description").textContent = level.objective;
     document.getElementById("editor-tip").textContent = level.tip;
@@ -282,6 +286,8 @@
   }
 
   defineBlocks();
+  document.getElementById("collection-title").textContent = collection.name;
+  document.getElementById("collection-description").textContent = collection.description;
   workspace = Blockly.inject("blocklyDiv", {
     toolbox: toolboxFor(levels[0]), renderer: "geras", trashcan: true, sounds: false, scrollbars: true,
     move: { scrollbars: true, drag: true, wheel: true },

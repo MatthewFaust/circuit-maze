@@ -8,6 +8,15 @@ const context = { window: {} };
 vm.runInNewContext(fs.readFileSync(path.join(__dirname, "..", "levels.js"), "utf8"), context);
 const levels = context.window.CircuitMazeLevels;
 
+test("Intro collection contains the five existing playable lessons in order", () => {
+  const collections = context.window.CircuitMazeCollections;
+  assert.equal(collections.length, 1);
+  assert.equal(collections[0].id, "intro");
+  assert.equal(collections[0].name, "Intro");
+  assert.deepEqual(Array.from(collections[0].levels, (level) => level.id), [1, 2, 3, 4, 5]);
+  assert.equal(collections[0].levels, levels);
+});
+
 const solutions = [
   ["maze_move", "maze_move"],
   ["maze_move", "maze_turn_right", "maze_move"],
