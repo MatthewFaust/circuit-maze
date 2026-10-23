@@ -161,6 +161,7 @@ static func _read_boss(d: Dictionary, errors: Array[String]) -> Dictionary:
 	return {
 		"name": get_str(d, "name", "Boss", errors),
 		"skin": get_str(d, "skin", "", errors),
+		"sprite": get_str(d, "sprite", "", errors),
 		"min_gear": {"armor": armor, "weapon": weapon},
 		"min_loadout": ProgressionCatalog.get_default().loadout(armor, weapon),
 		"units": units,

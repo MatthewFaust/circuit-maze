@@ -22,10 +22,15 @@ const OBJECT_TEX := {
 }
 ## Gap around each wall block, in board units.
 const WALL_INSET := 5.0
+## Boss sprites shrink with each split.
+const BOSS_SCALES := [1.0, 0.8, 0.62]
+const BOSS_BAR_COLOR := Color("#ef476f")
 
 var world: MazeWorld
 ## Draw visited dots and the breadcrumb line (DFS levels).
 var show_trail := false
+## Boss stages: the boss's sprite (set by the level screen before show_world).
+var boss_texture: Texture2D
 
 var board: Node2D
 var _floor: Node2D
@@ -52,6 +57,8 @@ var _idle_tweens: Array[Tween] = []
 ## Chapter colors (theme type "Palette"), refreshed when the theme changes.
 var _pal := {}
 var _wall_box: StyleBoxFlat
+## Boss id -> Node2D holding a "Body" sprite and a "Bar" (its HP bar).
+var _boss_nodes := {}
 
 
 func _ready() -> void:
@@ -118,6 +125,12 @@ func _layer(layer_name: String, draw_func: Callable) -> Node2D:
 	return n
 
 
+## The robot's look (the equipped skin).
+func set_robot_texture(tex: Texture2D) -> void:
+	if tex != null:
+		_robot_body.texture = tex
+
+
 ## Rebuilds the board for a fresh world (new variant, reset).
 func show_world(w: MazeWorld) -> void:
 	world = w
@@ -130,11 +143,14 @@ func show_world(w: MazeWorld) -> void:
 	for c in _fx.get_children():
 		c.queue_free()
 	_sprites.clear()
+	_boss_nodes.clear()
 	var g := world.grid
 	for i in g.size():
 		var t := g.cells[i]
 		if OBJECT_TEX.has(t):
 			_add_sprite(g.cell_at(i), t)
+	for b in world.alive_bosses():
+		_add_boss(b)
 	_fog_alpha.resize(g.size())
 	for i in g.size():
 		_fog_alpha[i] = 0.0 if world.revealed[i] == 1 else 1.0
@@ -146,6 +162,7 @@ func show_world(w: MazeWorld) -> void:
 	_robot_body.modulate = Color.WHITE
 	hide_banner()
 	sync()
+	after_step()
 	_fit()
 	_floor.queue_redraw()
 
@@ -175,6 +192,7 @@ func sync() -> void:
 	_marks.queue_redraw()
 	_numbers.queue_redraw()
 	_fog.queue_redraw()
+	_sync_bosses()
 
 
 func cell_center(c: Vector2i) -> Vector2:
@@ -249,6 +267,23 @@ func append_event(t: Tween, e: Dictionary) -> void:
 		"failed":
 			t.tween_callback(_power_down.bind(str(e["code"])))
 			t.tween_interval(0.3)
+		"boss_hit":
+			t.tween_callback(_boss_hit_fx.bind(int(e["id"]), int(e["damage"]), int(e["hp"]), int(e["max_hp"])))
+			t.tween_interval(0.12)
+		"attack_interrupted":
+			t.tween_callback(_float_text.bind("Interrupted!", cell_center(e["cell"]) + Vector2(0, -CELL * 0.5),
+					Color(1, 0.62, 0.3)))
+		"boss_struck":
+			t.tween_callback(_boss_strike_fx.bind(int(e["id"]), bool(e["blocked"])))
+			t.tween_interval(0.14)
+		"blocked":
+			t.tween_callback(_shield_fx)
+		"boss_defeated":
+			t.tween_callback(_boss_down_fx.bind(int(e["id"])))
+			t.tween_interval(0.25)
+		"boss_split":
+			t.tween_callback(_boss_split_fx.bind(e["children"], e["cell"]))
+			t.tween_interval(0.3)
 
 
 ## Applies an event with no animation (max speed). Call sync() afterwards.
@@ -267,6 +302,132 @@ func apply_event(e: Dictionary) -> void:
 			_celebrate()
 		"failed":
 			_power_down(str(e["code"]))
+		"boss_hit", "boss_defeated", "boss_split":
+			_sync_bosses()
+
+
+## After each step: the boss the robot faces glows red on the turn before it
+## strikes (the same thing boss_charging() senses).
+func after_step() -> void:
+	if world == null or not world.is_boss_stage():
+		return
+	var charging := world.striker(world.actions_taken) if world.is_running() else {}
+	for id: int in _boss_nodes:
+		var body: Sprite2D = (_boss_nodes[id] as Node2D).get_node("Body")
+		var on := not charging.is_empty() and int(charging["id"]) == id
+		body.self_modulate = Color(1.55, 0.72, 0.72) if on else Color.WHITE
+
+
+func _add_boss(b: Dictionary) -> Node2D:
+	var node := Node2D.new()
+	node.position = cell_center(b["cell"])
+	node.set_meta("hp", int(b["hp"]))
+	node.set_meta("max_hp", int(b["max_hp"]))
+	var s: float = BOSS_SCALES[mini(int(b["generation"]), BOSS_SCALES.size() - 1)]
+	var body := Sprite2D.new()
+	body.name = "Body"
+	body.texture = boss_texture if boss_texture != null else OBJECT_TEX[Tiles.SPIKE]
+	body.scale = Vector2(s, s)
+	node.add_child(body)
+	var bar := Node2D.new()
+	bar.name = "Bar"
+	bar.position = Vector2(0, -CELL * 0.5 * s - 8.0)
+	bar.draw.connect(_draw_boss_bar.bind(bar, node))
+	node.add_child(bar)
+	_objects.add_child(node)
+	_boss_nodes[int(b["id"])] = node
+	return node
+
+
+func _draw_boss_bar(bar: Node2D, node: Node2D) -> void:
+	var w := CELL * 0.72
+	var frac := float(node.get_meta("hp", 0)) / maxf(float(node.get_meta("max_hp", 1)), 1.0)
+	bar.draw_rect(Rect2(-w / 2.0 - 3.0, -7.0, w + 6.0, 14.0), _pal["outline"])
+	bar.draw_rect(Rect2(-w / 2.0, -4.0, w * frac, 8.0), BOSS_BAR_COLOR)
+
+
+## Matches the boss sprites to the world (instant runs and resets).
+func _sync_bosses() -> void:
+	if world == null:
+		return
+	for b in world.bosses:
+		var id := int(b["id"])
+		if bool(b["alive"]):
+			var node: Node2D = _boss_nodes[id] if _boss_nodes.has(id) else _add_boss(b)
+			node.position = cell_center(b["cell"])
+			node.set_meta("hp", int(b["hp"]))
+			(node.get_node("Bar") as Node2D).queue_redraw()
+		elif _boss_nodes.has(id):
+			(_boss_nodes[id] as Node2D).queue_free()
+			_boss_nodes.erase(id)
+
+
+func _boss_hit_fx(id: int, damage: int, hp: int, _max_hp: int) -> void:
+	Sfx.play(&"attack")
+	if not _boss_nodes.has(id):
+		return
+	var node: Node2D = _boss_nodes[id]
+	node.set_meta("hp", hp)
+	(node.get_node("Bar") as Node2D).queue_redraw()
+	_float_text("-%d" % damage, node.position + Vector2(0, -CELL * 0.55), Color(1, 0.85, 0.3))
+	var body: Sprite2D = node.get_node("Body")
+	body.modulate = Color(2.2, 2.2, 2.2)
+	body.create_tween().tween_property(body, "modulate", Color.WHITE, 0.18)
+
+
+func _boss_strike_fx(id: int, blocked: bool) -> void:
+	if blocked:
+		Sfx.play(&"shield")
+		_float_text("Blocked!", _anim_pos + Vector2(0, -CELL * 0.55), Color(0.5, 0.85, 1))
+	if not _boss_nodes.has(id) or Game.reduce_motion():
+		return
+	var node: Node2D = _boss_nodes[id]
+	var home := node.position
+	var t := node.create_tween()
+	t.tween_property(node, "position", home.lerp(_anim_pos, 0.28), 0.07)
+	t.tween_property(node, "position", home, 0.1)
+
+
+func _shield_fx() -> void:
+	var ring := Node2D.new()
+	ring.position = _anim_pos
+	ring.draw.connect(func() -> void:
+		ring.draw_arc(Vector2.ZERO, CELL * 0.48, 0.0, TAU, 40, Color(0.5, 0.85, 1, 0.9), 8.0, true))
+	_fx.add_child(ring)
+	var t := ring.create_tween().set_parallel()
+	t.tween_property(ring, "scale", Vector2(1.15, 1.15), 0.3).from(Vector2(0.8, 0.8))
+	t.tween_property(ring, "modulate:a", 0.0, 0.3).set_delay(0.12)
+	t.chain().tween_callback(ring.queue_free)
+
+
+func _boss_down_fx(id: int) -> void:
+	Sfx.play(&"boss_down")
+	if not _boss_nodes.has(id):
+		return
+	var node: Node2D = _boss_nodes[id]
+	_boss_nodes.erase(id)
+	_burst(node.position, Color(1.0, 0.55, 0.35), 24)
+	var t := node.create_tween().set_parallel()
+	t.tween_property(node, "scale", Vector2(0.2, 0.2), 0.3)
+	t.tween_property(node, "modulate:a", 0.0, 0.3)
+	t.chain().tween_callback(node.queue_free)
+
+
+## The halves fly out of the destroyed boss's tile to their own.
+func _boss_split_fx(children: Array, from: Vector2i) -> void:
+	if world == null:
+		return
+	for c: Dictionary in children:
+		var id := int(c["id"])
+		if _boss_nodes.has(id):
+			continue
+		var node := _add_boss(world.bosses[id])
+		var target := node.position
+		node.position = cell_center(from)
+		node.scale = Vector2(0.4, 0.4)
+		var t := node.create_tween().set_parallel()
+		t.tween_property(node, "position", target, 0.28).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		t.tween_property(node, "scale", Vector2.ONE, 0.28)
 
 
 func _fit() -> void:

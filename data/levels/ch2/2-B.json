@@ -16,7 +16,7 @@
   "robot": {"stamina": 30},
   "rules": {"max_hp": 20},
   "boss": {
-    "name": "Sensor Pi", "skin": "sentinel",
+    "name": "Sensor Pi", "sprite": "res://art/bosses/sensor_pi.svg", "skin": "sentinel",
     "min_gear": {"armor": "signal_shield", "weapon": ""},
     "units": [{"name": "Sensor Pi", "hp": 30, "attack": 7, "pattern": "OOX"}]
   },

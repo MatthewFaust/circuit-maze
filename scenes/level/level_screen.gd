@@ -77,6 +77,14 @@ func _ready() -> void:
 
 	_loadout = Progress.data.loadout(ProgressionCatalog.get_default())
 	_run.loadout = _loadout
+	var skin := ProgressionCatalog.get_default().skin_by_id(Progress.data.skin)
+	if not skin.is_empty() and ResourceLoader.exists(str(skin["texture"])):
+		_maze.set_robot_texture(load(str(skin["texture"])))
+	if level.is_boss() and ResourceLoader.exists(str(level.boss.get("sprite", ""))):
+		_maze.boss_texture = load(str(level.boss["sprite"]))
+	if level.is_boss():
+		_hud.show_combat(level.rules.base_attack + int(_loadout.get("damage", 0)), int(_loadout.get("defense", 0)))
+		_log.set_boss_stage(true)
 	_run.setup(level, _maze, _hud, _inspector, _log, _editor)
 	_run.state_changed.connect(_on_state_changed)
 	_run.variant_started.connect(_on_variant_started)
@@ -241,12 +249,12 @@ func _show_run_result(passed: bool, info: Dictionary, ev: Dictionary) -> void:
 	if _run.state != RunController.State.FINISHED:
 		return
 	if passed:
-		_result.show_success(level, ev, Game.next_level_id(level.id) != "")
+		_result.show_success(level, ev, Game.next_level_id(level.id) != "", _unlocked)
 	else:
 		var summary: Dictionary = info.get("summary", {})
 		var vi := int(info.get("variant", 0))
 		_result.show_failure(level, ev, level.variants[vi].name, str(summary.get("fail_code", "")),
-				str(summary.get("message", "")))
+				str(summary.get("message", "")), _unlocked)
 
 
 ## "Check": runs every map instantly and reports, without animation.
@@ -271,14 +279,16 @@ func _check_all() -> void:
 	_record(ev)
 	if first_fail < 0:
 		_log.show_message("All %d map(s) passed. Press Run to watch it." % variants.size(), "good")
-		_result.show_success(level, ev, Game.next_level_id(level.id) != "")
+		_result.show_success(level, ev, Game.next_level_id(level.id) != "", _unlocked)
 	else:
 		var r: Dictionary = variants[first_fail]
 		_log.show_message("%s fails: %s" % [level.variants[first_fail].name, str(r["message"])], "bad")
-		_result.show_failure(level, ev, level.variants[first_fail].name, str(r["fail_code"]), str(r["message"]))
+		_result.show_failure(level, ev, level.variants[first_fail].name, str(r["fail_code"]), str(r["message"]),
+				_unlocked)
 
 
 func _record(ev: Dictionary) -> void:
+	_unlocked = []
 	if not bool(ev.get("valid", false)):
 		return
 	Progress.data.record_result(level.id, ev)

@@ -1,6 +1,8 @@
 class_name ResultDialog
 extends Control
 ## Shown after a run: stars on success, or the reason and a CS tip on failure.
+## Boss stages show the win instead of stars. Either way, anything the result
+## unlocked (armor, weapons, skins) is listed.
 
 signal retry_requested
 signal next_requested
@@ -23,6 +25,11 @@ const FAILURES := {
 	"backtrack_empty": ["Nothing left to backtrack to", "[b]backtrack()[/b] needs a breadcrumb to return to. With an empty stack the robot has explored everything it can reach."],
 	"static": ["Not allowed on this level", ""],
 }
+## Boss stages: the tip for losing a fight.
+const BOSS_TIPS := {
+	"hp_zero": "A boss hits for its attack minus your defense, and a strike interrupts any attack. Watch its rhythm: [b]block()[/b] on the turns it strikes. Better gear from the Garage also lets you survive a few mistakes.",
+	"program_ended": "The fight isn't over until every boss is down. Keep attacking until boss_ahead() is false, or count the hits you need: its HP divided by your damage.",
+}
 
 @onready var _headline: Label = %Headline
 @onready var _stars: HBoxContainer = %Stars
@@ -32,12 +39,20 @@ const FAILURES := {
 @onready var _levels: Button = %LevelsButton
 @onready var _retry: Button = %RetryButton
 @onready var _next: Button = %NextButton
+var _unlocks: RichTextLabel
 
 
 func _ready() -> void:
 	($Dim as ColorRect).color = get_theme_color(&"dim", &"Palette")
 	for b: Button in [_levels, _retry, _next]:
 		b.focus_mode = Control.FOCUS_NONE
+	_unlocks = RichTextLabel.new()
+	_unlocks.bbcode_enabled = true
+	_unlocks.fit_content = true
+	_unlocks.scroll_active = false
+	_unlocks.custom_minimum_size = Vector2(520, 0)
+	_unlocks.hide()
+	_stats.add_sibling(_unlocks)
 	_levels.pressed.connect(func() -> void:
 		hide()
 		levels_requested.emit())
@@ -49,8 +64,23 @@ func _ready() -> void:
 		next_requested.emit())
 
 
-## ev comes from LevelEvaluator.evaluate().
-func show_success(level: LevelData, ev: Dictionary, has_next: bool) -> void:
+## ev comes from LevelEvaluator.evaluate(); unlocked from ProgressData.refresh_unlocks().
+func show_success(level: LevelData, ev: Dictionary, has_next: bool, unlocked: Array = []) -> void:
+	_show_unlocks(unlocked)
+	if level.is_boss():
+		_headline.text = "Boss defeated!"
+		_headline.add_theme_color_override("font_color", get_theme_color(&"good", &"Palette"))
+		_stars.hide()
+		_reason.text = "You beat %s%s." % [level.boss["name"],
+				" in every arena" if level.variants.size() > 1 else ""]
+		_tip.text = "[center]%s[/center]" % level.cs_note
+		_tip.visible = true
+		_fill_stats(level, ev)
+		_retry.text = "Fight again"
+		_next.visible = has_next
+		_next.text = "Next chapter"
+		_pop()
+		return
 	var count := int(ev["star_count"])
 	_headline.text = ["Escaped!", "Escaped!", "Great run!", "Perfect!"][count]
 	_headline.add_theme_color_override("font_color", get_theme_color(&"good", &"Palette"))
@@ -64,6 +94,7 @@ func show_success(level: LevelData, ev: Dictionary, has_next: bool) -> void:
 	_reason.text = "Your program escaped every map." if missing.is_empty() \
 			else "To earn every star: " + " and ".join(missing) + "."
 	_tip.text = "[center]%s[/center]" % level.cs_note
+	_tip.visible = true
 	_fill_stats(level, ev)
 	_retry.text = "Keep improving" if count < 3 else "Keep editing"
 	_next.visible = has_next
@@ -71,8 +102,13 @@ func show_success(level: LevelData, ev: Dictionary, has_next: bool) -> void:
 	_pop()
 
 
-func show_failure(level: LevelData, ev: Dictionary, variant_name: String, code: String, message: String) -> void:
+func show_failure(level: LevelData, ev: Dictionary, variant_name: String, code: String, message: String,
+		unlocked: Array = []) -> void:
+	_show_unlocks(unlocked)
 	var f: Array = FAILURES.get(code, ["The robot didn't escape", ""])
+	if level.is_boss():
+		f = [("The boss is still standing" if code == "program_ended" else str(f[0])),
+				BOSS_TIPS.get(code, str(f[1]))]
 	_headline.text = str(f[0])
 	_headline.add_theme_color_override("font_color", get_theme_color(&"bad", &"Palette"))
 	_stars.hide()
@@ -134,11 +170,38 @@ func _fill_stats(level: LevelData, ev: Dictionary) -> void:
 	for v: Dictionary in variants:
 		if bool(v["won"]):
 			passed += 1
+	if level.is_boss():
+		_stat("Arenas won", "%d / %d" % [passed, level.variants.size()])
+		_stat("Blocks used", "%d%s" % [int(ev["blocks"]), "   (limit %d)" % level.block_limit if level.block_limit > 0 else ""])
+		if bool(ev.get("solved", false)):
+			_stat("Stamina used", "%d" % int(ev["stamina_total"]))
+		return
 	_stat("Maps passed", "%d / %d" % [passed, level.variants.size()])
 	_stat("Blocks used", "%d   (par %d%s)" % [int(ev["blocks"]), level.par_blocks,
 			", limit %d" % level.block_limit if level.block_limit > 0 else ""])
 	if bool(ev.get("solved", false)):
 		_stat("Stamina used", "%d   (par %d)" % [int(ev["stamina_total"]), level.par_stamina])
+
+
+## "Unlocked: ..." for new armor, weapons and skins.
+func _show_unlocks(unlocked: Array) -> void:
+	_unlocks.visible = not unlocked.is_empty()
+	if unlocked.is_empty():
+		return
+	var parts := PackedStringArray()
+	for u: Dictionary in unlocked:
+		var how := ""
+		match str(u["kind"]):
+			"armor":
+				how = "equipped" if bool(u["equipped"]) else "in the Garage"
+			"weapon":
+				how = "equip it in the Garage"
+			"skin":
+				how = "your new look"
+		var detail := str(u["detail"])
+		parts.append("[b]%s[/b] (%s, %s)" % [u["name"], detail if detail != "skin" else "skin", how])
+	_unlocks.text = "[center][color=#%s]UNLOCKED[/color]   %s[/center]" % [
+			get_theme_color(&"accent_strong", &"Palette").to_html(false), "  ·  ".join(parts)]
 
 
 func _stat(name_text: String, value: String) -> void:

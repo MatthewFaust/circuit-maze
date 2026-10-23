@@ -31,6 +31,9 @@ func _ready() -> void:
 		_continue.pressed.connect(func() -> void: Game.goto_level(last))
 	else:
 		_continue.hide()
+	var skin := ProgressionCatalog.get_default().skin_by_id(Progress.data.skin)
+	if not skin.is_empty() and ResourceLoader.exists(str(skin["texture"])):
+		_logo.texture = load(str(skin["texture"]))
 	_settings.pressed.connect(_settings_dialog.call.bind("open"))
 	_settings_dialog.connect("appearance_changed", _apply_theme)
 	_quit.pressed.connect(func() -> void: get_tree().quit())

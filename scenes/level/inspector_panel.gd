@@ -8,6 +8,7 @@ const MAX_CHIPS := 14
 var show_calls := false
 var show_trail := false
 var show_scan := false
+var show_bosses := false
 
 var _calls_box: VBoxContainer
 var _calls_list: VBoxContainer
@@ -17,12 +18,17 @@ var _trail_count: Label
 var _scan_box: VBoxContainer
 var _scan_label: Label
 var _loops_label: Label
+var _boss_box: VBoxContainer
+var _boss_label: Label
 
 
 func _ready() -> void:
 	var col := VBoxContainer.new()
 	col.add_theme_constant_override("separation", 10)
 	add_child(col)
+	_boss_box = _section(col, "Bosses")
+	_boss_label = _small(_boss_box, "")
+	_boss_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_calls_box = _section(col, "Call stack")
 	_calls_list = VBoxContainer.new()
 	_calls_list.add_theme_constant_override("separation", 3)
@@ -45,10 +51,12 @@ func configure(level: LevelData) -> void:
 	show_calls = level.uses_functions()
 	show_trail = level.shows_trail()
 	show_scan = level.shows_scan()
+	show_bosses = level.is_boss()
 	_calls_box.visible = show_calls
 	_trail_box.visible = show_trail
 	_scan_box.visible = show_scan
-	visible = show_calls or show_trail or show_scan
+	_boss_box.visible = show_bosses
+	visible = show_calls or show_trail or show_scan or show_bosses
 
 
 func reset(world: MazeWorld) -> void:
@@ -56,6 +64,7 @@ func reset(world: MazeWorld) -> void:
 	_set_trail(world)
 	_scan_label.text = "No scan yet." if not world.has_scan() else _scan_text(world)
 	_loops_label.text = ""
+	_boss_label.text = _boss_text(world)
 
 
 ## After each step: the interpreter's call stack and loops, and the world's memory.
@@ -68,6 +77,8 @@ func update_step(result: Dictionary, world: MazeWorld) -> void:
 		_set_trail(world)
 	if show_scan and world.has_scan():
 		_scan_label.text = _scan_text(world)
+	if show_bosses:
+		_boss_label.text = _boss_text(world)
 	var parts := PackedStringArray()
 	for l: Dictionary in result.get("loops", []):
 		if int(l["total"]) > 0:
@@ -102,6 +113,20 @@ func _set_trail(world: MazeWorld) -> void:
 		var c: Vector2i = trail[i]
 		_chip(_trail_list, "(%d, %d)%s" % [c.x, c.y, "   ← top" if shown == 0 else ""], &"ChipTrail")
 		shown += 1
+
+
+## HP of every boss still standing. The rhythm isn't shown: reading it is the puzzle.
+func _boss_text(world: MazeWorld) -> String:
+	var alive := world.alive_bosses()
+	if alive.is_empty():
+		return "All defeated!" if world.is_boss_stage() else ""
+	var lines := PackedStringArray()
+	var charging := world.striker(world.actions_taken) if world.is_running() else {}
+	for b in alive:
+		var warn := "   ← about to strike!" if not charging.is_empty() and charging["id"] == b["id"] else ""
+		lines.append("%s: %d / %d HP%s" % [b["name"], int(b["hp"]), int(b["max_hp"]), warn])
+	lines.append("You hit for %d · defense %d" % [world.attack_damage, world.defense])
+	return "\n".join(lines)
 
 
 func _scan_text(world: MazeWorld) -> String:

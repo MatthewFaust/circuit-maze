@@ -54,8 +54,11 @@ func _build_chapter(chapter: Dictionary, catalog: LevelCatalog) -> Dictionary:
 
 	var ids: PackedStringArray = chapter["level_ids"]
 	var stars := 0
+	var regular := 0
 	for id in ids:
-		stars += Progress.data.stars(id)
+		if not catalog.get_level(id).is_boss():
+			stars += Progress.data.stars(id)
+			regular += 1
 	var header := HBoxContainer.new()
 	header.add_theme_constant_override("separation", 14)
 	vbox.add_child(header)
@@ -71,7 +74,7 @@ func _build_chapter(chapter: Dictionary, catalog: LevelCatalog) -> Dictionary:
 	header.add_child(sub)
 	var count := Label.new()
 	count.theme_type_variation = &"Muted"
-	count.text = "★ %d / %d" % [stars, ids.size() * 3]
+	count.text = "★ %d / %d" % [stars, regular * 3]
 	header.add_child(count)
 
 	var intro := Label.new()
@@ -110,6 +113,8 @@ func _level_button(level: LevelData, unlocked: bool, empty_star: Color) -> Butto
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
 	box.add_theme_constant_override("separation", 4)
 	b.add_child(box)
+	if level.is_boss():
+		return _boss_button(level, unlocked, b, box)
 	var number := Label.new()
 	number.theme_type_variation = &"TitleLabel"
 	number.text = level.id
@@ -138,6 +143,40 @@ func _level_button(level: LevelData, unlocked: bool, empty_star: Color) -> Butto
 	else:
 		stars_row.add_child(_icon(LOCK, 26))
 		b.modulate = Color(1, 1, 1, 0.6)
+	b.pressed.connect(func() -> void:
+		Sfx.play(&"click")
+		Game.goto_level(level.id))
+	return b
+
+
+## A boss stage: its sprite and whether it's beaten, instead of stars.
+func _boss_button(level: LevelData, unlocked: bool, b: Button, box: VBoxContainer) -> Button:
+	b.custom_minimum_size = Vector2(216, 132)
+	var sprite_path := str(level.boss.get("sprite", ""))
+	if unlocked and ResourceLoader.exists(sprite_path):
+		box.add_child(_icon(load(sprite_path), 52))
+	else:
+		box.add_child(_icon(LOCK, 30))
+	var name_label := Label.new()
+	name_label.theme_type_variation = &"TitleLabel"
+	name_label.add_theme_font_size_override("font_size", 17)
+	name_label.text = "BOSS · %s" % level.boss["name"]
+	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	name_label.custom_minimum_size = Vector2(190, 0)
+	box.add_child(name_label)
+	var status := Label.new()
+	var beaten := Progress.data.is_completed(level.id)
+	status.text = "Defeated ✓" if beaten else ("Not beaten yet" if unlocked else "Finish the chapter first")
+	status.theme_type_variation = &"Muted" if not beaten else &""
+	status.add_theme_font_size_override("font_size", 14)
+	status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(status)
+	if not unlocked:
+		b.modulate = Color(1, 1, 1, 0.6)
+		b.tooltip_text = "Finish the chapter's last stage to face %s" % level.boss["name"]
+	else:
+		b.tooltip_text = "%s: beat it to win a new skin" % level.boss["name"]
 	b.pressed.connect(func() -> void:
 		Sfx.play(&"click")
 		Game.goto_level(level.id))

@@ -45,6 +45,14 @@ func close() -> void:
 static func goals_text(level: LevelData) -> String:
 	var parts := PackedStringArray()
 	var maps := level.variants.size()
+	if level.is_boss():
+		parts.append("Defeat the boss%s" % (" in all %d arenas" % maps if maps > 1 else ""))
+		parts.append("%d HP" % level.rules.max_hp)
+		parts.append("max stamina %d" % level.variants[0].stamina)
+		if level.block_limit > 0:
+			parts.append("block limit %d" % level.block_limit)
+		parts.append("no stars: win a new skin")
+		return "  ·  ".join(parts)
 	parts.append("%d map%s to pass" % [maps, "" if maps == 1 else "s"])
 	parts.append("max stamina %d per map" % level.variants[0].stamina)
 	if level.block_limit > 0:

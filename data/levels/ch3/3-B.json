@@ -16,7 +16,7 @@
   "robot": {"stamina": 110},
   "rules": {"max_hp": 20},
   "boss": {
-    "name": "The Server Stack", "skin": "rackmount",
+    "name": "The Server Stack", "sprite": "res://art/bosses/server_stack.svg", "skin": "rackmount",
     "min_gear": {"armor": "mirror_plating", "weapon": ""},
     "units": [{"name": "The Server Stack", "hp": 20, "attack": 9, "pattern": "OOX", "split": [
       {"hp": 10, "cell": [2, 2], "split": [{"hp": 5, "cell": [2, 3]}, {"hp": 5, "cell": [2, 1]}]},

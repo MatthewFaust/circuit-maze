@@ -16,7 +16,7 @@
   "robot": {"stamina": 24},
   "rules": {"max_hp": 20},
   "boss": {
-    "name": "Raspberry Pi 3", "skin": "circuit_green",
+    "name": "Raspberry Pi 3", "sprite": "res://art/bosses/raspberry_pi.svg", "skin": "circuit_green",
     "min_gear": {"armor": "tin_shell", "weapon": ""},
     "units": [{"name": "Raspberry Pi 3", "hp": 16, "attack": 5, "pattern": "OOXX"}]
   },

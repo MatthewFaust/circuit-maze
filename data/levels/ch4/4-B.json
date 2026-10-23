@@ -10,13 +10,13 @@
     "scan() first. Walk with the Ripple program, but loop while not boss_ahead() instead of while not at_exit().",
     "After scan(), the first while (not boss_ahead()) walks downhill: if closer_ahead() move(), else if closer_left() turn_left(), else turn_right(). It stops facing the boss. The second while (boss_ahead()) fights: if boss_charging() block(), else attack(). The boss's rhythm differs between the mazes, which is exactly what boss_charging() handles."
   ],
-  "allowed": {"blocks": ["move", "turn_left", "turn_right", "while", "if", "if_else", "backtrack", "scan", "attack", "block"], "sensors": ["path_ahead", "path_left", "path_right", "unvisited_ahead", "unvisited_left", "unvisited_right", "closer_ahead", "closer_left", "closer_right", "boss_ahead", "boss_charging"], "functions": [], "not": true},
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "while", "if", "if_else", "scan", "attack", "block"], "sensors": ["path_ahead", "path_left", "path_right", "closer_ahead", "closer_left", "closer_right", "boss_ahead", "boss_charging"], "functions": [], "not": true},
   "block_limit": 14,
   "par": {"blocks": 0, "stamina": 0},
   "robot": {"stamina": 130},
   "rules": {"max_hp": 20},
   "boss": {
-    "name": "The Supercomputer", "skin": "mainframe",
+    "name": "The Supercomputer", "sprite": "res://art/bosses/supercomputer.svg", "skin": "mainframe",
     "min_gear": {"armor": "firewall_armor", "weapon": ""},
     "units": [{"name": "The Supercomputer", "hp": 80, "attack": 13, "pattern": "OOX"}]
   },

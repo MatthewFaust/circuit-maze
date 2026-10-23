@@ -9,6 +9,19 @@ extends HBoxContainer
 
 var _hp_tween: Tween
 var _stamina_tween: Tween
+var _combat: Label
+
+
+## Boss stages: shows the robot's attack and defense from its gear.
+func show_combat(attack: int, defense: int) -> void:
+	if _combat == null:
+		_combat = Label.new()
+		_combat.theme_type_variation = &"Muted"
+		_combat.tooltip_text = "Your damage per attack (2 + weapon) and your defense (armor).\nChange gear in the Garage."
+		_combat.mouse_filter = Control.MOUSE_FILTER_PASS
+		add_child(_combat)
+		move_child(_combat, 0)
+	_combat.text = "ATK %d  ·  DEF %d" % [attack, defense]
 
 
 func sync(world: MazeWorld) -> void:

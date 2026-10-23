@@ -38,7 +38,7 @@ var anti_solutions: Array[Dictionary] = []
 var hardcode_must_fail := true
 var inline_must_fail := false
 var variants: Array[LevelVariant] = []
-## Boss stages only (empty otherwise): {"name", "skin", "min_gear": {"armor",
+## Boss stages only (empty otherwise): {"name", "skin", "sprite", "min_gear": {"armor",
 ## "weapon"}, "min_loadout": {"damage", "defense"}, "units": [{"name", "hp",
 ## "attack", "pattern", "split": [{..., "cell": Vector2i}]}]}. One unit per "M"
 ## in each map, in reading order.

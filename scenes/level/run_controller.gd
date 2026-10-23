@@ -227,6 +227,7 @@ func _run_variant(gen: int) -> Dictionary:
 				maze.apply_event(e)
 				hud.apply_event(e, false)
 				log_line.apply_event(e)
+			maze.after_step()
 			if skipping:
 				_skip_steps -= 1
 				if _skip_steps == 0 and r["status"] == "running":
@@ -246,6 +247,7 @@ func _run_variant(gen: int) -> Dictionary:
 			for e in events:
 				maze.append_event(_tween, e)
 				_tween.tween_callback(_notify.bind(e))
+			_tween.tween_callback(maze.after_step)
 			_tween.tween_interval(STEP_GAP)
 			_tween.finished.connect(_step_over.emit)
 			await _step_over

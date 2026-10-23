@@ -349,3 +349,30 @@ func test_python_and_javascript_buttons() -> void:
 	check(not editor.is_code_visible(), "pressing JavaScript again closes the panel")
 	await _close(screen)
 	_restore_progress()
+
+
+
+## A boss stage shows its boss, the robot's stats, and the equipped skin.
+func test_boss_stage_and_skin() -> void:
+	_use_temp_progress()
+	var data: ProgressData = _progress.get("data")
+	data.owned_skins.append("sentinel")
+	check(data.equip("skin", "sentinel"), "equip a skin")
+	var screen := await _open(LEVEL_SCREEN, "1-B")
+	(screen.find_child("IntroDialog", true, false) as Control).hide()
+	var maze: MazeView = screen.find_child("MazeView", true, false)
+	var robot: Sprite2D = maze.find_child("Robot", true, false).get_child(0)
+	check_eq(robot.texture.resource_path, "res://art/robot/skin_sentinel.svg", "the robot wears the skin")
+	check_eq(maze._boss_nodes.size(), 1, "one boss on the board")
+	var hud: HudBars = screen.find_child("Hud", true, false)
+	check(hud._combat != null and hud._combat.text.begins_with("ATK 2"), "ATK and DEF in the top bar")
+	var editor: ProgramEditor = screen.find_child("ProgramEditor", true, false)
+	var level: LevelData = screen.get("level")
+	editor.set_program(ProgramParser.parse(level.solution_text)["program"])
+	screen.call("_check_all")
+	check(data.is_completed("1-B"), "beating the boss is recorded")
+	check_eq(data.skin, "circuit_green", "and its skin is put on")
+	var result: ResultDialog = screen.find_child("ResultDialog", true, false)
+	check(result._unlocks.visible and result._unlocks.text.contains("Circuit Green"), "the result lists the unlock")
+	await _close(screen)
+	_restore_progress()

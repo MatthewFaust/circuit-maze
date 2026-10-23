@@ -6,6 +6,12 @@ extends PanelContainer
 const TONES := ["info", "good", "warn", "bad"]
 
 var _label: Label
+## Says "Boss defeated!" instead of "Escaped!" on a win.
+var _boss_stage := false
+
+
+func set_boss_stage(on: bool) -> void:
+	_boss_stage = on
 
 
 func _ready() -> void:
@@ -49,8 +55,21 @@ func apply_event(e: Dictionary) -> void:
 			var order: PackedInt32Array = e["order"]
 			show_message("%s labelled %d tiles; the queue peaked at %d tiles." % [
 					"Dijkstra" if bool(e["weighted"]) else "BFS", order.size(), int(e["max_frontier"])], "info")
+		"boss_hit":
+			show_message("Hit! -%d (%d / %d left)" % [int(e["damage"]), int(e["hp"]), int(e["max_hp"])], "good")
+		"attack_interrupted":
+			show_message("Interrupted: the boss struck first, so the attack missed.", "warn")
+		"boss_struck":
+			if bool(e["blocked"]):
+				show_message("Blocked! The shield took the strike.", "good")
+		"boss_split":
+			show_message("It split into %d!" % (e["children"] as Array).size(), "warn")
+		"boss_defeated":
+			show_message("%s is down!" % str(e["name"]), "good")
+		"blocked":
+			show_message("Shield up.", "info")
 		"won":
-			show_message("Escaped!", "good")
+			show_message("Boss defeated!" if _boss_stage else "Escaped!", "good")
 		"failed":
 			show_message(str(e["message"]), "bad")
 
@@ -59,6 +78,8 @@ func _cause(cause: String) -> String:
 	match cause:
 		"bump":
 			return "Bump"
+		"boss":
+			return "The boss hits"
 		"spike":
 			return "Spikes"
 	return cause.capitalize()
