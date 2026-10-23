@@ -199,9 +199,26 @@ func _show_unlocks(unlocked: Array) -> void:
 			"skin":
 				how = "your new look"
 		var detail := str(u["detail"])
-		parts.append("[b]%s[/b] (%s, %s)" % [u["name"], detail if detail != "skin" else "skin", how])
+		var pic := _unlock_icon(u)
+		parts.append("%s[b]%s[/b] (%s, %s)" % ["[img=28]%s[/img] " % pic if pic != "" else "", u["name"],
+				detail if detail != "skin" else "skin", how])
 	_unlocks.text = "[center][color=#%s]UNLOCKED[/color]   %s[/center]" % [
 			get_theme_color(&"accent_strong", &"Palette").to_html(false), "  ·  ".join(parts)]
+
+
+## The picture of an unlocked item, or "".
+static func _unlock_icon(u: Dictionary) -> String:
+	var prog := ProgressionCatalog.get_default()
+	var entry: Dictionary
+	match str(u["kind"]):
+		"armor":
+			entry = prog.armor_by_id(str(u["id"]))
+		"weapon":
+			entry = prog.weapon_by_id(str(u["id"]))
+		"skin":
+			entry = prog.skin_by_id(str(u["id"]))
+	var path := str(entry.get("icon", entry.get("texture", "")))
+	return path if path != "" and ResourceLoader.exists(path) else ""
 
 
 func _stat(name_text: String, value: String) -> void:

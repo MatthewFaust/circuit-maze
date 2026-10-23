@@ -77,9 +77,8 @@ func _ready() -> void:
 
 	_loadout = Progress.data.loadout(ProgressionCatalog.get_default())
 	_run.loadout = _loadout
-	var skin := ProgressionCatalog.get_default().skin_by_id(Progress.data.skin)
-	if not skin.is_empty() and ResourceLoader.exists(str(skin["texture"])):
-		_maze.set_robot_texture(load(str(skin["texture"])))
+	var look := RobotGear.look(Progress.data)
+	_maze.set_robot_look(look["skin"], look["armor"], look["weapon"])
 	if level.is_boss() and ResourceLoader.exists(str(level.boss.get("sprite", ""))):
 		_maze.boss_texture = load(str(level.boss["sprite"]))
 	if level.is_boss():

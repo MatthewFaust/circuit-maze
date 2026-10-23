@@ -90,8 +90,10 @@ func show_tab(i: int) -> void:
 func _refresh() -> void:
 	var data := Progress.data
 	var skin := _prog.skin_by_id(data.skin)
-	if not skin.is_empty() and ResourceLoader.exists(str(skin["texture"])):
-		_preview.texture = load(str(skin["texture"]))
+	var look := RobotGear.look(data)
+	if look["skin"] != null:
+		_preview.texture = look["skin"]
+	RobotGear.dress_rect(_preview, look["armor"], look["weapon"])
 	_preview_name.text = str(skin.get("name", "Starter Bot"))
 	var lo := data.loadout(_prog)
 	_stats.text = "ATK %d  ·  DEF %d" % [MazeRules.new().base_attack + int(lo["damage"]), int(lo["defense"])]
@@ -187,7 +189,7 @@ func _build_shop() -> void:
 		var need := _prog.stars_needed(w, _catalog)
 		var owned := Progress.data.owned_weapons.has(w["id"])
 		var equipped := Progress.data.equipped_weapon == str(w["id"])
-		var row := _row(str(w["name"]), "+%d damage" % int(w["damage"]))
+		var row := _row(str(w["name"]), "+%d damage" % int(w["damage"]), str(w.get("icon", "")), owned)
 		var bar := ProgressBar.new()
 		bar.max_value = maxi(need, 1)
 		bar.value = mini(total, need)
@@ -214,7 +216,8 @@ func _build_equipment() -> void:
 	for a in _prog.armor:
 		var owned := Progress.data.owned_armor.has(a["id"])
 		var equipped := Progress.data.equipped_armor == str(a["id"])
-		var row := _row(str(a["name"]), "+%d defense  ·  unlocks at stage %s" % [int(a["defense"]), a["unlock_level"]])
+		var row := _row(str(a["name"]), "+%d defense  ·  unlocks at stage %s" % [int(a["defense"]), a["unlock_level"]],
+				str(a.get("icon", "")), owned)
 		if equipped:
 			row.add_child(_action("Equipped", Callable(), false, true))
 		elif owned:
@@ -282,14 +285,21 @@ func _equip(kind: String, id: String) -> void:
 	_refresh()
 
 
-## A row: name and detail on the left; the caller adds controls on the right.
-func _row(title: String, detail: String) -> HBoxContainer:
+## A row: the item's picture, name and detail on the left; the caller adds
+## controls on the right. Locked items are shown dimmed.
+func _row(title: String, detail: String, icon_path: String, owned: bool) -> HBoxContainer:
 	var panel := PanelContainer.new()
 	panel.theme_type_variation = &"ChapterPanel"
 	_content.add_child(panel)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 16)
 	panel.add_child(row)
+	var pic := _icon(load(icon_path) if ResourceLoader.exists(icon_path) else null, 56)
+	pic.name = "Icon"
+	pic.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	if not owned:
+		pic.modulate = Color(1, 1, 1, 0.4)
+	row.add_child(pic)
 	var text := VBoxContainer.new()
 	text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text)

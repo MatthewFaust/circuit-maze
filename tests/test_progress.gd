@@ -176,3 +176,10 @@ func test_gear_survives_save_and_old_saves_get_their_gear() -> void:
 	check(migrated.owned_armor.is_empty() and migrated.owned_skins.has("starter_bot"), "loads without gear")
 	migrated.refresh_unlocks(cat, prog)
 	check_eq(migrated.equipped_armor, "tin_shell", "and gets the armor it had earned")
+
+
+func test_every_weapon_and_armor_has_a_picture() -> void:
+	var prog := ProgressionCatalog.get_default()
+	for item in prog.armor + prog.weapons:
+		var icon := str(item.get("icon", ""))
+		check(icon != "" and ResourceLoader.exists(icon), "%s has a picture (%s)" % [item["id"], icon])

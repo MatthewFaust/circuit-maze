@@ -88,6 +88,8 @@ func _check_readable(p: ChapterPalette, chapter_no: int) -> void:
 	for kind: String in ChapterPalette.KIND_HUES:
 		_check_contrast(p, "ink", kind, TEXT_MIN, tag)
 	_check_contrast(p, "on_accent", "accent", LARGE_MIN, tag)
+	for bg in ["accent_soft", "accent_wash"]:
+		_check_contrast(p, "text", bg, TEXT_MIN, tag)
 	_check_contrast(p, "accent_strong", "surface", LARGE_MIN, tag)
 	_check_contrast(p, "tooltip_text", "tooltip", TEXT_MIN, tag)
 	for role in ["code_number", "code_function", "code_keyword", "code_sensor"]:

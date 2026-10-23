@@ -212,10 +212,20 @@ const EXTRA_STYLES := {
 
 ## Dark mode (a setting). Screens read it when they build their theme.
 static var dark_mode := false
-## Type variations the base theme doesn't have: "Type" -> [base type, the
-## "Type/style" it copies, the roles for that copy (as in STYLE_ROLES)].
+## Type variations the base theme doesn't have: "Type" -> {"base": base type,
+## "styles": {style name: ["Type/style" it copies, [bg role, border role],
+## border width (0 keeps the copied one)]}}.
 const EXTRA_VARIATIONS := {
-	"BlockCombat": [&"PanelContainer", "BlockMotion/panel", ["combat", "combat_edge"]],
+	"BlockCombat": {"base": &"PanelContainer", "styles": {
+		"panel": ["BlockMotion/panel", ["combat", "combat_edge"], 0],
+	}},
+	# A button that stands out without competing with the primary action (the Garage).
+	"AccentButton": {"base": &"Button", "styles": {
+		"normal": ["Button/normal", ["accent_soft", "accent_strong"], 2],
+		"hover": ["Button/hover", ["accent_wash", "accent_strong"], 2],
+		"pressed": ["Button/pressed", ["accent_soft", "accent_edge"], 2],
+		"disabled": ["Button/disabled", ["well", "line_soft"], 0],
+	}},
 }
 
 static var _cache := {}
@@ -465,16 +475,23 @@ func build_theme() -> Theme:
 				continue
 			t.set_color(parts[1], parts[0], _resolve(str(table[key]), fallback))
 	for type: String in EXTRA_VARIATIONS:
-		var spec: Array = EXTRA_VARIATIONS[type]
-		var src: PackedStringArray = str(spec[1]).split("/")
-		if not t.has_stylebox(src[1], src[0]):
-			continue
-		t.set_type_variation(type, spec[0])
-		var sb := t.get_stylebox(src[1], src[0]).duplicate() as StyleBoxFlat
-		var roles_for: Array = spec[2]
-		sb.bg_color = _resolve(str(roles_for[0]), sb.bg_color)
-		sb.border_color = _resolve(str(roles_for[1]), sb.border_color)
-		t.set_stylebox(src[1], type, sb)
+		var spec: Dictionary = EXTRA_VARIATIONS[type]
+		t.set_type_variation(type, spec["base"])
+		var styles: Dictionary = spec["styles"]
+		for style: String in styles:
+			var entry: Array = styles[style]
+			var src: PackedStringArray = str(entry[0]).split("/")
+			if not t.has_stylebox(src[1], src[0]):
+				continue
+			var sb := t.get_stylebox(src[1], src[0]).duplicate() as StyleBoxFlat
+			if sb == null:
+				continue
+			var roles_for: Array = entry[1]
+			sb.bg_color = _resolve(str(roles_for[0]), sb.bg_color)
+			sb.border_color = _resolve(str(roles_for[1]), sb.border_color)
+			if int(entry[2]) > 0:
+				sb.set_border_width_all(int(entry[2]))
+			t.set_stylebox(style, type, sb)
 	_add_icons(t)
 	for role: String in roles:
 		t.set_color(role, PALETTE_TYPE, roles[role])

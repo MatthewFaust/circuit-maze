@@ -11,9 +11,9 @@ const DEFAULT_SKIN := "starter_bot"
 
 static var _default: ProgressionCatalog
 
-## [{"id", "name", "defense", "unlock_level"}], weakest first.
+## [{"id", "name", "icon", "defense", "unlock_level"}], weakest first.
 var armor: Array[Dictionary] = []
-## [{"id", "name", "damage", "stars": int, or -1 for "all"}], cheapest first.
+## [{"id", "name", "icon", "damage", "stars": int, or -1 for "all"}], cheapest first.
 var weapons: Array[Dictionary] = []
 ## [{"id", "name", "texture", "boss_level" ("" for the default skin)}]
 var skins: Array[Dictionary] = []
@@ -41,6 +41,7 @@ static func load_from(path: String) -> ProgressionCatalog:
 		var a: Dictionary = item
 		cat.armor.append({
 			"id": LevelLoader.get_str(a, "id", "", errs), "name": LevelLoader.get_str(a, "name", "", errs),
+			"icon": LevelLoader.get_str(a, "icon", "", errs),
 			"defense": LevelLoader.get_int(a, "defense", 0, errs),
 			"unlock_level": LevelLoader.get_str(a, "unlock_level", "", errs),
 		})
@@ -52,6 +53,7 @@ static func load_from(path: String) -> ProgressionCatalog:
 		var stars := -1 if str(w.get("stars", "")) == "all" else LevelLoader.get_int(w, "stars", 0, errs)
 		cat.weapons.append({
 			"id": LevelLoader.get_str(w, "id", "", errs), "name": LevelLoader.get_str(w, "name", "", errs),
+			"icon": LevelLoader.get_str(w, "icon", "", errs),
 			"damage": LevelLoader.get_int(w, "damage", 0, errs), "stars": stars,
 		})
 	for item: Variant in d.get("skins", []):

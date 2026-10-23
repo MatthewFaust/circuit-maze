@@ -125,10 +125,12 @@ func _layer(layer_name: String, draw_func: Callable) -> Node2D:
 	return n
 
 
-## The robot's look (the equipped skin).
-func set_robot_texture(tex: Texture2D) -> void:
-	if tex != null:
-		_robot_body.texture = tex
+## The robot's look: the skin, plus the armor and weapon worn as accessories
+## (null for none). They're children of the body, so they turn with it.
+func set_robot_look(skin: Texture2D, armor: Texture2D, weapon: Texture2D) -> void:
+	if skin != null:
+		_robot_body.texture = skin
+	RobotGear.dress_sprite(_robot_body, armor, weapon)
 
 
 ## Rebuilds the board for a fresh world (new variant, reset).

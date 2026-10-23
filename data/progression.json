@@ -1,16 +1,16 @@
 {
   "version": 1,
   "armor": [
-    {"id": "tin_shell", "name": "Tin Shell", "defense": 1, "unlock_level": "1-5"},
-    {"id": "signal_shield", "name": "Signal Shield", "defense": 2, "unlock_level": "2-2"},
-    {"id": "mirror_plating", "name": "Mirror Plating", "defense": 4, "unlock_level": "3-4"},
-    {"id": "firewall_armor", "name": "Firewall Armor", "defense": 8, "unlock_level": "4-1"}
+    {"id": "tin_shell", "icon": "res://art/gear/tin_shell.svg", "name": "Tin Shell", "defense": 1, "unlock_level": "1-5"},
+    {"id": "signal_shield", "icon": "res://art/gear/signal_shield.svg", "name": "Signal Shield", "defense": 2, "unlock_level": "2-2"},
+    {"id": "mirror_plating", "icon": "res://art/gear/mirror_plating.svg", "name": "Mirror Plating", "defense": 4, "unlock_level": "3-4"},
+    {"id": "firewall_armor", "icon": "res://art/gear/firewall_armor.svg", "name": "Firewall Armor", "defense": 8, "unlock_level": "4-1"}
   ],
   "weapons": [
-    {"id": "loop_blaster", "name": "Loop Blaster", "damage": 1, "stars": 15},
-    {"id": "sensor_scope", "name": "Sensor Scope", "damage": 3, "stars": 27},
-    {"id": "function_cannon", "name": "Function Cannon", "damage": 9, "stars": 48},
-    {"id": "pathfinder_lance", "name": "Pathfinder Lance", "damage": 15, "stars": "all"}
+    {"id": "loop_blaster", "icon": "res://art/gear/loop_blaster.svg", "name": "Loop Blaster", "damage": 1, "stars": 15},
+    {"id": "sensor_scope", "icon": "res://art/gear/sensor_scope.svg", "name": "Sensor Scope", "damage": 3, "stars": 27},
+    {"id": "function_cannon", "icon": "res://art/gear/function_cannon.svg", "name": "Function Cannon", "damage": 9, "stars": 48},
+    {"id": "pathfinder_lance", "icon": "res://art/gear/pathfinder_lance.svg", "name": "Pathfinder Lance", "damage": 15, "stars": "all"}
   ],
   "skins": [
     {"id": "starter_bot", "name": "Starter Bot", "texture": "res://art/robot/robot.svg", "boss_level": ""},
