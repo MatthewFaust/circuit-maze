@@ -10,6 +10,10 @@ const SPEEDS := [1.0, 2.0, 4.0, 0.0]
 var level_id := ""
 var level: LevelData
 var _hints: HintPanel
+## Gear stats for boss fights, from the player's equipped armor and weapon.
+var _loadout := {}
+## Items the last recorded result unlocked (see ProgressData.refresh_unlocks).
+var _unlocked: Array[Dictionary] = []
 var _js_button: Button
 var _tab_guard := false
 var _speed_buttons: Array[Button] = []
@@ -71,6 +75,8 @@ func _ready() -> void:
 	_editor.program_changed.connect(_on_program_changed)
 	_editor.message.connect(func(text: String) -> void: _log.show_message(text, "warn"))
 
+	_loadout = Progress.data.loadout(ProgressionCatalog.get_default())
+	_run.loadout = _loadout
 	_run.setup(level, _maze, _hud, _inspector, _log, _editor)
 	_run.state_changed.connect(_on_state_changed)
 	_run.variant_started.connect(_on_variant_started)
@@ -223,7 +229,7 @@ func _on_variant_finished(i: int, summary: Dictionary) -> void:
 
 
 func _on_run_finished(passed: bool, info: Dictionary) -> void:
-	var ev := LevelEvaluator.evaluate(level, _editor.get_program_copy())
+	var ev := LevelEvaluator.evaluate(level, _editor.get_program_copy(), _loadout)
 	_record(ev)
 	# A tween callback rather than an await: it simply dies if the screen closes.
 	var t := create_tween()
@@ -250,7 +256,7 @@ func _check_all() -> void:
 	# Applies a half-typed repeat count, as Run does.
 	get_viewport().gui_release_focus()
 	var program := _editor.get_program_copy()
-	var ev := LevelEvaluator.evaluate(level, program)
+	var ev := LevelEvaluator.evaluate(level, program, _loadout)
 	if not bool(ev["valid"]):
 		var errs: PackedStringArray = ev["errors"]
 		_result.show_failure(level, ev, "", "static", errs[0] if not errs.is_empty() else "")
@@ -276,6 +282,7 @@ func _record(ev: Dictionary) -> void:
 	if not bool(ev.get("valid", false)):
 		return
 	Progress.data.record_result(level.id, ev)
+	_unlocked = Progress.data.refresh_unlocks(Game.catalog, ProgressionCatalog.get_default())
 	_save_program()
 	Progress.save()
 

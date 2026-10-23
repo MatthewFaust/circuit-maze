@@ -30,6 +30,8 @@ func load_progress() -> void:
 	var cfg := ConfigFile.new()
 	if cfg.load(path) == OK:
 		data = ProgressData.from_config(cfg)
+	# Older saves (and gear data that grew since) get everything already earned.
+	data.refresh_unlocks(LevelCatalog.get_default(), ProgressionCatalog.get_default())
 
 
 func save() -> void:

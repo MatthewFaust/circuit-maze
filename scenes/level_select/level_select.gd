@@ -26,7 +26,7 @@ func _ready() -> void:
 		_chapters.add_child(built["panel"])
 		if focus == null and built["focus"] != null:
 			focus = built["focus"]
-	_total.text = "%d / %d" % [Progress.data.total_stars(), catalog.order.size() * 3]
+	_total.text = "%d / %d" % [Progress.data.total_stars(catalog), catalog.max_stars()]
 	if focus != null:
 		_scroll_to.call_deferred(focus)
 	if Game.dev.has("shot"):

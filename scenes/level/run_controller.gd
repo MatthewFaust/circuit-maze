@@ -32,6 +32,8 @@ var world: MazeWorld
 var interp: ProgramInterpreter
 ## Variant index -> interpreter summary of the last run.
 var results := {}
+## The player's gear for boss fights: {"damage", "defense"} (null = the level's default).
+var loadout: Variant = null
 
 var maze: MazeView
 var hud: HudBars
@@ -157,7 +159,7 @@ func _set_state(s: int) -> void:
 
 
 func _load_variant(i: int) -> void:
-	world = level.variants[i].make_world(level)
+	world = level.variants[i].make_world(level, loadout)
 	maze.show_world(world)
 	hud.sync(world)
 	inspector.reset(world)
