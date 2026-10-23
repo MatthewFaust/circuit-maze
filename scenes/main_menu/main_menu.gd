@@ -2,7 +2,10 @@ extends Control
 ## Title screen. Also routes command-line developer options (see Game).
 
 const BUSH_TEX := preload("res://art/tiles/bush.svg")
+const GARAGE_ICON := preload("res://art/ui/garage.svg")
 const BACKDROP_CELL := 96.0
+## Room around the buttons inside the calm panel behind them.
+const PANEL_PAD := Vector2(48, 36)
 
 @onready var _backdrop: Control = %Backdrop
 @onready var _logo: TextureRect = %Logo
@@ -31,33 +34,57 @@ func _ready() -> void:
 		_continue.pressed.connect(func() -> void: Game.goto_level(last))
 	else:
 		_continue.hide()
-	var skin := ProgressionCatalog.get_default().skin_by_id(Progress.data.skin)
-	if not skin.is_empty() and ResourceLoader.exists(str(skin["texture"])):
-		_logo.texture = load(str(skin["texture"]))
+	var look := RobotGear.look(Progress.data)
+	if look["skin"] != null:
+		_logo.texture = look["skin"]
+	RobotGear.dress_rect(_logo, look["armor"], look["weapon"])
 	_settings.pressed.connect(_settings_dialog.call.bind("open"))
-	# The Garage (shop, equipment, wardrobe) sits between Continue and Settings.
-	var garage := Button.new()
-	garage.name = "GarageButton"
-	garage.text = "Garage"
-	garage.custom_minimum_size = _settings.custom_minimum_size
-	garage.size_flags_horizontal = _settings.size_flags_horizontal
-	garage.focus_mode = Control.FOCUS_NONE
-	garage.tooltip_text = "Weapons, armor and skins for boss fights"
-	garage.pressed.connect(func() -> void:
-		Sfx.play(&"click")
-		Game.goto_garage("menu"))
-	_settings.add_sibling(garage)
-	_settings.get_parent().move_child(garage, _settings.get_index())
 	_settings_dialog.connect("appearance_changed", _apply_theme)
 	_quit.pressed.connect(func() -> void: get_tree().quit())
 	if OS.has_feature("web"):
 		_quit.hide()
+	_build_garage_button()
+	_pair_small_buttons()
 	_backdrop.draw.connect(_draw_backdrop)
 	_backdrop.resized.connect(_backdrop.queue_redraw)
+	($Center/VBox as Control).resized.connect(_backdrop.queue_redraw)
 	if not Game.reduce_motion():
 		var t := create_tween().set_loops()
 		t.tween_property(_logo, "position:y", _logo.position.y - 10.0, 1.2).set_trans(Tween.TRANS_SINE)
 		t.tween_property(_logo, "position:y", _logo.position.y, 1.2).set_trans(Tween.TRANS_SINE)
+
+
+## The Garage (shop, equipment, wardrobe): a highlighted button right under Continue.
+func _build_garage_button() -> void:
+	var garage := Button.new()
+	garage.name = "GarageButton"
+	garage.text = "Garage"
+	garage.icon = GARAGE_ICON
+	garage.theme_type_variation = &"AccentButton"
+	garage.add_theme_font_size_override("font_size", 20)
+	garage.custom_minimum_size = Vector2(_play.custom_minimum_size.x, 54)
+	garage.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	garage.focus_mode = Control.FOCUS_NONE
+	garage.tooltip_text = "Shop for weapons, see your armor and change skins"
+	garage.pressed.connect(func() -> void:
+		Sfx.play(&"click")
+		Game.goto_garage("menu"))
+	_continue.add_sibling(garage)
+
+
+## Settings and Quit share one row, which keeps the stack short enough to fit.
+func _pair_small_buttons() -> void:
+	var row := HBoxContainer.new()
+	row.name = "SmallButtons"
+	row.add_theme_constant_override("separation", 12)
+	row.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	_settings.add_sibling(row)
+	var half := (_play.custom_minimum_size.x - 12.0) / 2.0
+	for b: Button in [_settings, _quit]:
+		b.reparent(row)
+		b.custom_minimum_size = Vector2(half, b.custom_minimum_size.y)
+	if not _quit.visible:
+		_settings.custom_minimum_size.x = _play.custom_minimum_size.x
 
 
 ## The colors of the chapter last played, in the current light or dark mode.
@@ -93,9 +120,10 @@ func _draw_backdrop() -> void:
 				_backdrop.draw_rect(r, walk)
 				if roll > 0.93:
 					_backdrop.draw_texture_rect(BUSH_TEX, r, false, Color(1, 1, 1, 0.35))
-	# A calm panel behind the title so it stays readable.
+	# A calm panel behind the title and buttons, sized to them so none hangs outside.
 	var panel := StyleBoxFlat.new()
 	panel.bg_color = Color(bg, 0.88)
 	panel.set_corner_radius_all(28)
-	var c := _backdrop.size / 2.0
-	panel.draw(canvas, Rect2(c - Vector2(420, 330), Vector2(840, 660)))
+	var box: Control = $Center/VBox
+	var r := Rect2(box.global_position - _backdrop.global_position, box.size)
+	panel.draw(canvas, r.grow_individual(PANEL_PAD.x, PANEL_PAD.y, PANEL_PAD.x, PANEL_PAD.y))

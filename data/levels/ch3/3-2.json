@@ -1,6 +1,6 @@
 {
   "id": "3-2",
-  "title": "Same Trick, Any Direction",
+  "title": "Same Trick",
   "concept": "Choosing the abstraction",
   "new_blocks": ["call:B"],
   "intro": "The same trick facing east, south, west and north. A function uses [i]relative[/i] moves, so it works whichever way the robot faces. Which chunk is worth naming?",

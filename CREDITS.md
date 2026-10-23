@@ -8,7 +8,7 @@ This file lists every image in the project, where it came from, and its license.
 
 | Source | Images | Status |
 |---|---|---|
-| Made by Claude (AI) | 52: every file in `art/` | AI-made, needs replacing |
+| Made by Claude (AI) | 62: every file in `art/` | AI-made, needs replacing |
 | Godot Engine | 1: `icon.svg` | Not AI-made |
 | Anywhere else | 0 | none |
 
@@ -17,7 +17,7 @@ This file lists every image in the project, where it came from, and its license.
   - There were 43 image files, all SVG. Every one is used by the game, except `floor.svg` and `stone.svg` (see below).
   - The `.svg.import` files beside them are Godot's import settings, not images.
 - **The first 42 files in `art/`:** a Python script that Claude wrote generated all of them. The script is kept outside the repo.
-- **Added later by Claude, written directly (2026-10-23):** `art/blocks/attack.svg` and `block.svg`, the 4 boss sprites in `art/bosses/`, the 4 skins in `art/robot/skin_*.svg`, and a redrawn `art/ui/star_empty.svg`. All are placeholders.
+- **Added later by Claude, written directly (2026-10-23):** `art/blocks/attack.svg` and `block.svg`, the 4 boss sprites in `art/bosses/`, the 4 skins in `art/robot/skin_*.svg`, the 8 gear pictures in `art/gear/`, `art/ui/portal.svg`, `art/ui/garage.svg`, and a redrawn `art/ui/star_empty.svg`. All are placeholders.
 - **`icon.svg`:**
   - Its timestamp shows Godot created it with the new project, before Claude started working on the project.
   - Its text is identical to the default project icon built into Godot 4.6.1.
@@ -61,6 +61,21 @@ These are larger than the images appear on screen, so they stay sharp on high-re
 | `art/robot/skin_sentinel.svg` | Placeholder skin "Sentinel" (won from Sensor Pi), facing east | maze board, main menu logo, Garage | None (AI-made) | AI-made placeholder, needs replacing |
 | `art/robot/skin_rackmount.svg` | Placeholder skin "Rackmount" (won from The Server Stack), facing east | maze board, main menu logo, Garage | None (AI-made) | AI-made placeholder, needs replacing |
 | `art/robot/skin_mainframe.svg` | Placeholder skin "Mainframe" (won from The Supercomputer), facing east | maze board, main menu logo, Garage | None (AI-made) | AI-made placeholder, needs replacing |
+
+### Gear
+
+Placeholders. Each picture is also worn on the robot as a small accessory (see `scenes/common/robot_gear.gd` for where it sits), and the weapons are drawn pointing east, the robot's facing. `data/progression.json` names each file, so new art can use any file name.
+
+| File | What it is | Used in | License | Status |
+|---|---|---|---|---|
+| `art/gear/loop_blaster.svg` | Loop Blaster (weapon) | robot accessory, Garage shop, unlock notices | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/gear/sensor_scope.svg` | Sensor Scope (weapon) | robot accessory, Garage shop, unlock notices | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/gear/function_cannon.svg` | Function Cannon (weapon) | robot accessory, Garage shop, unlock notices | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/gear/pathfinder_lance.svg` | Pathfinder Lance (weapon) | robot accessory, Garage shop, unlock notices | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/gear/tin_shell.svg` | Tin Shell (armor) | robot accessory, Garage equipment, unlock notices | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/gear/signal_shield.svg` | Signal Shield (armor) | robot accessory, Garage equipment, unlock notices | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/gear/mirror_plating.svg` | Mirror Plating (armor) | robot accessory, Garage equipment, unlock notices | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/gear/firewall_armor.svg` | Firewall Armor (armor) | robot accessory, Garage equipment, unlock notices | None (AI-made) | AI-made placeholder, needs replacing |
 
 ### Bosses
 
@@ -120,6 +135,8 @@ These are shown on the blocks in the editor palette and in the program (`scenes/
 | `art/ui/lock.svg` | Padlock | level select: locked levels | None (AI-made) | AI-made, needs replacing |
 | `art/ui/star.svg` | Filled star | level select, result dialog | None (AI-made) | AI-made, needs replacing |
 | `art/ui/star_empty.svg` | Empty star | level select, result dialog | None (AI-made) | AI-made, needs replacing |
+| `art/ui/garage.svg` | Toolbox | main menu and level select Garage buttons | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/ui/portal.svg` | Mysterious portal (a purple vortex) | level select: before each chapter's boss | None (AI-made) | AI-made placeholder, needs replacing |
 
 ## Not image files, but also made by Claude
 

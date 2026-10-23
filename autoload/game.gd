@@ -8,6 +8,7 @@ extends Node
 ##   --intro (show the intro dialog)  --hints=N (open the hint card with N hints shown)
 ##   --result (evaluate and show the result)
 ##   --code (open the Python view; --code=js for JavaScript)  --screen=menu|select|garage  --tab=shop|equipment|wardrobe (garage)
+##   --chapter=N (level select: scroll to chapter N)
 ##   --shot=PATH (save a PNG and quit)
 ##   --unlock-all  --dark (dark mode for this run, not saved)  --save=user://dev.cfg
 

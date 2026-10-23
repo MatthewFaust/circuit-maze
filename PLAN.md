@@ -237,7 +237,7 @@ The maps, solutions and pars in the appendix were checked with a quick simulatio
 | 2-5 | Spike Lanes | `spike_ahead`, deciding by context | 3 variants, HP |
 | **Ch3 "Name It, Reuse It": functions & recursion** ||||
 | 3-1 | Copy, Paste, Regret | `define`/`call` | sensors off; limit 24 (loops alone need 27) |
-| 3-2 | Same Trick, Any Direction | picking the right abstraction | sensors off; limit 21 |
+| 3-2 | Same Trick | picking the right abstraction | sensors off; limit 21 |
 | 3-3 | Hedge Trimmer, Inc. | a function hiding a loop and a decision | 3 variants, limit 14 |
 | 3-4 | Echo | recursion as memory (no variables) | 3 variants, stamina budget |
 | 3-5 | Tiny Stack, Big Tree | tree recursion vs. tail recursion | no loops; call depth limit 30 |

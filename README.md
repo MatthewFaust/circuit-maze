@@ -57,9 +57,10 @@ attack minus your defense (at least 1) unless you block, and a strike interrupts
 | The Server Stack (3-B) | 20, splits into 2 × 10, then 4 × 5 | 9 | a tree of servers: recursion |
 | The Supercomputer (4-B) | 80 | 13 | hidden in a maze: scan(), then fight |
 
-**Gear and the Garage** (main menu or level select): gear only matters in boss fights.
+**Gear and the Garage** (the highlighted **Garage** button on the main menu or level select): gear only matters in boss fights.
 - **Armor** comes free when you reach its stage and is equipped automatically: Tin Shell +1 defense (1-5), Signal Shield +2 (2-2), Mirror Plating +4 (3-4), Firewall Armor +8 (4-1).
 - **Weapons** unlock in the **Shop** as your star total grows; stars are never spent. Equip any unlocked one: Loop Blaster +1 damage (15 ★), Sensor Scope +3 (27 ★), Function Cannon +9 (48 ★), Pathfinder Lance +15 (all 66 ★).
+- The equipped weapon and armor ride on the robot as small accessories: the weapon on its front-top corner, the armor badge on its back.
 - **Skins** in the **Wardrobe** change only the robot's look. Beating a boss wins its skin and puts it on; the Starter Bot is always there.
 - Every boss can be beaten with the armor you're given and no weapon. Better weapons let a less careful program survive.
 
@@ -163,6 +164,7 @@ Pass these after `--` when launching:
 - `--speed=0`: max speed
 - `--intro`: show the briefing dialog
 - `--screen=garage`, `--tab=shop|equipment|wardrobe`: open the Garage
+- `--chapter=N`: level select scrolls to chapter N
 - `--hints=N`: open the hint card with N hints showing
 - `--dark`: use dark mode for this run, without saving it
 - `--result`: show the result dialog

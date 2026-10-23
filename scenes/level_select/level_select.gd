@@ -1,9 +1,14 @@
 extends Control
-## Chapters with their levels, locks and stars.
+## Chapters with their levels, locks and stars. Each chapter's boss stands at
+## the end of its row, behind a portal.
 
 const STAR_ON := preload("res://art/ui/star.svg")
 const STAR_OFF := preload("res://art/ui/star_empty.svg")
 const LOCK := preload("res://art/ui/lock.svg")
+const PORTAL := preload("res://art/ui/portal.svg")
+const GARAGE_ICON := preload("res://art/ui/garage.svg")
+## Seconds per turn of an open portal.
+const PORTAL_SPIN := 8.0
 
 @onready var _back: Button = %BackButton
 @onready var _total: Label = %TotalStars
@@ -22,18 +27,24 @@ func _ready() -> void:
 	var garage := Button.new()
 	garage.name = "GarageButton"
 	garage.text = "Garage"
-	garage.theme_type_variation = &"ToolButton"
+	garage.icon = GARAGE_ICON
+	garage.theme_type_variation = &"AccentButton"
+	garage.custom_minimum_size = Vector2(150, 44)
+	garage.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 	garage.focus_mode = Control.FOCUS_NONE
-	garage.tooltip_text = "Weapons, armor and skins for boss fights"
+	garage.tooltip_text = "Shop for weapons, see your armor and change skins"
 	garage.pressed.connect(Game.goto_garage.bind("select"))
 	_total.get_parent().add_child(garage)
 	_total.get_parent().move_child(garage, _total.get_index() - 1)
 	var catalog := Game.catalog
 	var focus: Control = null
+	var want_chapter := int(str(Game.dev.get("chapter", "0")))
 	for chapter in catalog.chapters:
 		var built := _build_chapter(chapter, catalog)
 		_chapters.add_child(built["panel"])
-		if focus == null and built["focus"] != null:
+		if int(chapter["id"]) == want_chapter:
+			focus = built["panel"]
+		elif want_chapter == 0 and focus == null and built["focus"] != null:
 			focus = built["focus"]
 	_total.text = "%d / %d" % [Progress.data.total_stars(catalog), catalog.max_stars()]
 	if focus != null:
@@ -92,17 +103,28 @@ func _build_chapter(chapter: Dictionary, catalog: LevelCatalog) -> Dictionary:
 	intro.text = str(chapter["intro"])
 	vbox.add_child(intro)
 
-	var row := HFlowContainer.new()
-	row.add_theme_constant_override("h_separation", 12)
-	row.add_theme_constant_override("v_separation", 12)
+	# The regular stages wrap on the left; the portal and the boss stay at the right end.
+	var row := HBoxContainer.new()
+	row.name = "LevelRow"
+	row.add_theme_constant_override("separation", 12)
 	vbox.add_child(row)
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 12)
+	flow.add_theme_constant_override("v_separation", 12)
+	flow.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(flow)
 	var focus: Control = null
 	var empty_star := ChapterPalette.for_chapter(int(chapter["id"])).color("line_strong")
 	for id in ids:
 		var level := catalog.get_level(id)
 		var unlocked := Progress.data.is_unlocked(id, catalog)
 		var button := _level_button(level, unlocked, empty_star)
-		row.add_child(button)
+		if level.is_boss():
+			row.add_child(_portal(unlocked))
+			button.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+			row.add_child(button)
+		else:
+			flow.add_child(button)
 		if focus == null and unlocked and not Progress.data.is_completed(id):
 			focus = button
 	return {"panel": panel, "focus": focus}
@@ -155,24 +177,70 @@ func _level_button(level: LevelData, unlocked: bool, empty_star: Color) -> Butto
 	b.pressed.connect(func() -> void:
 		Sfx.play(&"click")
 		Game.goto_level(level.id))
+	_fit_card(b, box)
 	return b
+
+
+## A button doesn't grow with the box pinned inside it, so the card's height
+## follows the box: a long title can never spill out.
+func _fit_card(b: Button, box: Control) -> void:
+	var base := b.custom_minimum_size.y
+	var fit := func() -> void:
+		if is_instance_valid(b) and is_instance_valid(box):
+			b.custom_minimum_size.y = maxf(base, box.get_combined_minimum_size().y + 20.0)
+	box.minimum_size_changed.connect(fit)
+	fit.call_deferred()
+
+
+## The mysterious way to the boss: it turns slowly while the boss is open, and
+## sleeps, dimmed, until then. It spins inside a plain holder, because
+## containers reset their children's rotation.
+func _portal(open: bool) -> Control:
+	var holder := Control.new()
+	holder.name = "Portal"
+	holder.custom_minimum_size = Vector2(96, 96)
+	holder.size_flags_vertical = Control.SIZE_SHRINK_CENTER
+	holder.mouse_filter = Control.MOUSE_FILTER_PASS
+	holder.tooltip_text = "A mysterious portal. Something is waiting on the other side..." if open \
+			else "The portal is dormant. Finish the chapter to wake it."
+	var swirl := TextureRect.new()
+	swirl.name = "Swirl"
+	swirl.texture = PORTAL
+	swirl.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	swirl.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	swirl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	swirl.set_anchors_preset(Control.PRESET_FULL_RECT)
+	swirl.resized.connect(func() -> void: swirl.pivot_offset = swirl.size / 2.0)
+	holder.add_child(swirl)
+	if not open:
+		swirl.modulate = Color(0.6, 0.6, 0.65, 0.45)
+	elif not Game.reduce_motion():
+		var t := swirl.create_tween().set_loops()
+		t.tween_property(swirl, "rotation", TAU, PORTAL_SPIN).from(0.0)
+	return holder
 
 
 ## A boss stage: its sprite and whether it's beaten, instead of stars.
 func _boss_button(level: LevelData, unlocked: bool, b: Button, box: VBoxContainer) -> Button:
-	b.custom_minimum_size = Vector2(216, 132)
+	b.custom_minimum_size = Vector2(224, 148)
 	var sprite_path := str(level.boss.get("sprite", ""))
 	if unlocked and ResourceLoader.exists(sprite_path):
 		box.add_child(_icon(load(sprite_path), 52))
 	else:
 		box.add_child(_icon(LOCK, 30))
+	var eyebrow := Label.new()
+	eyebrow.theme_type_variation = &"SectionTitle"
+	eyebrow.add_theme_font_size_override("font_size", 13)
+	eyebrow.text = "BOSS"
+	eyebrow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	box.add_child(eyebrow)
 	var name_label := Label.new()
 	name_label.theme_type_variation = &"TitleLabel"
-	name_label.add_theme_font_size_override("font_size", 17)
-	name_label.text = "BOSS · %s" % level.boss["name"]
+	name_label.add_theme_font_size_override("font_size", 16)
+	name_label.text = str(level.boss["name"])
 	name_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	name_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	name_label.custom_minimum_size = Vector2(190, 0)
+	name_label.custom_minimum_size = Vector2(200, 0)
 	box.add_child(name_label)
 	var status := Label.new()
 	var beaten := Progress.data.is_completed(level.id)
@@ -189,6 +257,7 @@ func _boss_button(level: LevelData, unlocked: bool, b: Button, box: VBoxContaine
 	b.pressed.connect(func() -> void:
 		Sfx.play(&"click")
 		Game.goto_level(level.id))
+	_fit_card(b, box)
 	return b
 
 

@@ -408,3 +408,47 @@ func test_garage_equips_weapons_used_in_boss_fights() -> void:
 	check_eq(int((screen.get("_loadout") as Dictionary)["damage"]), 1, "the boss fight uses the weapon")
 	await _close(screen)
 	_restore_progress()
+
+
+## Equipped gear is worn on the robot in the maze and in the Garage preview.
+func test_gear_shows_on_the_robot() -> void:
+	_use_temp_progress()
+	var data: ProgressData = _progress.get("data")
+	var screen := await _open(LEVEL_SCREEN, "1-1")
+	(screen.find_child("IntroDialog", true, false) as Control).hide()
+	var body: Sprite2D = (screen.find_child("MazeView", true, false) as Node).find_child("Robot", true, false).get_child(0)
+	check(body.get_node_or_null("Weapon") == null and body.get_node_or_null("Armor") == null, "nothing equipped, nothing worn")
+	await _close(screen)
+	data.owned_armor.append("tin_shell")
+	data.owned_weapons.append("function_cannon")
+	data.equip("armor", "tin_shell")
+	data.equip("weapon", "function_cannon")
+	screen = await _open(LEVEL_SCREEN, "1-1")
+	(screen.find_child("IntroDialog", true, false) as Control).hide()
+	body = (screen.find_child("MazeView", true, false) as Node).find_child("Robot", true, false).get_child(0)
+	var weapon: Sprite2D = body.get_node_or_null("Weapon")
+	var armor: Sprite2D = body.get_node_or_null("Armor")
+	check(weapon != null and weapon.texture.resource_path == "res://art/gear/function_cannon.svg", "the weapon rides on the robot")
+	check(armor != null and armor.texture.resource_path == "res://art/gear/tin_shell.svg", "and the armor")
+	await _close(screen)
+	var garage := await _open(GARAGE)
+	var preview_gear := garage.find_children("Weapon", "TextureRect", true, false)
+	check(not preview_gear.is_empty(), "the Garage preview wears the weapon")
+	await _close(garage)
+	_restore_progress()
+
+
+## Each chapter's row ends with a portal and then its boss, on the right.
+func test_bosses_wait_behind_portals() -> void:
+	_use_temp_progress()
+	var select := await _open(LEVEL_SELECT)
+	var rows := select.find_children("LevelRow", "HBoxContainer", true, false)
+	check_eq(rows.size(), 4, "one row per chapter")
+	for row: Control in rows:
+		var n := row.get_child_count()
+		check(n == 3 and str(row.get_child(n - 2).name) == "Portal", "a portal before the boss")
+		var boss_card := row.get_child(n - 1) as Button
+		check(boss_card != null and boss_card.custom_minimum_size.x >= 224, "the boss card is last")
+	check_eq(LevelCatalog.get_default().get_level("3-2").title, "Same Trick", "3-2's short name")
+	await _close(select)
+	_restore_progress()

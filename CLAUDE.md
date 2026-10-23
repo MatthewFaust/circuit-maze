@@ -54,7 +54,7 @@ GODOT=/Users/alexander/Downloads/Godot.app/Contents/MacOS/Godot
 - It reports false errors for scripts that use the autoloads `Game`, `Progress` or `Sfx`. For those, rely on the test run: `test_ui.gd` loads every screen and every level.
 
 **Developer options:**
-- They go after `--`. Examples: `--variant=N` (1-based), `--steps=N`, `--autorun`, `--speed=0`, `--intro`, `--hints=N`, `--dark`, `--screen=garage --tab=wardrobe`, `--result`, `--code` (or `--code=js`), `--screen=select`, `--unlock-all`.
+- They go after `--`. Examples: `--variant=N` (1-based), `--steps=N`, `--autorun`, `--speed=0`, `--intro`, `--hints=N`, `--dark`, `--screen=garage --tab=wardrobe`, `--chapter=N`, `--result`, `--code` (or `--code=js`), `--screen=select`, `--unlock-all`.
 - The full list is in the header of `autoload/game.gd`.
 - Always pass `--save=user://dev.cfg` so dev runs never touch the real progress file. That file is `user://progress.cfg`, in the custom user dir `RobotMazeAlgorithmEscape`.
 
@@ -173,6 +173,8 @@ These are `RefCounted` classes with `class_name`. They use no nodes and never re
 - **Its colors are not used at runtime.** `ChapterPalette` (`scenes/common/chapter_palette.gd`) copies the theme and replaces every color with a palette role from `STYLE_ROLES` / `COLOR_ROLES`. A new style or color in the theme needs a role there; `test_palette.gd` fails until it has one.
 - Screens set their chapter theme in `_enter_tree()` so children build in the right colors (the main menu, the first scene, does it in `_ready()` once the autoloads are loaded). Each level-select card wears its own chapter's theme.
 - Hand-drawn colors read roles from the theme type `Palette`: `get_theme_color(&"accent", &"Palette")`. Don't hard-code colors in scripts.
+- Type variations the base theme lacks (`BlockCombat`, and `AccentButton` for the Garage buttons) are built from `EXTRA_VARIATIONS` in `ChapterPalette`: each style copies a base style and sets palette roles.
+- **Gear on the robot:** `RobotGear` (`scenes/common/robot_gear.gd`) is the only place that decides where the weapon and armor sit, in the robot texture's 128 px space. `dress_sprite()` (maze) and `dress_rect()` (Garage preview, menu logo) use the same offsets.
 - `test_palette.gd` also checks WCAG contrast for text, blocks and buttons in every chapter in both modes, so palette changes can't make text unreadable.
 - The theme and the SVGs in `art/` are the source files; no generator script is in the repo. The switch, radio and slider icons are drawn from SVG strings in `ChapterPalette`, because the engine defaults are white and icons can't be tinted by the theme.
 - The SVGs are drawn on a 64-unit viewBox at 128×128, so they rasterize at 2× for Retina.
