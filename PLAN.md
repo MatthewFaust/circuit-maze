@@ -191,6 +191,7 @@ res://
 
 ## Levels: 22 total, one JSON file each
 Each level file contains:
+- Boss stages (`N-B`, one per chapter, last in the chapter) add `boss` (see README "Adding or changing a level"). Combat rules live in `MazeWorld`; gear and skins in `data/progression.json` (`ProgressionCatalog`), the player's gear in `ProgressData`. Each boss's `min_gear` is the default loadout, so the tests and `tools/level_report.gd` fight with it.
 - `id`, `title`, `concept`, `intro`, `cs_note`, `hints[]`: exactly 3, from a nudge to the strategy to an explanation of the full solution. The hint card prints the `solution` program as blocks under the third hint, so the hint is always the tested solution.
 - `allowed{blocks, sensors, functions, not}`, `block_limit`, `par{blocks, stamina}`
 - `robot{stamina, hp}`, `rules{}` overrides, `fog`, `starter`

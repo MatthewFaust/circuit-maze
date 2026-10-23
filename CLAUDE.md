@@ -8,6 +8,8 @@ Robot Maze: Algorithm Escape is a Godot 4.6 puzzle game that teaches CS algorith
 
 The player never steers the robot. They build a drag-and-drop block program, and the robot runs it on every map variant of the level, like a test suite.
 
+Each chapter ends with a boss stage (`1-B` … `4-B`): a duel where the program attacks and blocks to a rhythm. Stars from the 22 regular stages unlock weapons, stages grant armor, and bosses grant skins; the Garage screen equips them. Gear only matters in boss fights.
+
 - `PLAN.md` is the design spec: rules, architecture and all 22 level designs.
 - `README.md` is the guide for players and developers: controls, map legend, developer options.
 
@@ -52,7 +54,7 @@ GODOT=/Users/alexander/Downloads/Godot.app/Contents/MacOS/Godot
 - It reports false errors for scripts that use the autoloads `Game`, `Progress` or `Sfx`. For those, rely on the test run: `test_ui.gd` loads every screen and every level.
 
 **Developer options:**
-- They go after `--`. Examples: `--variant=N` (1-based), `--steps=N`, `--autorun`, `--speed=0`, `--intro`, `--hints=N`, `--dark`, `--result`, `--code` (or `--code=js`), `--screen=select`, `--unlock-all`.
+- They go after `--`. Examples: `--variant=N` (1-based), `--steps=N`, `--autorun`, `--speed=0`, `--intro`, `--hints=N`, `--dark`, `--screen=garage --tab=wardrobe`, `--result`, `--code` (or `--code=js`), `--screen=select`, `--unlock-all`.
 - The full list is in the header of `autoload/game.gd`.
 - Always pass `--save=user://dev.cfg` so dev runs never touch the real progress file. That file is `user://progress.cfg`, in the custom user dir `RobotMazeAlgorithmEscape`.
 
@@ -69,6 +71,7 @@ These are `RefCounted` classes with `class_name`. They use no nodes and never re
   - `sense(name)` evaluates a sensor and costs nothing.
   - Checks for each action run in this order: stamina → pay → effect → HP ≤ 0 fails → standing on the exit wins.
   - Every cost, damage amount and limit lives in `MazeRules`. A level's `rules{}` can override any key listed in `MazeRules.OVERRIDABLE`.
+  - **Boss combat** (only when `setup_combat()` added bosses): after the action's effect, the boss the robot faced *at the start of the turn* strikes if its `pattern` letter for this turn (`actions_taken`, 0-based) is `X`. Damage is `max(attack − defense, 1)`, `block()` stops it, and it interrupts an `attack()`. A defeated unit spawns its `split` children. The stage is won when no boss is alive, and `scan()` targets bosses instead of exits.
 - **Programs**
   - Programs are plain Dictionaries. The shape is documented at the top of `program_model.gd`.
   - They're deep-copied for undo snapshots, and the interpreter gets its own copy, so editing never affects a run in progress.
@@ -88,12 +91,15 @@ These are `RefCounted` classes with `class_name`. They use no nodes and never re
 - **Levels**
   - `LevelCatalog` reads `data/levels/catalog.json` → `LevelLoader` → `LevelData`. JSON floats are converted to ints once, at load.
   - `LevelVariant.make_world()` builds a fresh `MazeWorld` for each map.
-  - **`LevelEvaluator.evaluate(level, program)` is the single authority for pass/fail and stars.** It runs every variant headlessly.
-- **`ProgressData`** is the pure save model.
+  - **`LevelEvaluator.evaluate(level, program, loadout)` is the single authority for pass/fail and stars.** It runs every variant headlessly. `loadout` (`{damage, defense}`) only matters on boss stages; `null` means the level's `default_loadout()`, its boss's `min_gear`. The game passes the player's loadout; tests and tools use the default.
+  - Boss stages award no stars: `stars_for()` records only `escape`, which opens the next chapter. `LevelCatalog.max_stars()` and `ProgressData.total_stars(catalog)` count regular stages only.
+- **`ProgressData`** is the pure save model (version 2 adds a `[gear]` section).
+  - `refresh_unlocks(catalog, progression)` grants armor (its stage reached), weapons (star total), and skins (boss beaten), auto-equips armor and skins, and returns the new items for the result dialog. `Progress` runs it on load, so older saves catch up.
+- **`ProgressionCatalog`** reads `data/progression.json`: armor, weapons (a star threshold, or `"all"`), and skins (texture, boss stage).
 
 ### 2. `autoload/`
 
-- **`Game`:** the catalog, scene switching with a fade, and the developer command-line options.
+- **`Game`:** the catalog, scene switching with a fade (`goto_garage(return_to)` among them), and the developer command-line options.
 - **`Progress`:** saves and loads `ProgressData` as a ConfigFile, with a debounced `queue_save()` and the settings.
 - **`Sfx`:** synthesizes its WAV sounds at startup and stays silent when headless.
 
@@ -116,7 +122,7 @@ These are `RefCounted` classes with `class_name`. They use no nodes and never re
 
 ## Levels
 
-- Each level is one JSON file in `data/levels/chN/` and must be listed in `catalog.json`.
+- Each level is one JSON file in `data/levels/chN/` and must be listed in `catalog.json`. There are 26: 22 regular stages and a boss stage at the end of each chapter.
 - Programs in level files (`solution`, `alt_solutions`, `anti_solutions`, `starter`) use the Python-like text form, one line per array item, with 4-space indents.
 - **`test_levels.gd` enforces this contract for every level:**
   - the maps are valid
@@ -125,6 +131,7 @@ These are `RefCounted` classes with `class_name`. They use no nodes and never re
   - every anti-solution fails, with `expect_fail_code` when one is given
   - replaying one map's action list fails the level, unless `checks.hardcode_must_fail` is false
   - with `checks.inline_must_fail`, inlining the function calls exceeds the block limit
+  - **boss stages:** the solution wins with `min_gear`, whose armor unlocks before the boss and which has no weapon (so the gate never blocks anyone); at least one anti-solution has `passes_with` gear that rescues it; the boss's `skin` is the one `progression.json` ties to it
 - **Hints:** exactly 3 per level (the test enforces it). They go from a nudge, to the strategy, to an explanation of the full solution. `HintPanel` prints the level's `solution` as blocks (`ProgramPrinter.block_text()`) under the third hint, so never write the program into the hint text; update `solution` instead.
 - **When a level fails, fix its map or its par, not `MazeRules`.** The rules are shared by all 22 levels.
 - Use `tools/level_report.gd` to find the right numbers.

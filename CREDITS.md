@@ -8,15 +8,16 @@ This file lists every image in the project, where it came from, and its license.
 
 | Source | Images | Status |
 |---|---|---|
-| Made by Claude (AI) | 42: every file in `art/` | AI-made, needs replacing |
+| Made by Claude (AI) | 52: every file in `art/` | AI-made, needs replacing |
 | Godot Engine | 1: `icon.svg` | Not AI-made |
 | Anywhere else | 0 | none |
 
 **How this was checked (2026-10-13):**
 - **Search:** I searched the whole project, outside Godot's `.godot/` cache, for image files of every common format.
-  - There are 43 image files, all SVG. Every one is used by the game.
+  - There were 43 image files, all SVG. Every one is used by the game, except `floor.svg` and `stone.svg` (see below).
   - The `.svg.import` files beside them are Godot's import settings, not images.
-- **The 42 files in `art/`:** a Python script that Claude wrote generated all of them. The script is kept outside the repo. Running it again reproduces all 42 files byte for byte.
+- **The first 42 files in `art/`:** a Python script that Claude wrote generated all of them. The script is kept outside the repo.
+- **Added later by Claude, written directly (2026-10-23):** `art/blocks/attack.svg` and `block.svg`, the 4 boss sprites in `art/bosses/`, the 4 skins in `art/robot/skin_*.svg`, and a redrawn `art/ui/star_empty.svg`. All are placeholders.
 - **`icon.svg`:**
   - Its timestamp shows Godot created it with the new project, before Claude started working on the project.
   - Its text is identical to the default project icon built into Godot 4.6.1.
@@ -55,7 +56,22 @@ These are larger than the images appear on screen, so they stay sharp on high-re
 | `art/tiles/spike.svg` | Spike tile | maze board | None (AI-made) | AI-made, needs replacing |
 | `art/tiles/battery.svg` | Battery pickup (+stamina) | maze board | None (AI-made) | AI-made, needs replacing |
 | `art/tiles/repair.svg` | Repair kit pickup (+HP) | maze board | None (AI-made) | AI-made, needs replacing |
-| `art/robot/robot.svg` | The robot, drawn facing east | maze board, main menu logo | None (AI-made) | AI-made, needs replacing |
+| `art/robot/robot.svg` | The robot, drawn facing east; also the "Starter Bot" skin | maze board, main menu logo, Garage | None (AI-made) | AI-made, needs replacing |
+| `art/robot/skin_circuit_green.svg` | Placeholder skin "Circuit Green" (won from Raspberry Pi 3), facing east | maze board, main menu logo, Garage | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/robot/skin_sentinel.svg` | Placeholder skin "Sentinel" (won from Sensor Pi), facing east | maze board, main menu logo, Garage | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/robot/skin_rackmount.svg` | Placeholder skin "Rackmount" (won from The Server Stack), facing east | maze board, main menu logo, Garage | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/robot/skin_mainframe.svg` | Placeholder skin "Mainframe" (won from The Supercomputer), facing east | maze board, main menu logo, Garage | None (AI-made) | AI-made placeholder, needs replacing |
+
+### Bosses
+
+Placeholders: boss stages name their sprite in the level file (`"sprite"` in `boss`), and the skins are listed in `data/progression.json`, so new art can use any file name.
+
+| File | What it is | Used in | License | Status |
+|---|---|---|---|---|
+| `art/bosses/raspberry_pi.svg` | Raspberry Pi 3, chapter 1 boss | 1-B board, level select | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/bosses/sensor_pi.svg` | Sensor Pi, chapter 2 boss | 2-B board, level select | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/bosses/server_stack.svg` | The Server Stack, chapter 3 boss (drawn smaller as it splits) | 3-B board, level select | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/bosses/supercomputer.svg` | The Supercomputer, chapter 4 boss | 4-B board, level select | None (AI-made) | AI-made placeholder, needs replacing |
 
 ### Block icons
 
@@ -75,6 +91,8 @@ These are shown on the blocks in the editor palette and in the program (`scenes/
 | `art/blocks/if.svg` | `if` | None (AI-made) | AI-made, needs replacing |
 | `art/blocks/if_else.svg` | `if / else` (same drawing as `if.svg`) | None (AI-made) | AI-made, needs replacing |
 | `art/blocks/call.svg` | `call A/B/C` (functions) | None (AI-made) | AI-made, needs replacing |
+| `art/blocks/attack.svg` | `attack()` (boss stages) | None (AI-made) | AI-made placeholder, needs replacing |
+| `art/blocks/block.svg` | `block()` (boss stages) | None (AI-made) | AI-made placeholder, needs replacing |
 
 ### Interface icons
 
@@ -110,7 +128,8 @@ These have no image or sound files, but they are visuals and sounds that Claude 
 | What | Where | License | Status |
 |---|---|---|---|
 | **Board markers:** visited dots, breadcrumb trail, scan heat-map squares, fog | drawn with simple shapes by `scenes/maze/maze_view.gd` | None (AI-made) | AI-made, needs replacing |
-| **Particle bursts:** bump sparks, cut leaves, win burst, power-down smoke | `scenes/maze/maze_view.gd` (plain colored squares, no texture) | None (AI-made) | AI-made, needs replacing |
+| **Particle bursts:** bump sparks, cut leaves, win burst, power-down smoke, boss defeat | `scenes/maze/maze_view.gd` (plain colored squares, no texture) | None (AI-made) | AI-made, needs replacing |
+| **Boss fight effects:** HP bars, hit flashes, the red glow before a strike, the shield ring | drawn with simple shapes by `scenes/maze/maze_view.gd` | None (AI-made) | AI-made, needs replacing |
 | **Interface style:** panel and button shapes, borders | `ui/theme/main_theme.tres` (flat colored boxes, no images) | None (AI-made) | AI-made, needs replacing |
 | **Chapter color themes (light and dark):** recolored interface, maze floor and walls, switch, radio and slider icons | `scenes/common/chapter_palette.gd`, palettes in `data/levels/catalog.json` | None (palette colors chosen by the project team) | Project-made |
 | **Sound effects** | synthesized when the game starts by `autoload/sfx.gd` (there are no audio files) | None (AI-made) | AI-made, needs replacing |

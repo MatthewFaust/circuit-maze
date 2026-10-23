@@ -4,8 +4,9 @@ A single-player, stage-based puzzle game that teaches computer science algorithm
 A robot is trapped in a maze. You never steer it. Instead you build a program from
 drag-and-drop blocks, press **Run**, and watch the robot carry it out step by step.
 
-- **4 chapters, 22 levels:** Sequencing & Loops → Conditionals & Sensors → Functions &
-  Recursion → Maze Algorithms (wall following, DFS, BFS, and a Dijkstra bonus level)
+- **4 chapters, 22 levels and 4 bosses:** Sequencing & Loops → Conditionals & Sensors → Functions &
+  Recursion → Maze Algorithms (wall following, DFS, BFS, and a Dijkstra bonus level). Each
+  chapter ends with a boss fight that opens the next chapter.
 - **Tiles:** floor (walk freely), **bush** (blocks the way until `cut()` destroys it),
   **stone** (never passable), spikes, batteries, repair kits and the exit
 - **Health and stamina:** every action costs stamina; bumping stone or bushes and
@@ -43,6 +44,27 @@ Main scene: `scenes/main_menu/main_menu.tscn`.
 
 Each star is kept separately as your best result, and one star unlocks the next level.
 
+**Boss fights**: the last stage of each chapter is a duel, not a maze. The robot has 20 HP;
+`attack()` hits the boss in front for 2 damage plus your weapon's, and `block()` raises a shield
+for one turn. Every boss strikes in a rhythm: on a strike turn the boss you face hits you for its
+attack minus your defense (at least 1) unless you block, and a strike interrupts your attack.
+`boss_ahead()` and `boss_charging()` read the fight. Bosses award no stars; each one unlocks a skin.
+
+| Boss | HP | Attack | Teaches |
+|---|---|---|---|
+| Raspberry Pi 3 (1-B) | 16 | 5 | a fixed rhythm: repeat |
+| Sensor Pi (2-B) | 30 | 7 | a different rhythm per arena: sensors |
+| The Server Stack (3-B) | 20, splits into 2 × 10, then 4 × 5 | 9 | a tree of servers: recursion |
+| The Supercomputer (4-B) | 80 | 13 | hidden in a maze: scan(), then fight |
+
+**Gear and the Garage** (main menu or level select): gear only matters in boss fights.
+- **Armor** comes free when you reach its stage and is equipped automatically: Tin Shell +1 defense (1-5), Signal Shield +2 (2-2), Mirror Plating +4 (3-4), Firewall Armor +8 (4-1).
+- **Weapons** unlock in the **Shop** as your star total grows; stars are never spent. Equip any unlocked one: Loop Blaster +1 damage (15 ★), Sensor Scope +3 (27 ★), Function Cannon +9 (48 ★), Pathfinder Lance +15 (all 66 ★).
+- **Skins** in the **Wardrobe** change only the robot's look. Beating a boss wins its skin and puts it on; the Starter Bot is always there.
+- Every boss can be beaten with the armor you're given and no weapon. Better weapons let a less careful program survive.
+
+Stars, gear, what's equipped and your skin are all saved.
+
 **Colors**: each chapter has its own color theme, in a light and a dark version. Switch between them with **Settings → Dark mode** on the main menu; the choice is saved.
 
 ## Rules at a glance
@@ -53,12 +75,15 @@ Each star is kept separately as your best result, and one star unlocks the next 
 | `turn_left()`, `turn_right()` | 1 | |
 | `cut()` | 3 | Destroys the bush ahead (wasted if there is none) |
 | `backtrack()` | 1 + turns | Pops the breadcrumb stack (DFS) |
-| `scan()`, `scan_weighted()` | 5 | BFS / Dijkstra distance numbers from the exit |
+| `scan()`, `scan_weighted()` | 5 | BFS / Dijkstra distance numbers from the exit (from the bosses in boss stages) |
+| `attack()` | 1 | Boss stages: damage the boss ahead (2 + weapon); a strike that turn interrupts it |
+| `block()` | 1 | Boss stages: no damage from a strike this turn |
 
 Sensors are free:
 - `path_ahead/left/right`, `bush_ahead`, `stone_ahead`, `spike_ahead`, `at_exit`
 - `unvisited_*` (DFS)
 - `closer_*` (after a scan)
+- `boss_ahead`, `boss_charging` (boss stages)
 
 A run fails when:
 - HP hits 0
@@ -96,6 +121,7 @@ tests/         headless test runner + suites      tools/level_report.gd  pars an
      | `^` | spike |
      | `+` | battery |
      | `H` | repair kit |
+     | `M` | boss (boss stages; no exit needed) |
    - **Programs** (`solution`, `alt_solutions`, `anti_solutions`, `starter`) use the Python-like text form, one line per array item.
 2. See how every program in the file performs:
    `Godot --headless --path . --script res://tools/level_report.gd -- --level=N-M`
@@ -104,6 +130,10 @@ tests/         headless test runner + suites      tools/level_report.gd  pars an
    - every anti-solution fails
    - replaying one map's moves doesn't solve a multi-map level
    - the maps are valid
+   - a boss solution wins with the boss's `min_gear`, and an anti-solution's `passes_with` gear rescues it
+4. **Boss stages** add a `boss` object: `name`, `sprite`, `skin`, `min_gear` (`armor`, `weapon`), and
+   `units` (one per `M`, in reading order) with `hp`, `attack`, `pattern` (`O` open, `X` strike) and
+   optional `split` children with a `cell`. A variant can set `boss_pattern`. Set `rules.max_hp` to 20.
 
 ## Tests
 
@@ -132,6 +162,7 @@ Pass these after `--` when launching:
 - `--autorun`: start running immediately
 - `--speed=0`: max speed
 - `--intro`: show the briefing dialog
+- `--screen=garage`, `--tab=shop|equipment|wardrobe`: open the Garage
 - `--hints=N`: open the hint card with N hints showing
 - `--dark`: use dark mode for this run, without saving it
 - `--result`: show the result dialog
