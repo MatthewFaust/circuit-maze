@@ -10,8 +10,8 @@ The player never steers the robot. They build a drag-and-drop block program, and
 
 Each chapter ends with a boss stage (`1-B` … `4-B`): a duel where the program attacks and blocks to a rhythm. Stars from the 22 regular stages unlock weapons, stages grant armor, and bosses grant skins; the Garage screen equips them. Gear only matters in boss fights.
 
-- `PLAN.md` is the design spec: rules, architecture and all 22 level designs.
-- `README.md` is the guide for players and developers: controls, map legend, developer options.
+- `PLAN.md` is the design spec: rules, architecture and the 22 regular level designs.
+- `README.md` is the guide for players and developers: controls, map legend, boss and gear rules, how to write a level (including a boss stage), developer options.
 
 ## Commands
 
@@ -57,6 +57,11 @@ GODOT=/Users/alexander/Downloads/Godot.app/Contents/MacOS/Godot
 - They go after `--`. Examples: `--variant=N` (1-based), `--steps=N`, `--autorun`, `--speed=0`, `--intro`, `--hints=N`, `--dark`, `--screen=garage --tab=wardrobe`, `--chapter=N`, `--result`, `--code` (or `--code=js`), `--screen=select`, `--unlock-all`.
 - The full list is in the header of `autoload/game.gd`.
 - Always pass `--save=user://dev.cfg` so dev runs never touch the real progress file. That file is `user://progress.cfg`, in the custom user dir `RobotMazeAlgorithmEscape`.
+- Runs that end with `--shot` quit without saving, so `dev.cfg` never gains gear. To screenshot equipped gear, copy `dev.cfg` to another throwaway save and append a `[gear]` section (`armor="…"`, `weapon="…"`, plus the `owned_*` arrays).
+
+**Screenshots and window size:**
+- The window opens maximized (`window/size/mode=2`), and the UI is laid out at 1600×900 and stretched (`canvas_items`, aspect `expand`). So `--resolution` doesn't change the layout: every 16:9 window shows the same picture, scaled, and other aspects only add room.
+- A layout fits on every window if it fits at 1600×900.
 
 ## Architecture
 
@@ -67,9 +72,9 @@ There are three layers, and dependencies only point downward.
 These are `RefCounted` classes with `class_name`. They use no nodes and never reference autoloads, so all of the game logic runs and tests headless.
 
 - **`MazeWorld`**
-  - `apply_action(name)` changes the world and returns an `Array[Dictionary]` of events, such as `{"type": "moved"}`, `bumped`, `hp_changed`, `cut`, `scanned`, `won` or `failed`.
+  - `apply_action(name)` changes the world and returns an `Array[Dictionary]` of events, such as `{"type": "moved"}`, `bumped`, `hp_changed`, `cut`, `scanned`, `won` or `failed`. Boss stages add `boss_hit`, `attack_interrupted`, `boss_struck`, `blocked`, `boss_split` and `boss_defeated`.
   - `sense(name)` evaluates a sensor and costs nothing.
-  - Checks for each action run in this order: stamina → pay → effect → HP ≤ 0 fails → standing on the exit wins.
+  - Checks for each action run in this order: stamina → pay → effect → the faced boss strikes (boss stages) → HP ≤ 0 fails → standing on the exit wins (in a boss stage: no boss left alive).
   - Every cost, damage amount and limit lives in `MazeRules`. A level's `rules{}` can override any key listed in `MazeRules.OVERRIDABLE`.
   - **Boss combat** (only when `setup_combat()` added bosses): after the action's effect, the boss the robot faced *at the start of the turn* strikes if its `pattern` letter for this turn (`actions_taken`, 0-based) is `X`. Damage is `max(attack − defense, 1)`, `block()` stops it, and it interrupts an `attack()`. A defeated unit spawns its `split` children. The stage is won when no boss is alive, and `scan()` targets bosses instead of exits.
 - **Programs**
@@ -111,8 +116,14 @@ These are `RefCounted` classes with `class_name`. They use no nodes and never re
     - Animated: `append_event(tween, e)`, with one Tween per step.
     - Max speed: `apply_event(e)`, no animation.
   - `MazeView`, `HudBars` and `LogLine` implement both methods. A new event type needs handling in each of them.
+  - After every step (both paths) it calls `MazeView.after_step()`, which turns the faced boss red on the turn before it strikes.
+  - `RunController.loadout` holds the player's gear; it builds every world with it.
   - **Cancellation:** a generation counter, checked after every await, plus the `_step_over` signal. Never await SceneTree timers or a tween that may be killed.
-- **The animated run is only a visualization.** When it ends, `level_screen` calls `LevelEvaluator.evaluate()` on the editor's program to show the result and record stars. **Check** does the same with no animation.
+- **The animated run is only a visualization.** When it ends, `level_screen` calls `LevelEvaluator.evaluate()` on the editor's program (with the player's loadout) to show the result and record stars, then `refresh_unlocks()`, whose new items the result dialog lists. **Check** does the same with no animation.
+- **Code views:** the Python (`C`) and JavaScript (`J`) buttons share one panel (`CodeView`, `code_language`); turning one on turns the other off. `TextEdit` already has a `language` property, hence the name.
+- **`level/hint_panel.gd`** (`HintPanel`): the hint card over the maze. Each Hint press reveals one more hint; the third shows the solution as blocks.
+- **`garage/garage.gd`:** the Shop, Equipment and Wardrobe tabs, built in code. Equips go through `ProgressData.equip()` and save at once.
+- **`level_select/level_select.gd`:** each chapter row is an expanding `HFlowContainer` of regular stages, then a portal and the boss card on the right. Cards grow to fit their text (`_fit_card()`), because a Button doesn't grow with the box pinned inside it.
 - **`editor/ProgramEditor`**
   - The program Dictionary is the only source of truth.
   - **Structural edits:** save an undo snapshot (`EditHistory`), change the model, then rebuild the views, deferred.
@@ -133,7 +144,8 @@ These are `RefCounted` classes with `class_name`. They use no nodes and never re
   - with `checks.inline_must_fail`, inlining the function calls exceeds the block limit
   - **boss stages:** the solution wins with `min_gear`, whose armor unlocks before the boss and which has no weapon (so the gate never blocks anyone); at least one anti-solution has `passes_with` gear that rescues it; the boss's `skin` is the one `progression.json` ties to it
 - **Hints:** exactly 3 per level (the test enforces it). They go from a nudge, to the strategy, to an explanation of the full solution. `HintPanel` prints the level's `solution` as blocks (`ProgramPrinter.block_text()`) under the third hint, so never write the program into the hint text; update `solution` instead.
-- **When a level fails, fix its map or its par, not `MazeRules`.** The rules are shared by all 22 levels.
+- **Boss stages** add a `boss` object (README, "Adding or changing a level"); `M` marks each boss in the map, and they set `rules.max_hp` to 20.
+- **When a level fails, fix its map or its par, not `MazeRules`.** The rules are shared by all 26 stages.
 - Use `tools/level_report.gd` to find the right numbers.
 
 ## Conventions and gotchas
@@ -162,7 +174,9 @@ These are `RefCounted` classes with `class_name`. They use no nodes and never re
 - `test_ui.gd` catches regressions with simulated mouse drags.
 
 **Godot quirks**
-- Containers reset their children's `scale` and `position`, so animate a wrapper node or `modulate`.
+- Containers reset their children's `scale`, `rotation` and `position`, so animate a wrapper node or `modulate`. (The level-select portal spins inside a plain Control holder.)
+- A `SpinBox` applies typed text only in a deferred call after editing ends, so code that reads the value right away gets the old one. The repeat-count box connects its LineEdit's `focus_exited` to `spin.apply()`, and Run, Check and Back release focus first.
+- Connecting a signal twice to a bound callable that differs only in its bound arguments still counts as a duplicate. Connect once (`RobotGear` places all overlays from one `resized` handler).
 - `set_pressed_no_signal()` doesn't unpress ButtonGroup siblings. Set each button explicitly.
 - Don't free controls inside `_drop_data`. Defer the rebuild.
 
