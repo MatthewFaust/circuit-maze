@@ -10,6 +10,7 @@ const SPEEDS := [1.0, 2.0, 4.0, 0.0]
 var level_id := ""
 var level: LevelData
 var _hints: HintPanel
+var _js_button: Button
 var _tab_guard := false
 var _speed_buttons: Array[Button] = []
 
@@ -84,7 +85,9 @@ func _ready() -> void:
 	_reset_button.pressed.connect(_run.reset)
 	_check_button.pressed.connect(_check_all)
 	_hint_button.pressed.connect(_show_hint)
-	_code_button.toggled.connect(_editor.show_code)
+	_js_button = _make_js_button()
+	_code_button.toggled.connect(_on_code_toggled.bind(CodeView.PYTHON))
+	_js_button.toggled.connect(_on_code_toggled.bind(CodeView.JAVASCRIPT))
 	var group := ButtonGroup.new()
 	_speed_buttons = [%Speed1, %Speed2, %Speed4, %SpeedMax]
 	for i in _speed_buttons.size():
@@ -135,6 +138,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			_show_hint()
 		KEY_C:
 			_code_button.button_pressed = not _code_button.button_pressed
+		KEY_J:
+			_js_button.button_pressed = not _js_button.button_pressed
 		KEY_1, KEY_2, KEY_3, KEY_4:
 			var i: int = k.keycode - KEY_1
 			_speed_buttons[i].button_pressed = true
@@ -145,6 +150,31 @@ func _unhandled_key_input(event: InputEvent) -> void:
 			handled = false
 	if handled:
 		get_viewport().set_input_as_handled()
+
+
+## A twin of the Python button, built in code next to it.
+func _make_js_button() -> Button:
+	var b := Button.new()
+	b.name = "JsButton"
+	b.text = "JavaScript"
+	b.icon = _code_button.icon
+	b.toggle_mode = true
+	b.focus_mode = Control.FOCUS_NONE
+	b.theme_type_variation = &"ToolButton"
+	b.tooltip_text = "Show the program as JavaScript code (J)"
+	_code_button.add_sibling(b)
+	return b
+
+
+## Python and JavaScript share one code panel: turning one on turns the other
+## off, and the panel closes only when neither is on.
+func _on_code_toggled(on: bool, lang: String) -> void:
+	var other := _js_button if lang == CodeView.PYTHON else _code_button
+	if on:
+		other.set_pressed_no_signal(false)
+		_editor.show_code(true, lang)
+	elif not other.button_pressed:
+		_editor.show_code(false)
 
 
 func _set_speed(s: float) -> void:
@@ -319,7 +349,8 @@ func _apply_dev_options() -> void:
 	if d.has("speed"):
 		_set_speed(float(str(d["speed"])))
 	if d.has("code"):
-		_code_button.button_pressed = true
+		var js := str(d["code"]) == "js"
+		(_js_button if js else _code_button).button_pressed = true
 	if d.has("intro"):
 		_intro.open(level)
 	if d.has("hints"):

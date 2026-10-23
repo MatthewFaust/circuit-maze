@@ -7,7 +7,7 @@ extends Node
 ##   --steps=N (run N steps instantly)  --autorun  --speed=1|2|4|0 (0 = max)
 ##   --intro (show the intro dialog)  --hints=N (open the hint card with N hints shown)
 ##   --result (evaluate and show the result)
-##   --code (open the code view)  --screen=menu|select  --shot=PATH (save a PNG and quit)
+##   --code (open the Python view; --code=js for JavaScript)  --screen=menu|select  --shot=PATH (save a PNG and quit)
 ##   --unlock-all  --dark (dark mode for this run, not saved)  --save=user://dev.cfg
 
 const MAIN_MENU := "res://scenes/main_menu/main_menu.tscn"

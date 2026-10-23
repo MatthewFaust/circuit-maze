@@ -100,9 +100,13 @@ func set_locked(on: bool) -> void:
 		get_viewport().gui_cancel_drag()
 
 
-func show_code(on: bool) -> void:
+## Shows or hides the code panel. lang: CodeView.PYTHON or CodeView.JAVASCRIPT.
+func show_code(on: bool, lang: String = CodeView.PYTHON) -> void:
 	_code_panel.visible = on
 	if on:
+		_code_view.set_code_language(lang)
+		var title := "PYTHON" if lang == CodeView.PYTHON else "JAVASCRIPT"
+		(_code_panel.get_child(0) as Label).text = "THE SAME PROGRAM IN " + title
 		_code_view.show_program(program)
 		if _highlight_id >= 0:
 			_code_view.highlight_node(_highlight_id)
@@ -110,6 +114,10 @@ func show_code(on: bool) -> void:
 
 func is_code_visible() -> bool:
 	return _code_panel.visible
+
+
+func code_language() -> String:
+	return _code_view.code_language
 
 
 func section_refs() -> Array[String]:

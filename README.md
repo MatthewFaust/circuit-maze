@@ -33,7 +33,7 @@ Main scene: `scenes/main_menu/main_menu.tscn`.
 | **Reset** / `R` | stop and put the robot back |
 | `1` `2` `3` `4` | speed 1x, 2x, 4x, max |
 | **Check** | test every map instantly, without animation |
-| **Hint** / `H`, **Python** / `C`, **Briefing** | hints, the program as Python code, the level intro |
+| **Hint** / `H`, **Python** / `C`, **JavaScript** / `J`, **Briefing** | hints, the program as Python or JavaScript code (one at a time; press the active one again to close it), the level intro |
 | **Hint**, pressed again | each level has 3 hints: what to notice, the strategy, then the full solution as blocks. Each press shows the next one; once all three are showing, a press closes the card |
 
 **Stars**:
@@ -135,7 +135,7 @@ Pass these after `--` when launching:
 - `--hints=N`: open the hint card with N hints showing
 - `--dark`: use dark mode for this run, without saving it
 - `--result`: show the result dialog
-- `--code`: open the Python view
+- `--code`: open the Python view (`--code=js` for JavaScript)
 - `--screen=select`: open the level select screen
 - `--shot=/abs/path.png`: save a screenshot and quit
 - `--unlock-all`: unlock every level

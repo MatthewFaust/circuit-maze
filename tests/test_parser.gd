@@ -109,6 +109,54 @@ func test_printer_output() -> void:
 	check_eq(ProgramPrinter.to_text(p), expected, "printed text")
 
 
+func test_javascript_output() -> void:
+	var p := _parse("def A():\n    move()\nrepeat 2:\n    repeat 3:\n        A()\nwhile not at_exit():\n    if bush_ahead():\n        cut()\n    elif path_left():\n        turn_left()\n    else:\n        turn_right()")
+	var expected := "\n".join([
+		"function A() {", "  move();", "}", "",
+		"for (let i = 0; i < 2; i++) {", "  for (let j = 0; j < 3; j++) {", "    A();", "  }", "}",
+		"while (!at_exit()) {", "  if (bush_ahead()) {", "    cut();", "  } else if (path_left()) {",
+		"    turn_left();", "  } else {", "    turn_right();", "  }", "}",
+	])
+	check_eq(ProgramPrinter.render_js(p)["text"], expected, "JavaScript text")
+
+
+## Every block of every level's solution gets a JavaScript line (so the running
+## block can be highlighted), and the braces balance.
+func test_javascript_line_map_covers_every_solution() -> void:
+	for id: String in LevelCatalog.get_default().order:
+		var level := LevelCatalog.get_default().get_level(id)
+		var p := _parse(level.solution_text)
+		ProgramModel.assign_ids(p)
+		var r := ProgramPrinter.render_js(p)
+		var text: String = r["text"]
+		check_eq(text.count("{"), text.count("}"), "%s: braces balance" % id)
+		var line_of: Dictionary = r["line_of"]
+		var lines := text.split("\n")
+		for list: Array in _all_lists(p):
+			for node: Dictionary in list:
+				var nid: int = node["id"]
+				if not check(line_of.has(nid), "%s: block %d has a line" % [id, nid]):
+					continue
+				var line: String = lines[int(line_of[nid])]
+				var t: String = node["type"]
+				var want: String = "for (" if t == "repeat" else (str(node["fn"]) if t == "call" else ("if (" if t.begins_with("if") else t))
+				check(line.contains(want), "%s: line for %s reads \"%s\"" % [id, t, line.strip_edges()])
+
+
+func _all_lists(p: Dictionary) -> Array:
+	var out: Array = [p["main"]]
+	for f: String in p["functions"]:
+		out.append(p["functions"][f])
+	var i := 0
+	while i < out.size():
+		for node: Dictionary in out[i]:
+			for key in ["body", "else_body"]:
+				if node.has(key):
+					out.append(node[key])
+		i += 1
+	return out
+
+
 ## The full-solution hint prints programs the way the block editor shows them.
 func test_block_text() -> void:
 	var p := _parse("def A():\n    move()\nrepeat 2:\n    A()\nwhile not at_exit():\n    if bush_ahead():\n        cut()\n    elif path_left():\n        turn_left()")

@@ -3,8 +3,14 @@ extends RefCounted
 ## Prints a program as Python-like text: functions first, then main.
 ## repeat prints as "for _ in range(N):", and an else that holds a single if
 ## prints as "elif". ProgramParser reads this text back to the same program.
+##
+## render_js() prints the same program as JavaScript for the code view. It is
+## for reading only; nothing parses it back.
 
 const INDENT := "    "
+const JS_INDENT := "  "
+## Loop counters for nested repeats in JavaScript: i, then j, then k...
+const JS_LOOP_VARS := ["i", "j", "k", "m", "n"]
 
 
 static func to_text(p: Dictionary) -> String:
@@ -31,6 +37,84 @@ static func render(p: Dictionary) -> Dictionary:
 	while lines.size() > 0 and lines[lines.size() - 1] == "":
 		lines.remove_at(lines.size() - 1)
 	return {"text": "\n".join(lines), "line_of": line_of}
+
+
+## The program as JavaScript: {"text": String, "line_of": {node id: 0-based line}},
+## like render(). repeat N prints as a counted for loop, "not" as "!", and an
+## else that holds a single if as "} else if (...) {".
+static func render_js(p: Dictionary) -> Dictionary:
+	var lines := PackedStringArray()
+	var line_of := {}
+	var fns: Dictionary = p.get("functions", {})
+	var called: Dictionary = ProgramModel.usage(p)["calls"]
+	var names: Array = fns.keys()
+	names.sort()
+	for fname: String in names:
+		var body: Array = fns[fname]
+		if body.is_empty() and not called.has(fname):
+			continue
+		lines.append("function %s() {" % fname)
+		_emit_js_list(body, 1, 0, lines, line_of)
+		lines.append("}")
+		lines.append("")
+	_emit_js_list(p.get("main", []), 0, 0, lines, line_of)
+	while lines.size() > 0 and lines[lines.size() - 1] == "":
+		lines.remove_at(lines.size() - 1)
+	return {"text": "\n".join(lines), "line_of": line_of}
+
+
+static func cond_js(c: Dictionary) -> String:
+	var negate: bool = c.get("negate", false)
+	return ("!" if negate else "") + str(c.get("sensor", "?")) + "()"
+
+
+## loops: how many repeats enclose this list, to pick the next loop counter.
+static func _emit_js_list(list: Array, depth: int, loops: int, lines: PackedStringArray, line_of: Dictionary) -> void:
+	for node: Dictionary in list:
+		_emit_js_node(node, depth, loops, lines, line_of)
+
+
+static func _emit_js_node(node: Dictionary, depth: int, loops: int, lines: PackedStringArray, line_of: Dictionary) -> void:
+	var prefix := JS_INDENT.repeat(depth)
+	var id: int = node.get("id", -1)
+	if id >= 0:
+		line_of[id] = lines.size()
+	var t: String = node["type"]
+	match t:
+		"call":
+			lines.append(prefix + str(node["fn"]) + "();")
+		"repeat":
+			var v: String = JS_LOOP_VARS[loops] if loops < JS_LOOP_VARS.size() else "i%d" % (loops + 1)
+			lines.append(prefix + "for (let %s = 0; %s < %d; %s++) {" % [v, v, int(node["count"]), v])
+			_emit_js_list(node["body"], depth + 1, loops + 1, lines, line_of)
+			lines.append(prefix + "}")
+		"while":
+			lines.append(prefix + "while (" + cond_js(node["cond"]) + ") {")
+			_emit_js_list(node["body"], depth + 1, loops, lines, line_of)
+			lines.append(prefix + "}")
+		"if", "if_else":
+			lines.append(prefix + "if (" + cond_js(node["cond"]) + ") {")
+			_emit_js_list(node["body"], depth + 1, loops, lines, line_of)
+			var current := node
+			# Follow the else chain: an else holding one if prints as "else if".
+			while str(current["type"]) == "if_else":
+				var else_body: Array = current["else_body"]
+				var inner: Dictionary = else_body[0] if else_body.size() == 1 else {}
+				var it: String = inner.get("type", "")
+				if it == "if" or it == "if_else":
+					var inner_id: int = inner.get("id", -1)
+					if inner_id >= 0:
+						line_of[inner_id] = lines.size()
+					lines.append(prefix + "} else if (" + cond_js(inner["cond"]) + ") {")
+					_emit_js_list(inner["body"], depth + 1, loops, lines, line_of)
+					current = inner
+				else:
+					lines.append(prefix + "} else {")
+					_emit_js_list(else_body, depth + 1, loops, lines, line_of)
+					break
+			lines.append(prefix + "}")
+		_:
+			lines.append(prefix + t + "();")
 
 
 ## The program as the block editor shows it: main first, then each function

@@ -317,3 +317,35 @@ func test_hint_card_reveals_three_hints_then_solution() -> void:
 	check(not card.visible, "a press with every hint shown closes the card")
 	await _close(screen)
 	_restore_progress()
+
+
+## Python and JavaScript share the code panel: one at a time, and pressing the
+## active one closes it.
+func test_python_and_javascript_buttons() -> void:
+	_use_temp_progress()
+	var screen := await _open(LEVEL_SCREEN, "2-3")
+	(screen.find_child("IntroDialog", true, false) as Control).hide()
+	var editor: ProgramEditor = screen.find_child("ProgramEditor", true, false)
+	var py: Button = screen.find_child("CodeButton", true, false)
+	var js: Button = screen.find_child("JsButton", true, false)
+	if not check(js != null, "there is a JavaScript button"):
+		return
+	var view: CodeView = screen.find_child("CodeView", true, false)
+	var title: Label = view.get_parent().get_child(0)
+	var level: LevelData = screen.get("level")
+	editor.set_program(ProgramParser.parse(level.solution_text)["program"])
+	await _frames(3)
+	tree.root.gui_embed_subwindows = true
+	await _click(_center(py))
+	check(editor.is_code_visible() and view.code_language == CodeView.PYTHON, "Python opens the panel")
+	check_eq(view.text, ProgramPrinter.to_text(editor.get_program_copy()), "Python text")
+	await _click(_center(js))
+	check(editor.is_code_visible(), "JavaScript keeps the panel open")
+	check_eq(view.code_language, CodeView.JAVASCRIPT, "language")
+	check(not py.button_pressed, "the Python button lets go")
+	check_eq(title.text, "THE SAME PROGRAM IN JAVASCRIPT", "panel title")
+	check_eq(view.text, ProgramPrinter.render_js(editor.get_program_copy())["text"], "JavaScript text")
+	await _click(_center(js))
+	check(not editor.is_code_visible(), "pressing JavaScript again closes the panel")
+	await _close(screen)
+	_restore_progress()

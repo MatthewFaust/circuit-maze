@@ -52,7 +52,7 @@ GODOT=/Users/alexander/Downloads/Godot.app/Contents/MacOS/Godot
 - It reports false errors for scripts that use the autoloads `Game`, `Progress` or `Sfx`. For those, rely on the test run: `test_ui.gd` loads every screen and every level.
 
 **Developer options:**
-- They go after `--`. Examples: `--variant=N` (1-based), `--steps=N`, `--autorun`, `--speed=0`, `--intro`, `--hints=N`, `--dark`, `--result`, `--code`, `--screen=select`, `--unlock-all`.
+- They go after `--`. Examples: `--variant=N` (1-based), `--steps=N`, `--autorun`, `--speed=0`, `--intro`, `--hints=N`, `--dark`, `--result`, `--code` (or `--code=js`), `--screen=select`, `--unlock-all`.
 - The full list is in the header of `autoload/game.gd`.
 - Always pass `--save=user://dev.cfg` so dev runs never touch the real progress file. That file is `user://progress.cfg`, in the custom user dir `RobotMazeAlgorithmEscape`.
 
@@ -83,6 +83,7 @@ These are `RefCounted` classes with `class_name`. They use no nodes and never re
   - These read and write a Python-like text form of the same model (`for _ in range(N):`, `elif`).
   - Level files store programs in this form.
   - The in-game Python view uses `ProgramPrinter.render()`, which also maps node ids to line numbers.
+  - The JavaScript view uses `ProgramPrinter.render_js()`, with the same line map. It's for reading only; nothing parses JavaScript back.
   - Converting to text and back must be lossless; a test checks this.
 - **Levels**
   - `LevelCatalog` reads `data/levels/catalog.json` → `LevelLoader` → `LevelData`. JSON floats are converted to ints once, at load.
