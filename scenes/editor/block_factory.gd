@@ -107,7 +107,17 @@ static func build_block(ed: ProgramEditor, node: Dictionary, depth: int) -> Bloc
 		spin.value_changed.connect(func(value: float) -> void: ed.set_param(id, "count", int(value)))
 		# SpinBox only applies typed text in a deferred call after editing ends,
 		# so Run would read the old count. Apply it the moment focus leaves.
-		spin.get_line_edit().focus_exited.connect(spin.apply)
+		var le := spin.get_line_edit()
+		le.focus_exited.connect(spin.apply)
+		# select_all_on_focus skips mouse clicks, so typing "8" into "2" would
+		# give "28". Select when the click that focused the box is released.
+		le.focus_entered.connect(func() -> void: le.set_meta(&"select_on_release", true))
+		le.gui_input.connect(func(event: InputEvent) -> void:
+			var mb := event as InputEventMouseButton
+			if mb != null and mb.button_index == MOUSE_BUTTON_LEFT and not mb.pressed \
+					and le.get_meta(&"select_on_release", false):
+				le.set_meta(&"select_on_release", false)
+				le.select_all.call_deferred())
 		spin.tooltip_text = "How many times to repeat"
 		_widget(ed, v, spin)
 		header.add_child(spin)

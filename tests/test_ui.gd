@@ -236,41 +236,54 @@ func test_full_run_records_stars() -> void:
 	_restore_progress()
 
 
-## Types a repeat count without pressing Enter: Run and Check must still use it.
+
+## Typed keys go straight to the focused control.
+func _type(text: String) -> void:
+	for ch in text:
+		for pressed in [true, false]:
+			var k := InputEventKey.new()
+			k.keycode = OS.find_keycode_from_string(ch)
+			k.physical_keycode = k.keycode
+			k.unicode = ch.unicode_at(0) if pressed else 0
+			k.pressed = pressed
+			tree.root.push_input(k)
+		await _frames(1)
+
+
+## Clicks a repeat count, types a new one without pressing Enter, then clicks
+## Run or Check: both must use the typed count, not the old one.
 func test_typed_repeat_count_applies_on_run_and_check() -> void:
 	_use_temp_progress()
-	var screen := await _open(LEVEL_SCREEN, "1-4")
+	var screen := await _open(LEVEL_SCREEN, "1-5")
 	var editor: ProgramEditor = screen.find_child("ProgramEditor", true, false)
 	var run: RunController = screen.find_child("RunController", true, false)
 	(screen.find_child("IntroDialog", true, false) as Control).hide()
 	var level: LevelData = screen.get("level")
 	var p: Dictionary = ProgramParser.parse(level.solution_text)["program"]
 	((p["main"] as Array)[0] as Dictionary)["count"] = 2
-	for action in ["run", "check"]:
+	tree.root.gui_embed_subwindows = true
+	run.set_speed(0.0)
+	for button in ["RunButton", "CheckButton"]:
 		editor.set_program(p)
 		await _frames(3)
 		var spin: SpinBox = editor._lists[0].block_views[0].widgets[0]
-		var le := spin.get_line_edit()
-		le.grab_focus()
-		le.edit()
-		le.text = "10"
-		if action == "run":
-			run.set_speed(0.0)
-			run.run()
+		await _click(_center(spin.get_line_edit()))
+		check_eq(spin.get_line_edit().get_selected_text(), "2", "clicking the count selects it")
+		await _type("3")
+		await _click(_center(screen.find_child(button, true, false)))
+		var main: Array = editor.get_program_copy()["main"]
+		check_eq(int((main[0] as Dictionary)["count"]), 3, "%s used the typed count" % button)
+		if button == "RunButton":
 			for i in 600:
 				if run.state == RunController.State.FINISHED:
 					break
 				await tree.process_frame
-			check_eq(run.state, RunController.State.FINISHED, "run finished")
 			var summary: Dictionary = run.results.get(0, {})
-			check(bool(summary.get("won", false)), "Run used the typed count (got %s)" % str(summary.get("fail_code", "")))
+			check(bool(summary.get("won", false)), "the run escaped (got %s)" % str(summary.get("fail_code", "")))
 			run.reset()
 		else:
-			(screen.find_child("ResultDialog", true, false) as Control).hide()
-			screen.call("_check_all")
 			var data: ProgressData = _progress.get("data")
-			check_eq(data.stars("1-4"), 3, "Check used the typed count")
-		var main: Array = editor.get_program_copy()["main"]
-		check_eq(int((main[0] as Dictionary)["count"]), 10, "%s: the model holds the typed count" % action)
+			check_eq(data.stars("1-5"), 3, "Check recorded three stars")
+		(screen.find_child("ResultDialog", true, false) as Control).hide()
 	await _close(screen)
 	_restore_progress()
