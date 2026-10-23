@@ -1,0 +1,71 @@
+{
+  "id": "3-B",
+  "title": "Boss: The Server Stack",
+  "concept": "Boss fight: recursion on a tree",
+  "new_blocks": [],
+  "intro": "The Server Stack doesn't die, it [b]splits[/b]. Destroy it and two half-size servers appear on either side of where it stood; destroy one of those and it splits again. Only the boss you're facing can hit you. Every server, big or small, is the same problem, so solve it once and let the function call itself.",
+  "cs_note": "This is a [b]binary tree[/b]: every server has two children until the smallest ones. Recursion fits trees perfectly: handle this node, then call yourself on each child. The call stack remembers where to come back to, so the robot always finds its way home.",
+  "hints": [
+    "Write B first: fight whatever is in front until it falls (you did this against the Sensor Pi).",
+    "A: if a server is ahead, beat it with B, step into its tile, then deal with its left half, then its right half, then step back to where you started.",
+    "A says: if boss_ahead(): B(), move(), turn_left(), A(), turn right twice, A(), turn_left(), C(). The two A() calls handle the left and right halves, and C steps back (turn around, move, turn around). With no server ahead, A does nothing: that's the base case. Each call returns to where it began, facing the same way, so the parent can carry on."
+  ],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "while", "if", "if_else", "attack", "block"], "sensors": ["boss_ahead", "boss_charging"], "functions": ["A", "B", "C"], "not": true},
+  "block_limit": 26,
+  "par": {"blocks": 0, "stamina": 0},
+  "robot": {"stamina": 110},
+  "rules": {"max_hp": 20},
+  "boss": {
+    "name": "The Server Stack", "skin": "rackmount",
+    "min_gear": {"armor": "mirror_plating", "weapon": ""},
+    "units": [{"name": "The Server Stack", "hp": 20, "attack": 9, "pattern": "OOX", "split": [
+      {"hp": 10, "cell": [2, 2], "split": [{"hp": 5, "cell": [2, 3]}, {"hp": 5, "cell": [2, 1]}]},
+      {"hp": 10, "cell": [4, 2], "split": [{"hp": 5, "cell": [4, 1]}, {"hp": 5, "cell": [4, 3]}]}
+    ]}]
+  },
+  "solution": [
+    "def A():",
+    "    if boss_ahead():",
+    "        B()",
+    "        move()",
+    "        turn_left()",
+    "        A()",
+    "        turn_right()",
+    "        turn_right()",
+    "        A()",
+    "        turn_left()",
+    "        C()",
+    "def B():",
+    "    while boss_ahead():",
+    "        if boss_charging():",
+    "            block()",
+    "        else:",
+    "            attack()",
+    "def C():",
+    "    turn_left()",
+    "    turn_left()",
+    "    move()",
+    "    turn_left()",
+    "    turn_left()",
+    "A()"
+  ],
+  "anti_solutions": [
+    {"name": "only the first server", "program": ["def B():", "    while boss_ahead():", "        if boss_charging():", "            block()", "        else:", "            attack()", "B()"], "expect_fail_code": "program_ended"},
+    {"name": "never blocks", "program": [
+      "def A():", "    if boss_ahead():", "        B()", "        move()", "        turn_left()", "        A()", "        turn_right()", "        turn_right()", "        A()", "        turn_left()", "        C()",
+      "def B():", "    while boss_ahead():", "        attack()",
+      "def C():", "    turn_left()", "    turn_left()", "    move()", "    turn_left()", "    turn_left()",
+      "A()"], "expect_fail_code": "hp_zero",
+     "passes_with": {"armor": "mirror_plating", "weapon": "function_cannon"}}
+  ],
+  "checks": {"hardcode_must_fail": false},
+  "variants": [
+    {"name": "Server room", "facing": "N", "map": [
+      "#######",
+      "##...##",
+      "##.M.##",
+      "##.S.##",
+      "#######"
+    ]}
+  ]
+}

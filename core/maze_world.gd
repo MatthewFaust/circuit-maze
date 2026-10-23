@@ -5,15 +5,24 @@ extends RefCounted
 ## (Dictionaries with a "type" key) for the views to animate.
 ##
 ## Order of checks for an action: enough stamina? -> pay -> effect ->
-## HP <= 0 fails -> standing on the exit wins.
+## bosses strike -> HP <= 0 fails -> standing on the exit (or, in a boss
+## stage, every boss defeated) wins.
+##
+## Boss stages: each boss follows a repeating rhythm, one letter per robot
+## action ("O" open, "X" strike). On an X turn the boss the robot faces (at
+## the start of the turn) hits it for (attack - defense, at least 1) unless
+## the robot's action was block(), and an attack() made that turn is
+## interrupted. Facing a boss is what engages it; turning away disengages. A
+## boss with "split" children spawns them when it is destroyed.
 
 enum Status { RUNNING, WON, FAILED }
 
-const ACTIONS := ["move", "turn_left", "turn_right", "cut", "backtrack", "scan", "scan_weighted"]
+const ACTIONS := ["move", "turn_left", "turn_right", "cut", "backtrack", "scan", "scan_weighted",
+	"attack", "block"]
 const SENSORS := [
 	"path_ahead", "path_left", "path_right", "bush_ahead", "stone_ahead", "spike_ahead",
 	"at_exit", "unvisited_ahead", "unvisited_left", "unvisited_right",
-	"closer_ahead", "closer_left", "closer_right",
+	"closer_ahead", "closer_left", "closer_right", "boss_ahead", "boss_charging",
 ]
 
 var grid: MazeGrid
@@ -36,6 +45,13 @@ var peak_trail := 0
 var scan := {}
 var fog := false
 var revealed := PackedByteArray()
+## Boss stages: every boss unit ever on the map, including defeated ones and the
+## halves they split into: {"id", "name", "hp", "max_hp", "attack", "pattern",
+## "cell": Vector2i, "alive": bool, "split": [child specs], "generation": int}.
+var bosses: Array[Dictionary] = []
+## The robot's damage per landed attack() (base + weapon) and its defense.
+var attack_damage := 2
+var defense := 0
 
 
 func _init(p_grid: MazeGrid, p_start: Vector2i, p_facing: int, p_rules: MazeRules,
@@ -63,6 +79,55 @@ func _init(p_grid: MazeGrid, p_start: Vector2i, p_facing: int, p_rules: MazeRule
 			revealed[grid.index_of(e)] = 1
 	else:
 		revealed.fill(1)
+	attack_damage = rules.base_attack
+
+
+## Turns this world into a boss fight. units: the level's boss units, one per
+## "M" in the map (cells, in reading order). pattern: a rhythm that replaces
+## every unit's own ("" keeps them). damage_bonus/p_defense: the robot's gear.
+func setup_combat(units: Array, cells: Array[Vector2i], pattern: String, damage_bonus: int,
+		p_defense: int) -> void:
+	attack_damage = rules.base_attack + damage_bonus
+	defense = p_defense
+	for i in mini(units.size(), cells.size()):
+		_spawn(units[i], cells[i], pattern, 0)
+
+
+func is_boss_stage() -> bool:
+	return not bosses.is_empty()
+
+
+func alive_bosses() -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	for b in bosses:
+		if bool(b["alive"]):
+			out.append(b)
+	return out
+
+
+## The living boss on cell c, or {}.
+func boss_at(c: Vector2i) -> Dictionary:
+	for b in bosses:
+		if bool(b["alive"]) and b["cell"] == c:
+			return b
+	return {}
+
+
+## Whether boss b strikes on turn n (0-based count of robot actions).
+static func strikes_on(b: Dictionary, n: int) -> bool:
+	var pattern: String = b["pattern"]
+	return pattern != "" and pattern[n % pattern.length()] == "X"
+
+
+## The boss the robot faces, if it strikes on turn n; otherwise {}.
+func striker(n: int) -> Dictionary:
+	var b := boss_at(cell_rel(0))
+	return b if not b.is_empty() and strikes_on(b, n) else {}
+
+
+## The robot can step onto c: open floor without a living boss.
+func is_open(c: Vector2i) -> bool:
+	return Tiles.is_walkable(grid.get_tile(c)) and boss_at(c).is_empty()
 
 
 func is_running() -> bool:
@@ -89,6 +154,10 @@ func cost_of(action: String) -> int:
 			return rules.cut_cost
 		"scan", "scan_weighted":
 			return rules.scan_cost
+		"attack":
+			return rules.attack_cost
+		"block":
+			return rules.block_cost
 		"backtrack":
 			return rules.backtrack_cost + _backtrack_turns() * rules.turn_cost
 	return 0
@@ -103,6 +172,8 @@ func apply_action(action: String) -> Array[Dictionary]:
 	if action == "backtrack" and trail.is_empty():
 		return fail("backtrack_empty",
 				"backtrack() with an empty breadcrumb stack: there is nowhere left to go back to.")
+	# The boss faced at the start of the turn is the one that may strike.
+	var striking := striker(actions_taken) if is_boss_stage() else {}
 	var cost := cost_of(action)
 	if robot.stamina < cost:
 		return fail("no_stamina", "Out of stamina: %s() needs %d, but only %d is left."
@@ -125,8 +196,18 @@ func apply_action(action: String) -> Array[Dictionary]:
 			_do_scan(false, ev)
 		"scan_weighted":
 			_do_scan(true, ev)
+		"attack":
+			_do_attack(ev, striking)
+		"block":
+			ev.append({"type": "blocked", "cell": robot.pos})
+	if not striking.is_empty():
+		_boss_strike(striking, action, ev)
 	if robot.hp <= 0:
 		ev.append_array(fail("hp_zero", "The robot was destroyed: HP reached 0."))
+	elif is_boss_stage():
+		if alive_bosses().is_empty():
+			status = Status.WON
+			ev.append({"type": "won", "cell": robot.pos})
 	elif grid.get_tile(robot.pos) == Tiles.EXIT:
 		status = Status.WON
 		ev.append({"type": "won", "cell": robot.pos})
@@ -149,11 +230,11 @@ func fail(code: String, message: String) -> Array[Dictionary]:
 func sense(sensor: String) -> bool:
 	match sensor:
 		"path_ahead":
-			return Tiles.is_walkable(grid.get_tile(cell_rel(0)))
+			return is_open(cell_rel(0))
 		"path_left":
-			return Tiles.is_walkable(grid.get_tile(cell_rel(-1)))
+			return is_open(cell_rel(-1))
 		"path_right":
-			return Tiles.is_walkable(grid.get_tile(cell_rel(1)))
+			return is_open(cell_rel(1))
 		"bush_ahead":
 			return grid.get_tile(cell_rel(0)) == Tiles.BUSH
 		"stone_ahead":
@@ -174,6 +255,11 @@ func sense(sensor: String) -> bool:
 			return is_closer(cell_rel(-1))
 		"closer_right":
 			return is_closer(cell_rel(1))
+		"boss_ahead":
+			return not boss_at(cell_rel(0)).is_empty()
+		"boss_charging":
+			# The coming turn is turn number actions_taken (0-based).
+			return not striker(actions_taken).is_empty()
 	return false
 
 
@@ -187,7 +273,7 @@ func is_visited(c: Vector2i) -> bool:
 
 
 func is_unvisited(c: Vector2i) -> bool:
-	return grid.in_bounds(c) and Tiles.is_walkable(grid.get_tile(c)) and not is_visited(c)
+	return grid.in_bounds(c) and is_open(c) and not is_visited(c)
 
 
 func is_revealed(c: Vector2i) -> bool:
@@ -230,6 +316,11 @@ func _do_move(ev: Array[Dictionary]) -> void:
 	var from := robot.pos
 	var to := from + Tiles.dir_vec(robot.facing)
 	var t := grid.get_tile(to)
+	if not boss_at(to).is_empty():
+		# Walking into a boss: a wasted turn and a bush-sized bruise.
+		ev.append({"type": "bumped", "from": from, "cell": to, "tile": Tiles.BUSH})
+		_change_hp(-rules.bump_bush_damage, "bump", ev)
+		return
 	if not Tiles.is_walkable(t):
 		ev.append({"type": "bumped", "from": from, "cell": to, "tile": t})
 		var damage := rules.bump_bush_damage if t == Tiles.BUSH else rules.bump_stone_damage
@@ -285,12 +376,76 @@ func _do_backtrack(ev: Array[Dictionary]) -> void:
 
 
 func _do_scan(weighted: bool, ev: Array[Dictionary]) -> void:
-	scan = MazePathing.distance_field(grid, exits, rules, weighted)
+	# In a boss stage the scan measures the way to the bosses instead of an exit.
+	var goals := exits
+	if is_boss_stage():
+		goals = []
+		for b in alive_bosses():
+			goals.append(b["cell"])
+	scan = MazePathing.distance_field(grid, goals, rules, weighted)
 	ev.append({"type": "scanned", "dist": scan["dist"], "order": scan["order"],
 			"weighted": weighted, "max_frontier": scan["max_frontier"]})
 	if scan_distance(robot.pos) < 0:
 		ev.append({"type": "warning", "code": "unreachable", "cell": robot.pos,
 				"text": "The scan can't reach the exit from here."})
+
+
+## striking: the boss striking this turn ({} if none), which interrupts the attack.
+func _do_attack(ev: Array[Dictionary], striking: Dictionary) -> void:
+	var ahead := cell_rel(0)
+	var target := boss_at(ahead)
+	if target.is_empty():
+		ev.append({"type": "warning", "code": "nothing_to_attack", "cell": ahead,
+				"text": "attack() hit thin air: no boss ahead, %d stamina wasted." % rules.attack_cost})
+		return
+	if not striking.is_empty():
+		ev.append({"type": "attack_interrupted", "id": target["id"], "cell": ahead})
+		return
+	target["hp"] = maxi(int(target["hp"]) - attack_damage, 0)
+	ev.append({"type": "boss_hit", "id": target["id"], "cell": ahead, "damage": attack_damage,
+			"hp": target["hp"], "max_hp": target["max_hp"]})
+	if int(target["hp"]) == 0:
+		_defeat(target, ev)
+
+
+func _defeat(b: Dictionary, ev: Array[Dictionary]) -> void:
+	b["alive"] = false
+	ev.append({"type": "boss_defeated", "id": b["id"], "cell": b["cell"], "name": b["name"]})
+	var children: Array[Dictionary] = []
+	for spec: Dictionary in b["split"]:
+		var child := _spawn(spec, spec["cell"], "", int(b["generation"]) + 1, b)
+		children.append({"id": child["id"], "cell": child["cell"], "hp": child["hp"],
+				"max_hp": child["max_hp"], "generation": child["generation"]})
+	if not children.is_empty():
+		ev.append({"type": "boss_split", "id": b["id"], "cell": b["cell"], "children": children})
+
+
+## The faced boss strikes on its X turn; block() stops the hit.
+func _boss_strike(b: Dictionary, action: String, ev: Array[Dictionary]) -> void:
+	if action == "block":
+		ev.append({"type": "boss_struck", "id": b["id"], "cell": b["cell"], "blocked": true, "damage": 0})
+		return
+	var damage := maxi(int(b["attack"]) - defense, 1)
+	ev.append({"type": "boss_struck", "id": b["id"], "cell": b["cell"], "blocked": false, "damage": damage})
+	_change_hp(-damage, "boss", ev)
+
+
+## spec: {"name", "hp", "attack", "pattern", "split"}; a split child inherits
+## missing fields from parent.
+func _spawn(spec: Dictionary, cell: Vector2i, pattern: String, generation: int,
+		parent: Dictionary = {}) -> Dictionary:
+	var hp: int = spec.get("hp", 1)
+	var b := {
+		"id": bosses.size(),
+		"name": str(spec.get("name", parent.get("name", "Boss"))),
+		"hp": hp, "max_hp": hp,
+		"attack": int(spec.get("attack", parent.get("attack", 1))),
+		"pattern": pattern if pattern != "" else str(spec.get("pattern", parent.get("pattern", ""))),
+		"cell": cell, "alive": true,
+		"split": spec.get("split", []), "generation": generation,
+	}
+	bosses.append(b)
+	return b
 
 
 func _enter(to: Vector2i, kind: String, ev: Array[Dictionary]) -> void:

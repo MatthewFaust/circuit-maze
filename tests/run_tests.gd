@@ -14,6 +14,7 @@ const REQUIRED_CLASSES := [
 	"Tiles", "MazeGrid", "RobotState", "MazeRules", "MazePathing", "MazeWorld",
 	"ProgramModel", "ProgramInterpreter", "ProgramParser", "ProgramPrinter",
 	"LevelVariant", "LevelData", "LevelLoader", "LevelCatalog", "LevelEvaluator", "ProgressData",
+	"ProgressionCatalog",
 ]
 
 

@@ -8,7 +8,7 @@
       "palette_dark": {"name": "Midnight meadow", "background": "#0F1F18", "floor": "#1A3328", "path": "#2A5140", "accent": "#5FD3A0", "text": "#DDF3E8"},
       "intro": "Your robot does exactly what you say: no more, no less, and never what you meant. Write instructions in order, squash repetition with loops, and keep an eye on the two numbers that will haunt you all semester: HP and stamina.",
       "objectives": ["Trace a sequence step by step", "Reason about turns relative to facing", "Predict HP and stamina costs", "Use repeat, and see that nested loops multiply", "Compare the cost of two plans"],
-      "levels": ["ch1/1-1.json", "ch1/1-2.json", "ch1/1-3.json", "ch1/1-4.json", "ch1/1-5.json", "ch1/1-6.json"]
+      "levels": ["ch1/1-1.json", "ch1/1-2.json", "ch1/1-3.json", "ch1/1-4.json", "ch1/1-5.json", "ch1/1-6.json", "ch1/1-B.json"]
     },
     {
       "title": "Eyes Open",
@@ -17,7 +17,7 @@
       "palette_dark": {"name": "Night circuit", "background": "#1E1808", "floor": "#33290F", "path": "#4D3D14", "accent": "#F5B942", "text": "#FBEFCF"},
       "intro": "A program that only works on the map you've already seen is just a recording. Sensors, if/else and while let one program handle maps it has never met. Every level now ships several maps, and your program must pass all of them, exactly like a test suite.",
       "objectives": ["Use indefinite iteration and loop guards", "Branch, including nested branches", "Cover every case in a decision", "Treat map variants as test cases", "Read failures as evidence"],
-      "levels": ["ch2/2-1.json", "ch2/2-2.json", "ch2/2-3.json", "ch2/2-4.json", "ch2/2-5.json"]
+      "levels": ["ch2/2-1.json", "ch2/2-2.json", "ch2/2-3.json", "ch2/2-4.json", "ch2/2-5.json", "ch2/2-B.json"]
     },
     {
       "title": "Name It, Reuse It",
@@ -26,7 +26,7 @@
       "palette_dark": {"name": "Twilight mirror", "background": "#16132A", "floor": "#241F42", "path": "#3A3266", "accent": "#A897F0", "text": "#E8E3FB"},
       "intro": "Your programs are getting long and repetitive. Functions let you name an idea once and use it anywhere, facing any direction. Recursion lets a function call itself, and the call stack quietly remembers things you have no variable for.",
       "objectives": ["Decompose a task into functions", "Choose where to draw a function's boundary", "Compose functions that call functions", "Write recursion with a base case", "Use the call stack as memory", "Recognize and explain a stack overflow"],
-      "levels": ["ch3/3-1.json", "ch3/3-2.json", "ch3/3-3.json", "ch3/3-4.json", "ch3/3-5.json"]
+      "levels": ["ch3/3-1.json", "ch3/3-2.json", "ch3/3-3.json", "ch3/3-4.json", "ch3/3-5.json", "ch3/3-B.json"]
     },
     {
       "title": "Lost in the Labyrinth",
@@ -35,7 +35,7 @@
       "palette_dark": {"name": "Ember canyon", "background": "#22120D", "floor": "#3A1E16", "path": "#5A2E21", "accent": "#F08A6C", "text": "#FBE2D8"},
       "intro": "Real mazes fight back with loops, dead ends, fog and stingy batteries. Go from a wall-hugging rule of thumb to depth-first search with an explicit stack, then to breadth-first search that floods the maze with distances, and finally (bonus) Dijkstra, for when steps don't all cost the same.",
       "objectives": ["Tell a heuristic from a correct algorithm", "Use a visited set", "Compare a stack (LIFO) with a queue (FIFO)", "Argue that DFS finds an exit and BFS finds a shortest path", "Explore an unknown map vs. plan on a known one", "Work with weighted graphs and priority queues"],
-      "levels": ["ch4/4-1.json", "ch4/4-2.json", "ch4/4-3.json", "ch4/4-4.json", "ch4/4-5.json", "ch4/4-6.json"]
+      "levels": ["ch4/4-1.json", "ch4/4-2.json", "ch4/4-3.json", "ch4/4-4.json", "ch4/4-5.json", "ch4/4-6.json", "ch4/4-B.json"]
     }
   ]
 }

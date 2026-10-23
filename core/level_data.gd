@@ -31,11 +31,29 @@ var starter_text := ""
 var solution_text := ""
 ## [{"name", "text"}]: must escape, may miss the pars.
 var alt_solutions: Array[Dictionary] = []
-## [{"name", "text", "expect_fail_code", "note"}]: must not solve the level.
+## [{"name", "text", "expect_fail_code", "note", "passes_with"}]: must not solve
+## the level. Boss stages: with the gear in passes_with ({"armor", "weapon"},
+## empty = none) the program must win, showing that better gear forgives it.
 var anti_solutions: Array[Dictionary] = []
 var hardcode_must_fail := true
 var inline_must_fail := false
 var variants: Array[LevelVariant] = []
+## Boss stages only (empty otherwise): {"name", "skin", "min_gear": {"armor",
+## "weapon"}, "min_loadout": {"damage", "defense"}, "units": [{"name", "hp",
+## "attack", "pattern", "split": [{..., "cell": Vector2i}]}]}. One unit per "M"
+## in each map, in reading order.
+var boss := {}
+
+
+## A boss stage: won by defeating every boss, awards no stars.
+func is_boss() -> bool:
+	return not boss.is_empty()
+
+
+## The gear the tests and tools fight with: the boss's minimum gear (none
+## for regular stages, where gear has no effect).
+func default_loadout() -> Dictionary:
+	return boss.get("min_loadout", {"damage": 0, "defense": 0})
 
 
 func uses_functions() -> bool:

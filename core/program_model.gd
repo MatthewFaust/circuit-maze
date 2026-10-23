@@ -4,7 +4,7 @@ extends RefCounted
 ##
 ##   {"version": 1, "main": [node, ...], "functions": {"A": [node, ...], ...}}
 ##
-##   action:  {"id": 3, "type": "move"}    (also turn_left, turn_right, cut, backtrack, scan, scan_weighted)
+##   action:  {"id": 3, "type": "move"}    (also turn_left, turn_right, cut, backtrack, scan, scan_weighted, attack, block)
 ##   repeat:  {"id", "type": "repeat", "count": 3, "body": [...]}
 ##   while:   {"id", "type": "while", "cond": {"sensor": "path_ahead", "negate": false}, "body": [...]}
 ##   if:      {"id", "type": "if", "cond": {...}, "body": [...]}
@@ -20,7 +20,7 @@ const SENSORS := MazeWorld.SENSORS
 const CONTAINERS := ["repeat", "while", "if", "if_else"]
 const BLOCK_TYPES := [
 	"move", "turn_left", "turn_right", "cut", "backtrack", "scan", "scan_weighted",
-	"repeat", "while", "if", "if_else", "call",
+	"attack", "block", "repeat", "while", "if", "if_else", "call",
 ]
 const FUNCTION_NAMES := ["A", "B", "C"]
 const MAX_REPEAT := 99

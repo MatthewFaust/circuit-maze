@@ -1,0 +1,53 @@
+{
+  "id": "2-B",
+  "title": "Boss: Sensor Pi",
+  "concept": "Boss fight: sensing the rhythm",
+  "new_blocks": [],
+  "intro": "The Sensor Pi never fights the same way twice: every arena has its own rhythm, so counting won't save you. Luckily its antenna glows before each strike. [b]boss_charging()[/b] is true when the boss in front of you will strike on the next turn, and [b]boss_ahead()[/b] is true while a boss is still standing in front of you.",
+  "cs_note": "Hard-coding works only for the input you've already seen. A program that [b]reads the situation[/b] each turn (if it's charging, block; otherwise attack) handles any rhythm, including ones nobody has shown you yet.",
+  "hints": [
+    "Look at the three arena tabs: each boss strikes on a different beat.",
+    "Every turn, ask one question: is it about to strike? If so block(), otherwise attack().",
+    "Wrap an if … else in [b]while boss_ahead()[/b]: if boss_charging(), block(); else attack(). The while keeps fighting until the boss falls, however long that takes, and the if picks the right move for each turn of whatever rhythm this arena has."
+  ],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "while", "if", "if_else", "attack", "block"], "sensors": ["boss_ahead", "boss_charging"], "functions": [], "not": true},
+  "block_limit": 6,
+  "par": {"blocks": 0, "stamina": 0},
+  "robot": {"stamina": 30},
+  "rules": {"max_hp": 20},
+  "boss": {
+    "name": "Sensor Pi", "skin": "sentinel",
+    "min_gear": {"armor": "signal_shield", "weapon": ""},
+    "units": [{"name": "Sensor Pi", "hp": 30, "attack": 7, "pattern": "OOX"}]
+  },
+  "solution": ["while boss_ahead():", "    if boss_charging():", "        block()", "    else:", "        attack()"],
+  "anti_solutions": [
+    {"name": "attack every turn", "program": ["while boss_ahead():", "    attack()"], "expect_fail_code": "hp_zero",
+     "passes_with": {"armor": "signal_shield", "weapon": "sensor_scope"}},
+    {"name": "Arena 1's rhythm everywhere", "program": ["for _ in range(8):", "    attack()", "    attack()", "    block()"]}
+  ],
+  "variants": [
+    {"name": "Arena 1", "facing": "E", "boss_pattern": "OOX", "map": [
+      "#######",
+      "#.....#",
+      "#.SM..#",
+      "#.....#",
+      "#######"
+    ]},
+    {"name": "Arena 2", "facing": "N", "boss_pattern": "OXOOX", "map": [
+      "#######",
+      "##...##",
+      "##.M.##",
+      "##.S.##",
+      "##...##",
+      "#######"
+    ]},
+    {"name": "Arena 3", "facing": "W", "boss_pattern": "OOOXX", "map": [
+      "########",
+      "#......#",
+      "#..MS..#",
+      "#......#",
+      "########"
+    ]}
+  ]
+}

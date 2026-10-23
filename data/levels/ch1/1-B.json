@@ -1,0 +1,39 @@
+{
+  "id": "1-B",
+  "title": "Boss: Raspberry Pi 3",
+  "concept": "Boss fight: loops in rhythm",
+  "new_blocks": ["attack", "block"],
+  "intro": "A Raspberry Pi 3 has taken over the exit. It fights in a fixed rhythm: [b]two quiet turns, then two strikes[/b], again and again. [b]attack()[/b] hits the boss in front of you for 2 damage, and [b]block()[/b] raises your shield for one turn. A strike interrupts an attack, and only a block stops the hit. You have 20 HP here, and your armor softens every hit.",
+  "cs_note": "A [b]loop[/b] is the natural shape of anything rhythmic. Once you know one cycle of the pattern, a repeat plays it as often as you need, and one wrong beat in the body goes wrong in every pass.",
+  "hints": [
+    "Step through with [b]Step[/b] and watch which turns the boss strikes on.",
+    "One cycle is four turns: two attacks while it's quiet, two blocks while it strikes. 16 HP at 2 damage a hit is 8 landed attacks.",
+    "The boss strikes on turns 3 and 4 of every cycle. Put attack, attack, block, block inside [b]repeat 4 times[/b]: four cycles land exactly 8 attacks and block every strike, so you never get hit. A better weapon from the Shop lets you land fewer attacks."
+  ],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "attack", "block"], "sensors": [], "functions": [], "not": false},
+  "block_limit": 6,
+  "par": {"blocks": 0, "stamina": 0},
+  "robot": {"stamina": 24},
+  "rules": {"max_hp": 20},
+  "boss": {
+    "name": "Raspberry Pi 3", "skin": "circuit_green",
+    "min_gear": {"armor": "tin_shell", "weapon": ""},
+    "units": [{"name": "Raspberry Pi 3", "hp": 16, "attack": 5, "pattern": "OOXX"}]
+  },
+  "solution": ["for _ in range(4):", "    attack()", "    attack()", "    block()", "    block()"],
+  "anti_solutions": [
+    {"name": "attack every turn", "program": ["for _ in range(20):", "    attack()"], "expect_fail_code": "hp_zero",
+     "passes_with": {"armor": "tin_shell", "weapon": "loop_blaster"}},
+    {"name": "a three-beat rhythm", "program": ["for _ in range(8):", "    attack()", "    attack()", "    block()"], "expect_fail_code": "hp_zero"}
+  ],
+  "checks": {"hardcode_must_fail": false},
+  "variants": [
+    {"name": "Arena", "facing": "E", "map": [
+      "#######",
+      "#.....#",
+      "#.SM..#",
+      "#.....#",
+      "#######"
+    ]}
+  ]
+}

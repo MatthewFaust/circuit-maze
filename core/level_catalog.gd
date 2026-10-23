@@ -100,6 +100,15 @@ static func _read_palette(raw: Variant, errs: Array[String], field: String = "pa
 	return out
 
 
+## Stars available from the regular stages (boss stages award none).
+func max_stars() -> int:
+	var n := 0
+	for id in order:
+		if not (levels[id] as LevelData).is_boss():
+			n += 3
+	return n
+
+
 func get_level(id: String) -> LevelData:
 	return levels.get(id, null)
 

@@ -85,6 +85,7 @@ static func level_from_dict(d: Dictionary, path: String = "") -> Dictionary:
 				"text": get_program_text(e, "program", errors),
 				"expect_fail_code": get_str(e, "expect_fail_code", "", errors),
 				"note": get_str(e, "note", "", errors),
+				"passes_with": get_dict(e, "passes_with", errors),
 			}
 			if key == "alt_solutions":
 				lv.alt_solutions.append(entry)
@@ -118,12 +119,100 @@ static func level_from_dict(d: Dictionary, path: String = "") -> Dictionary:
 				errors.append("%s: facing must be N, E, S or W" % v.name)
 				v.facing = Tiles.EAST
 			v.stamina = get_int(vd, "stamina", default_stamina, errors)
+			v.boss_cells.assign(parsed["bosses"])
+			v.boss_pattern = get_str(vd, "boss_pattern", "", errors)
+			if v.boss_pattern != "" and not _is_pattern(v.boss_pattern):
+				errors.append("%s: boss_pattern may only use O and X" % v.name)
 			lv.variants.append(v)
+
+	if d.has("boss"):
+		lv.boss = _read_boss(get_dict(d, "boss", errors), errors)
+		for v in lv.variants:
+			if v.boss_cells.size() != (lv.boss.get("units", []) as Array).size():
+				errors.append("%s: the map has %d M tiles but the boss has %d units"
+						% [v.name, v.boss_cells.size(), (lv.boss.get("units", []) as Array).size()])
+			if v.grid != null:
+				for c in _split_cells(lv.boss.get("units", [])):
+					if not Tiles.is_walkable(v.grid.get_tile(c)) or c == v.start:
+						errors.append("%s: split cell %s must be open floor" % [v.name, str(c)])
+	else:
+		for v in lv.variants:
+			if not v.boss_cells.is_empty():
+				errors.append("%s: M tiles need a boss" % v.name)
 
 	var prefixed: Array[String] = []
 	for e in errors:
 		prefixed.append("%s: %s" % [path if path != "" else lv.id, e])
 	return {"level": lv if errors.is_empty() else null, "errors": prefixed}
+
+
+## Boss spec with JSON floats turned into ints and split cells into Vector2i.
+static func _read_boss(d: Dictionary, errors: Array[String]) -> Dictionary:
+	var gear := get_dict(d, "min_gear", errors)
+	var armor := get_str(gear, "armor", "", errors)
+	var weapon := get_str(gear, "weapon", "", errors)
+	var units: Array = []
+	var raw: Variant = d.get("units", [])
+	if typeof(raw) != TYPE_ARRAY or (raw as Array).is_empty():
+		errors.append("boss.units must be a non-empty array")
+	else:
+		for item: Variant in raw:
+			units.append(_read_unit(item, false, errors))
+	return {
+		"name": get_str(d, "name", "Boss", errors),
+		"skin": get_str(d, "skin", "", errors),
+		"min_gear": {"armor": armor, "weapon": weapon},
+		"min_loadout": ProgressionCatalog.get_default().loadout(armor, weapon),
+		"units": units,
+	}
+
+
+static func _read_unit(item: Variant, is_child: bool, errors: Array[String]) -> Dictionary:
+	if typeof(item) != TYPE_DICTIONARY:
+		errors.append("boss units must be objects")
+		return {}
+	var u: Dictionary = item
+	var out := {"hp": get_int(u, "hp", 0, errors), "split": []}
+	if int(out["hp"]) <= 0:
+		errors.append("a boss unit needs hp above 0")
+	if u.has("name"):
+		out["name"] = get_str(u, "name", "", errors)
+	if u.has("attack") or not is_child:
+		out["attack"] = get_int(u, "attack", 0, errors)
+	if u.has("pattern") or not is_child:
+		out["pattern"] = get_str(u, "pattern", "", errors)
+		if not _is_pattern(str(out["pattern"])):
+			errors.append("a boss pattern needs O and X letters only, e.g. \"OOXX\"")
+	if is_child:
+		var cell: Variant = u.get("cell")
+		if typeof(cell) != TYPE_ARRAY or (cell as Array).size() != 2:
+			errors.append("a split unit needs \"cell\": [x, y]")
+			out["cell"] = Vector2i.ZERO
+		else:
+			out["cell"] = Vector2i(int((cell as Array)[0]), int((cell as Array)[1]))
+	var split: Variant = u.get("split", [])
+	if typeof(split) == TYPE_ARRAY:
+		for child: Variant in split:
+			(out["split"] as Array).append(_read_unit(child, true, errors))
+	return out
+
+
+static func _is_pattern(p: String) -> bool:
+	if p == "":
+		return false
+	for ch in p:
+		if ch != "O" and ch != "X":
+			return false
+	return true
+
+
+static func _split_cells(units: Array) -> Array[Vector2i]:
+	var out: Array[Vector2i] = []
+	for u: Dictionary in units:
+		for child: Dictionary in u.get("split", []):
+			out.append(child["cell"])
+			out.append_array(_split_cells([child]))
+	return out
 
 
 static func get_str(d: Dictionary, key: String, default: String, errors: Array[String]) -> String:

@@ -36,8 +36,9 @@ static func static_check(level: LevelData, p: Dictionary) -> PackedStringArray:
 
 
 ## Runs the program on one variant. Returns the interpreter summary plus "variant".
-static func run_variant(level: LevelData, index: int, p: Dictionary) -> Dictionary:
-	var world := level.variants[index].make_world(level)
+## loadout: {"damage", "defense"} (boss stages); null = the level's default.
+static func run_variant(level: LevelData, index: int, p: Dictionary, loadout: Variant = null) -> Dictionary:
+	var world := level.variants[index].make_world(level, loadout)
 	var interp := ProgramInterpreter.new(p, world)
 	var result := interp.run_to_end()
 	result["variant"] = index
@@ -46,7 +47,7 @@ static func run_variant(level: LevelData, index: int, p: Dictionary) -> Dictiona
 
 ## {"valid", "errors", "blocks", "variants": [summary...], "solved", "stamina_total",
 ##  "stars": {"escape", "stamina", "blocks"}, "star_count"}
-static func evaluate(level: LevelData, p: Dictionary) -> Dictionary:
+static func evaluate(level: LevelData, p: Dictionary, loadout: Variant = null) -> Dictionary:
 	var errs := static_check(level, p)
 	var blocks := ProgramModel.count_blocks(p)
 	var out := {
@@ -60,7 +61,7 @@ static func evaluate(level: LevelData, p: Dictionary) -> Dictionary:
 	var solved := true
 	var total := 0
 	for i in level.variants.size():
-		var r := run_variant(level, i, p)
+		var r := run_variant(level, i, p, loadout)
 		results.append(r)
 		solved = solved and bool(r["won"])
 		total += int(r["stamina_spent"])
@@ -72,6 +73,9 @@ static func evaluate(level: LevelData, p: Dictionary) -> Dictionary:
 
 
 static func stars_for(level: LevelData, solved: bool, stamina_total: int, blocks: int) -> Dictionary:
+	if level.is_boss():
+		# Boss stages award no stars; "escape" records the win (it opens the next chapter).
+		return {"escape": solved, "stamina": false, "blocks": false}
 	return {
 		"escape": solved,
 		"stamina": solved and (level.par_stamina <= 0 or stamina_total <= level.par_stamina),

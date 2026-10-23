@@ -19,11 +19,16 @@ var max_actions := 1000
 var max_ops := 20000
 var max_idle_ops := 2000
 var max_call_depth := 100
+## Boss fights: the robot's damage before its weapon, and the cost of attack() and block().
+var base_attack := 2
+var attack_cost := 1
+var block_cost := 1
 
 const OVERRIDABLE := [
 	"max_hp", "move_cost", "turn_cost", "cut_cost", "backtrack_cost", "scan_cost",
 	"bump_stone_damage", "bump_bush_damage", "spike_damage", "battery_amount",
 	"repair_amount", "max_actions", "max_ops", "max_idle_ops", "max_call_depth",
+	"base_attack", "attack_cost", "block_cost",
 ]
 
 

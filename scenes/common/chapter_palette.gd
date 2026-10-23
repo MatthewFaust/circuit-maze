@@ -19,7 +19,7 @@ const PALETTE_TYPE := &"Palette"
 ## Block colors stay distinct by kind; each chapter softens them to pastels.
 const KIND_HUES := {
 	"motion": Color("#4c97ff"), "control": Color("#ffab19"), "sensing": Color("#2bb8b0"),
-	"function": Color("#9966ff"), "algorithm": Color("#59c059"),
+	"function": Color("#9966ff"), "algorithm": Color("#59c059"), "combat": Color("#e5484d"),
 }
 const HP_COLOR := Color("#ef476f")
 const STAMINA_COLOR := Color("#ffb703")
@@ -212,6 +212,12 @@ const EXTRA_STYLES := {
 
 ## Dark mode (a setting). Screens read it when they build their theme.
 static var dark_mode := false
+## Type variations the base theme doesn't have: "Type" -> [base type, the
+## "Type/style" it copies, the roles for that copy (as in STYLE_ROLES)].
+const EXTRA_VARIATIONS := {
+	"BlockCombat": [&"PanelContainer", "BlockMotion/panel", ["combat", "combat_edge"]],
+}
+
 static var _cache := {}
 
 var name := ""
@@ -458,6 +464,17 @@ func build_theme() -> Theme:
 			if str(table[key]) == "" and not t.has_color(parts[1], parts[0]):
 				continue
 			t.set_color(parts[1], parts[0], _resolve(str(table[key]), fallback))
+	for type: String in EXTRA_VARIATIONS:
+		var spec: Array = EXTRA_VARIATIONS[type]
+		var src: PackedStringArray = str(spec[1]).split("/")
+		if not t.has_stylebox(src[1], src[0]):
+			continue
+		t.set_type_variation(type, spec[0])
+		var sb := t.get_stylebox(src[1], src[0]).duplicate() as StyleBoxFlat
+		var roles_for: Array = spec[2]
+		sb.bg_color = _resolve(str(roles_for[0]), sb.bg_color)
+		sb.border_color = _resolve(str(roles_for[1]), sb.border_color)
+		t.set_stylebox(src[1], type, sb)
 	_add_icons(t)
 	for role: String in roles:
 		t.set_color(role, PALETTE_TYPE, roles[role])

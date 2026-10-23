@@ -71,7 +71,8 @@ func step() -> Dictionary:
 			return _abort("idle_loop", "%d checks in a row without a single action: a loop is spinning without doing anything. Does its body contain an action, and can its condition change?"
 					% rules.max_idle_ops, checks)
 		if _stack.is_empty():
-			return _abort("program_ended", "The program finished, but the robot isn't on the exit.", checks)
+			return _abort("program_ended", "The program finished, but the boss is still standing."
+					if world.is_boss_stage() else "The program finished, but the robot isn't on the exit.", checks)
 		var f: Frame = _stack.back()
 		if f.pc >= f.nodes.size():
 			# End of a body: loop again or return to the enclosing frame.

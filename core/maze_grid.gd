@@ -72,17 +72,19 @@ func to_rows(marks: Dictionary = {}) -> PackedStringArray:
 
 
 ## Parses map rows. Returns {"grid": MazeGrid or null, "start": Vector2i,
-## "errors": PackedStringArray}. A valid map is rectangular, uses only legend
-## characters, and has exactly one S and at least one E.
+## "bosses": Array[Vector2i] (the M cells, in reading order), "errors":
+## PackedStringArray}. A valid map is rectangular, uses only legend characters,
+## and has exactly one S and at least one E or M.
 static func from_rows(rows: PackedStringArray) -> Dictionary:
 	var errors := PackedStringArray()
 	var h := rows.size()
 	var w := 0 if h == 0 else rows[0].length()
 	if h == 0 or w == 0:
 		errors.append("map is empty")
-		return {"grid": null, "start": Vector2i.ZERO, "errors": errors}
+		return {"grid": null, "start": Vector2i.ZERO, "bosses": [], "errors": errors}
 	var grid := MazeGrid.new(w, h)
 	var starts: Array[Vector2i] = []
+	var bosses: Array[Vector2i] = []
 	var exits := 0
 	for y in h:
 		var row: String = rows[y]
@@ -95,6 +97,10 @@ static func from_rows(rows: PackedStringArray) -> Dictionary:
 				starts.append(Vector2i(x, y))
 				grid.set_tile(Vector2i(x, y), Tiles.FLOOR)
 				continue
+			if ch == Tiles.BOSS_CHAR:
+				bosses.append(Vector2i(x, y))
+				grid.set_tile(Vector2i(x, y), Tiles.FLOOR)
+				continue
 			var t := Tiles.from_char(ch)
 			if t < 0:
 				errors.append("unknown character '%s' at (%d, %d)" % [ch, x, y])
@@ -104,7 +110,7 @@ static func from_rows(rows: PackedStringArray) -> Dictionary:
 			grid.set_tile(Vector2i(x, y), t)
 	if starts.size() != 1:
 		errors.append("map needs exactly one S, found %d" % starts.size())
-	if exits == 0:
+	if exits == 0 and bosses.is_empty():
 		errors.append("map has no exit (E)")
 	var start: Vector2i = starts[0] if starts.size() > 0 else Vector2i.ZERO
-	return {"grid": grid if errors.is_empty() else null, "start": start, "errors": errors}
+	return {"grid": grid if errors.is_empty() else null, "start": start, "bosses": bosses, "errors": errors}

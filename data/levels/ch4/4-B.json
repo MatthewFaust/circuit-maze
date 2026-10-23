@@ -1,0 +1,68 @@
+{
+  "id": "4-B",
+  "title": "Boss: The Supercomputer",
+  "concept": "Boss fight: find it, then fight it",
+  "new_blocks": [],
+  "intro": "The Supercomputer hides deep in its own maze, and it hits hard. In a boss stage [b]scan()[/b] measures the way to the boss instead of to an exit, so the closer sensors lead you straight to it. Find it without wasting stamina, then fight it with everything you've learned.",
+  "cs_note": "Real programs are built from parts you already trust. Here that's two loops in a row: a [b]breadth-first search[/b] walk that stops once the boss is in front of you, then the sensing fight loop from the Sensor Pi.",
+  "hints": [
+    "Two jobs, one after the other: reach the boss, then beat it.",
+    "scan() first. Walk with the Ripple program, but loop while not boss_ahead() instead of while not at_exit().",
+    "After scan(), the first while (not boss_ahead()) walks downhill: if closer_ahead() move(), else if closer_left() turn_left(), else turn_right(). It stops facing the boss. The second while (boss_ahead()) fights: if boss_charging() block(), else attack(). The boss's rhythm differs between the mazes, which is exactly what boss_charging() handles."
+  ],
+  "allowed": {"blocks": ["move", "turn_left", "turn_right", "while", "if", "if_else", "backtrack", "scan", "attack", "block"], "sensors": ["path_ahead", "path_left", "path_right", "unvisited_ahead", "unvisited_left", "unvisited_right", "closer_ahead", "closer_left", "closer_right", "boss_ahead", "boss_charging"], "functions": [], "not": true},
+  "block_limit": 14,
+  "par": {"blocks": 0, "stamina": 0},
+  "robot": {"stamina": 130},
+  "rules": {"max_hp": 20},
+  "boss": {
+    "name": "The Supercomputer", "skin": "mainframe",
+    "min_gear": {"armor": "firewall_armor", "weapon": ""},
+    "units": [{"name": "The Supercomputer", "hp": 80, "attack": 13, "pattern": "OOX"}]
+  },
+  "solution": [
+    "scan()",
+    "while not boss_ahead():",
+    "    if closer_ahead():",
+    "        move()",
+    "    elif closer_left():",
+    "        turn_left()",
+    "    else:",
+    "        turn_right()",
+    "while boss_ahead():",
+    "    if boss_charging():",
+    "        block()",
+    "    else:",
+    "        attack()"
+  ],
+  "anti_solutions": [
+    {"name": "walk there, then attack every turn", "program": [
+      "scan()", "while not boss_ahead():", "    if closer_ahead():", "        move()", "    elif closer_left():", "        turn_left()", "    else:", "        turn_right()",
+      "while boss_ahead():", "    attack()"], "expect_fail_code": "hp_zero",
+     "passes_with": {"armor": "firewall_armor", "weapon": "pathfinder_lance"}}
+  ],
+  "variants": [
+    {"name": "Core A", "facing": "E", "boss_pattern": "OOX", "map": [
+      "###########",
+      "#S..#.....#",
+      "###.#.###.#",
+      "#...#.#M..#",
+      "#.###.#####",
+      "#.....#...#",
+      "#####...#.#",
+      "#.......#.#",
+      "###########"
+    ]},
+    {"name": "Core B", "facing": "E", "boss_pattern": "OXOOX", "map": [
+      "###########",
+      "#.......#.#",
+      "#####...#.#",
+      "#.....#...#",
+      "#.###.#####",
+      "#...#.#M..#",
+      "###.#.###.#",
+      "#S..#.....#",
+      "###########"
+    ]}
+  ]
+}

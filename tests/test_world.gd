@@ -287,3 +287,108 @@ func test_fog_reveals_neighbors() -> void:
 	var ev := w.apply_action("move")
 	check(_types(ev).has("revealed"), "revealed event")
 	check(w.is_revealed(Vector2i(3, 1)), "revealed after moving")
+
+
+
+# ------------------------------------------------------------------ boss fights
+
+## A robot facing one boss in a small arena. pattern: the boss's rhythm.
+func _duel(pattern: String, hp: int = 6, attack: int = 5, damage_bonus: int = 0, armor: int = 0,
+		split: Array = []) -> MazeWorld:
+	var rows := ["#######", "#.....#", "#.SM..#", "#.....#", "#######"]
+	var parsed := MazeGrid.from_rows(PackedStringArray(rows))
+	var rules := MazeRules.new()
+	rules.max_hp = 20
+	var w := MazeWorld.new(parsed["grid"], parsed["start"], Tiles.EAST, rules, 50)
+	var cells: Array[Vector2i] = []
+	cells.assign(parsed["bosses"])
+	w.setup_combat([{"name": "Pi", "hp": hp, "attack": attack, "pattern": pattern, "split": split}],
+			cells, "", damage_bonus, armor)
+	return w
+
+
+func test_boss_marker_needs_no_exit() -> void:
+	var r := MazeGrid.from_rows(PackedStringArray(["#####", "#SM.#", "#####"]))
+	check(r["grid"] != null, "a boss map without an exit is valid: %s" % str(r["errors"]))
+	check_eq((r["bosses"] as Array).size(), 1, "one boss cell")
+	check_eq(r["grid"].get_tile(Vector2i(2, 1)), Tiles.FLOOR, "floor under the boss")
+
+
+func test_attack_lands_on_open_turns() -> void:
+	var w := _duel("O", 6, 5, 1)
+	var ev := w.apply_action("attack")
+	check(_types(ev).has("boss_hit"), "attack hits: %s" % str(_types(ev)))
+	check_eq(int(w.bosses[0]["hp"]), 3, "base 2 + weapon 1 = 3 damage")
+	check(w.is_running(), "boss still standing")
+	ev = w.apply_action("attack")
+	check(_types(ev).has("boss_defeated") and _types(ev).has("won"), "the last boss down wins: %s" % str(_types(ev)))
+
+
+func test_strike_hits_and_interrupts_attack() -> void:
+	var w := _duel("X", 6, 5, 0, 1)
+	var ev := w.apply_action("attack")
+	check(_types(ev).has("attack_interrupted"), "the strike interrupts the attack: %s" % str(_types(ev)))
+	check_eq(int(w.bosses[0]["hp"]), 6, "no damage lands")
+	check_eq(w.robot.hp, 16, "hit for attack 5 - defense 1 = 4")
+
+
+func test_block_stops_the_strike() -> void:
+	var w := _duel("X", 6, 5)
+	var ev := w.apply_action("block")
+	check(_types(ev).has("blocked"), "shield raised")
+	var struck: Dictionary = {}
+	for e in ev:
+		if e["type"] == "boss_struck":
+			struck = e
+	check(bool(struck.get("blocked", false)), "the strike is blocked")
+	check_eq(w.robot.hp, 20, "no damage")
+
+
+## Defense 8 against attack 5 still costs 1 HP. The boss faced at the start of
+## a turn is the one that strikes, so turning away is hit once, then safe.
+func test_defense_floor_and_turning_away() -> void:
+	var w := _duel("X", 6, 5, 0, 8)
+	w.apply_action("turn_left")
+	check_eq(w.robot.hp, 19, "a hit always does at least 1, even while turning away")
+	w.apply_action("turn_left")
+	check_eq(w.robot.hp, 19, "facing away: not engaged, not hit")
+
+
+func test_rhythm_and_charging_sensor() -> void:
+	var w := _duel("OOX", 20)
+	check(not w.sense("boss_charging"), "turn 1 is open")
+	w.apply_action("attack")
+	w.apply_action("attack")
+	check(w.sense("boss_charging"), "turn 3 strikes")
+	check(w.sense("boss_ahead"), "boss ahead")
+	check(not w.sense("path_ahead"), "a boss blocks the way")
+	w.apply_action("block")
+	check(not w.sense("boss_charging"), "the rhythm repeats: turn 4 is open")
+	w.apply_action("turn_left")
+	check(not w.sense("boss_ahead") and not w.sense("boss_charging"), "facing away, the boss is not engaged")
+
+
+func test_walking_into_a_boss_bumps() -> void:
+	var w := _duel("O")
+	var ev := w.apply_action("move")
+	check(_types(ev).has("bumped"), "bumped: %s" % str(_types(ev)))
+	check_eq(w.robot.pos, Vector2i(2, 2), "didn't move")
+
+
+func test_boss_splits_into_children() -> void:
+	var halves := [{"hp": 2, "cell": Vector2i(3, 1)}, {"hp": 2, "cell": Vector2i(3, 3)}]
+	var w := _duel("O", 2, 5, 0, 0, halves)
+	var ev := w.apply_action("attack")
+	check(_types(ev).has("boss_split"), "split: %s" % str(_types(ev)))
+	check(w.is_running(), "the halves are still standing")
+	check_eq(w.alive_bosses().size(), 2, "two halves")
+	check_eq(int(w.alive_bosses()[0]["attack"]), 5, "a half inherits its parent's attack")
+	check_eq(str(w.alive_bosses()[0]["pattern"]), "O", "and its rhythm")
+	check(w.is_open(Vector2i(3, 2)), "the parent's tile is free")
+
+
+func test_scan_leads_to_the_boss() -> void:
+	var w := _duel("O")
+	w.apply_action("turn_left")
+	w.apply_action("scan")
+	check(w.sense("closer_right"), "after scan, the boss side is closer")

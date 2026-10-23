@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "armor": [
+    {"id": "tin_shell", "name": "Tin Shell", "defense": 1, "unlock_level": "1-5"},
+    {"id": "signal_shield", "name": "Signal Shield", "defense": 2, "unlock_level": "2-2"},
+    {"id": "mirror_plating", "name": "Mirror Plating", "defense": 4, "unlock_level": "3-4"},
+    {"id": "firewall_armor", "name": "Firewall Armor", "defense": 8, "unlock_level": "4-1"}
+  ],
+  "weapons": [
+    {"id": "loop_blaster", "name": "Loop Blaster", "damage": 1, "stars": 15},
+    {"id": "sensor_scope", "name": "Sensor Scope", "damage": 3, "stars": 27},
+    {"id": "function_cannon", "name": "Function Cannon", "damage": 9, "stars": 48},
+    {"id": "pathfinder_lance", "name": "Pathfinder Lance", "damage": 15, "stars": "all"}
+  ],
+  "skins": [
+    {"id": "starter_bot", "name": "Starter Bot", "texture": "res://art/robot/robot.svg", "boss_level": ""},
+    {"id": "circuit_green", "name": "Circuit Green", "texture": "res://art/robot/skin_circuit_green.svg", "boss_level": "1-B"},
+    {"id": "sentinel", "name": "Sentinel", "texture": "res://art/robot/skin_sentinel.svg", "boss_level": "2-B"},
+    {"id": "rackmount", "name": "Rackmount", "texture": "res://art/robot/skin_rackmount.svg", "boss_level": "3-B"},
+    {"id": "mainframe", "name": "Mainframe", "texture": "res://art/robot/skin_mainframe.svg", "boss_level": "4-B"}
+  ]
+}

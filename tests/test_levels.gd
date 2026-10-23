@@ -3,7 +3,8 @@ extends "res://tests/suite_base.gd"
 ## the reference solution earns 3 stars, alt solutions escape, anti-solutions
 ## fail, a hard-coded replay of one map's moves fails, and so on.
 
-const EXPECTED_LEVELS := 22
+const EXPECTED_LEVELS := 26
+const EXPECTED_BOSSES := 4
 
 var _catalog: LevelCatalog
 
@@ -36,6 +37,12 @@ func test_catalog_loads() -> void:
 	check(_catalog.errors.is_empty(), "catalog errors:\n" + "\n".join(_catalog.errors))
 	check_eq(levels.size(), EXPECTED_LEVELS, "level count")
 	check_eq(_catalog.chapters.size(), 4, "chapters")
+	var bosses := levels.filter(func(l: LevelData) -> bool: return l.is_boss())
+	check_eq(bosses.size(), EXPECTED_BOSSES, "boss stages")
+	for ch: Dictionary in _catalog.chapters:
+		var ids: PackedStringArray = ch["level_ids"]
+		check(_catalog.get_level(ids[ids.size() - 1]).is_boss(), "chapter %d ends with its boss" % int(ch["id"]))
+	check_eq(_catalog.max_stars(), (EXPECTED_LEVELS - EXPECTED_BOSSES) * 3, "stars come from regular stages")
 
 
 func test_maps_are_valid_and_solvable() -> void:
@@ -43,10 +50,12 @@ func test_maps_are_valid_and_solvable() -> void:
 		var cut_allowed := level.allowed_blocks.has("cut") or level.allowed_blocks.has("scan_weighted")
 		for v in level.variants:
 			var exit_ok := false
-			for e in v.grid.find_all(Tiles.EXIT):
+			var goals: Array[Vector2i] = v.grid.find_all(Tiles.EXIT)
+			goals.append_array(v.boss_cells)
+			for e in goals:
 				if MazePathing.reachable(v.grid, v.start, e, cut_allowed):
 					exit_ok = true
-			check(exit_ok, "%s %s: exit unreachable" % [level.id, v.name])
+			check(exit_ok, "%s %s: exit (or boss) unreachable" % [level.id, v.name])
 			check(v.stamina > 0, "%s %s: no stamina" % [level.id, v.name])
 			if level.chapter == 4:
 				var w := v.make_world(level)
@@ -63,10 +72,42 @@ func test_reference_solutions_earn_three_stars() -> void:
 		if not check(bool(ev["valid"]), "%s solution is not allowed here: %s" % [level.id, str(ev["errors"])]):
 			continue
 		check(bool(ev["solved"]), "%s solution fails: %s" % [level.id, _describe(ev)])
+		if level.is_boss():
+			# Boss stages award no stars; the solution must win with the minimum gear.
+			check_eq(ev["star_count"], 1, "%s records only the win" % level.id)
+			continue
 		check_eq(ev["star_count"], 3, "%s solution stars %s (par %d stamina / %d blocks)"
 				% [level.id, _describe(ev), level.par_stamina, level.par_blocks])
 		if level.par_stamina > 0 and int(ev["stamina_total"]) * 5 < level.par_stamina * 4:
 			print("  WARN %s: stamina par %d is loose (solution uses %d)" % [level.id, level.par_stamina, int(ev["stamina_total"])])
+
+
+## Bosses are beatable with the armor the player is given and no weapon, and
+## better gear rescues the sloppy programs that minimum gear can't.
+func test_boss_gear() -> void:
+	var prog := ProgressionCatalog.get_default()
+	check(prog.errors.is_empty(), "progression data: %s" % str(prog.errors))
+	for level in _levels():
+		if not level.is_boss():
+			continue
+		var gear: Dictionary = level.boss["min_gear"]
+		check(str(gear["weapon"]) == "", "%s must not need a weapon" % level.id)
+		var armor := prog.armor_by_id(str(gear["armor"]))
+		if check(not armor.is_empty(), "%s min armor exists" % level.id):
+			var i := _catalog.order.find(str(armor["unlock_level"]))
+			check(i >= 0 and i < _catalog.order.find(level.id), "%s: its armor unlocks before the boss" % level.id)
+		check(prog.skin_by_id(str(level.boss["skin"])).get("boss_level", "") == level.id,
+				"%s unlocks skin %s" % [level.id, level.boss["skin"]])
+		var rescued := false
+		for anti in level.anti_solutions:
+			var pw: Dictionary = anti["passes_with"]
+			if pw.is_empty():
+				continue
+			rescued = true
+			var p := _program(level, anti["text"], "anti '%s'" % anti["name"])
+			var ev := LevelEvaluator.evaluate(level, p, prog.loadout(str(pw.get("armor", "")), str(pw.get("weapon", ""))))
+			check(bool(ev["solved"]), "%s anti '%s' should win with %s: %s" % [level.id, anti["name"], str(pw), _describe(ev)])
+		check(rescued, "%s shows that better gear helps (an anti-solution with passes_with)" % level.id)
 
 
 func test_alt_solutions_escape() -> void:

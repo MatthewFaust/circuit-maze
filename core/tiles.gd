@@ -8,6 +8,8 @@ enum { FLOOR, STONE, BUSH, EXIT, SPIKE, BATTERY, REPAIR }
 const CHARS := [".", "#", "B", "E", "^", "+", "H"]
 const NAMES := ["floor", "stone", "bush", "exit", "spike", "battery", "repair kit"]
 const START_CHAR := "S"
+## "M" marks a boss in boss stages (floor underneath).
+const BOSS_CHAR := "M"
 
 ## Facing: 0 = north, 1 = east, 2 = south, 3 = west (clockwise, y grows downward).
 const NORTH := 0
