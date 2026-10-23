@@ -12,8 +12,6 @@ const CELL := 128.0
 const MAX_SCALE := 0.8
 const MOVE_TIME := 0.26
 const TURN_TIME := 0.16
-const FLOOR_TEX := preload("res://art/tiles/floor.svg")
-const STONE_TEX := preload("res://art/tiles/stone.svg")
 const ROBOT_TEX := preload("res://art/robot/robot.svg")
 const OBJECT_TEX := {
 	Tiles.BUSH: preload("res://art/tiles/bush.svg"),
@@ -22,8 +20,8 @@ const OBJECT_TEX := {
 	Tiles.BATTERY: preload("res://art/tiles/battery.svg"),
 	Tiles.REPAIR: preload("res://art/tiles/repair.svg"),
 }
-const TRAIL_COLOR := Color(0.35, 0.85, 0.45, 0.9)
-const VISITED_COLOR := Color(0.35, 0.85, 0.45, 0.35)
+## Gap around each wall block, in board units.
+const WALL_INSET := 5.0
 
 var world: MazeWorld
 ## Draw visited dots and the breadcrumb line (DFS levels).
@@ -51,12 +49,16 @@ var _scan_weighted := false
 var _trail: Array[Vector2i] = []
 var _visited := PackedByteArray()
 var _idle_tweens: Array[Tween] = []
+## Chapter colors (theme type "Palette"), refreshed when the theme changes.
+var _pal := {}
+var _wall_box: StyleBoxFlat
 
 
 func _ready() -> void:
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_font = get_theme_default_font()
+	_read_palette()
 	board = Node2D.new()
 	board.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 	add_child(board)
@@ -76,7 +78,7 @@ func _ready() -> void:
 	_banner.theme_type_variation = &"HeroTitle"
 	_banner.add_theme_font_size_override("font_size", 56)
 	_banner.add_theme_constant_override("outline_size", 12)
-	_banner.add_theme_color_override("font_outline_color", Color(0.05, 0.06, 0.1, 0.9))
+	_banner.add_theme_color_override("font_outline_color", _pal["surface"])
 	_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_banner.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_banner.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -84,6 +86,27 @@ func _ready() -> void:
 	_banner.hide()
 	add_child(_banner)
 	resized.connect(_fit)
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_THEME_CHANGED and _floor != null:
+		_read_palette()
+		_banner.add_theme_color_override("font_outline_color", _pal["surface"])
+		for layer: Node2D in [_floor, _marks, _numbers, _fog]:
+			layer.queue_redraw()
+
+
+func _read_palette() -> void:
+	for role in ["surface", "wall", "wall_top", "wall_edge", "walk", "walk_line", "trail", "visited",
+			"fog", "fog_dot", "outline", "accent"]:
+		_pal[role] = get_theme_color(StringName(role), &"Palette")
+	_wall_box = StyleBoxFlat.new()
+	_wall_box.bg_color = _pal["wall"]
+	_wall_box.set_corner_radius_all(18)
+	_wall_box.border_width_bottom = 8
+	_wall_box.border_width_top = 2
+	_wall_box.border_color = _pal["wall_edge"]
+	_wall_box.border_blend = false
 
 
 func _layer(layer_name: String, draw_func: Callable) -> Node2D:
@@ -411,7 +434,7 @@ func _float_text(text: String, at: Vector2, color: Color) -> void:
 	l.text = text
 	l.add_theme_font_size_override("font_size", 40)
 	l.add_theme_color_override("font_color", color)
-	l.add_theme_color_override("font_outline_color", Color(0.05, 0.06, 0.1))
+	l.add_theme_color_override("font_outline_color", _pal["outline"])
 	l.add_theme_constant_override("outline_size", 10)
 	l.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_fx.add_child(l)
@@ -449,11 +472,21 @@ func _draw_floor() -> void:
 		return
 	var g := world.grid
 	var cell := Vector2(CELL, CELL)
+	var canvas := _floor.get_canvas_item()
+	# Walkable cells first, as one surface with faint grid lines.
 	for y in g.height:
 		for x in g.width:
-			var r := Rect2(Vector2(x, y) * CELL, cell)
-			var t := g.get_tile(Vector2i(x, y))
-			_floor.draw_texture_rect(STONE_TEX if t == Tiles.STONE else FLOOR_TEX, r, false)
+			if g.get_tile(Vector2i(x, y)) != Tiles.STONE:
+				var r := Rect2(Vector2(x, y) * CELL, cell)
+				_floor.draw_rect(r, _pal["walk"])
+				_floor.draw_rect(r.grow(-1.5), _pal["walk_line"], false, 3.0)
+	# Walls: raised blocks with a light top edge and a darker base.
+	for y in g.height:
+		for x in g.width:
+			if g.get_tile(Vector2i(x, y)) == Tiles.STONE:
+				var r := Rect2(Vector2(x, y) * CELL, cell).grow(-WALL_INSET)
+				_wall_box.draw(canvas, r)
+				_floor.draw_rect(Rect2(r.position + Vector2(18, 10), Vector2(r.size.x - 36, 6)), _pal["wall_top"])
 
 
 func _draw_marks() -> void:
@@ -475,16 +508,16 @@ func _draw_marks() -> void:
 		return
 	for i in _visited.size():
 		if _visited[i] == 1:
-			_marks.draw_circle(cell_center(g.cell_at(i)), 9.0, VISITED_COLOR)
+			_marks.draw_circle(cell_center(g.cell_at(i)), 9.0, _pal["visited"])
 	if not _trail.is_empty():
 		var pts := PackedVector2Array()
 		for c in _trail:
 			pts.append(cell_center(c))
 		pts.append(_anim_pos)
 		if pts.size() >= 2:
-			_marks.draw_polyline(pts, TRAIL_COLOR, 10.0, true)
+			_marks.draw_polyline(pts, _pal["trail"], 10.0, true)
 		for c in _trail:
-			_marks.draw_circle(cell_center(c), 14.0, TRAIL_COLOR)
+			_marks.draw_circle(cell_center(c), 14.0, _pal["trail"])
 
 
 ## Scan numbers sit above bushes and items: a bush's cost is part of the answer.
@@ -500,8 +533,8 @@ func _draw_numbers() -> void:
 		var fs := 40
 		var sz := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
 		var pos := cell_center(g.cell_at(i)) + Vector2(-sz.x / 2.0, CELL * 0.36)
-		_numbers.draw_string_outline(_font, pos, label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 8, Color(0.05, 0.06, 0.1, 0.9))
-		_numbers.draw_string(_font, pos, label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, Color(0.85, 0.95, 1.0))
+		_numbers.draw_string_outline(_font, pos, label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 8, _pal["outline"])
+		_numbers.draw_string(_font, pos, label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, _pal["surface"])
 
 
 func _draw_fog() -> void:
@@ -513,6 +546,6 @@ func _draw_fog() -> void:
 		if a <= 0.0:
 			continue
 		var c := g.cell_at(i)
-		_fog.draw_rect(Rect2(Vector2(c) * CELL - Vector2(1, 1), Vector2(CELL + 2, CELL + 2)), Color(0.04, 0.05, 0.08, a))
+		_fog.draw_rect(Rect2(Vector2(c) * CELL - Vector2(1, 1), Vector2(CELL + 2, CELL + 2)), Color(_pal["fog"], a))
 		if a > 0.5:
-			_fog.draw_circle(cell_center(c), 6.0, Color(0.2, 0.24, 0.33, a))
+			_fog.draw_circle(cell_center(c), 6.0, Color(_pal["fog_dot"], a))

@@ -5,10 +5,13 @@ extends RefCounted
 ## differently in exported builds.
 
 const DEFAULT_PATH := "res://data/levels/catalog.json"
+## Colors every chapter palette must give, as "#RRGGBB".
+const PALETTE_KEYS := ["background", "floor", "path", "accent", "text"]
 
 static var _default: LevelCatalog
 
-## [{"id": int, "title", "subtitle", "intro", "objectives": PackedStringArray, "level_ids": PackedStringArray}]
+## [{"id": int, "title", "subtitle", "intro", "objectives": PackedStringArray,
+##   "level_ids": PackedStringArray, "palette": {"name": String, <PALETTE_KEYS>: Color}}]
 var chapters: Array[Dictionary] = []
 var levels := {}
 var order := PackedStringArray()
@@ -51,6 +54,7 @@ static func load_from(path: String) -> LevelCatalog:
 			"intro": LevelLoader.get_str(cd, "intro", "", errs),
 			"objectives": LevelLoader.get_str_array(cd, "objectives", errs),
 			"level_ids": PackedStringArray(),
+			"palette": _read_palette(cd.get("palette"), errs),
 		}
 		var ids: PackedStringArray = chapter["level_ids"]
 		var number := 0
@@ -76,6 +80,22 @@ static func load_from(path: String) -> LevelCatalog:
 			cat.errors.append("%s: chapter %d: %s" % [path, chapter_no, e])
 		cat.chapters.append(chapter)
 	return cat
+
+
+static func _read_palette(raw: Variant, errs: Array[String]) -> Dictionary:
+	var out := {"name": ""}
+	if typeof(raw) != TYPE_DICTIONARY:
+		errs.append("palette must be an object with %s" % ", ".join(PALETTE_KEYS))
+		return out
+	var d: Dictionary = raw
+	out["name"] = LevelLoader.get_str(d, "name", "", errs)
+	for key: String in PALETTE_KEYS:
+		var v: Variant = d.get(key)
+		if typeof(v) != TYPE_STRING or not Color.html_is_valid(v):
+			errs.append("palette.%s must be a color like \"#4FB286\"" % key)
+			continue
+		out[key] = Color.html(v)
+	return out
 
 
 func get_level(id: String) -> LevelData:

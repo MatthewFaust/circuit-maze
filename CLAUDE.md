@@ -158,8 +158,13 @@ These are `RefCounted` classes with `class_name`. They use no nodes and never re
 - Don't free controls inside `_drop_data`. Defer the rebuild.
 
 **Theme and art**
-- All colors and fonts live in `ui/theme/main_theme.tres` as type variations, such as `PrimaryButton`, `BlockMotion` and `HPBar`. Set `theme_type_variation` instead of hard-coding colors.
-- The theme and the SVGs in `art/` are the source files; no generator script is in the repo.
+- Each chapter has its own color theme. Its five colors (`background`, `floor`, `path`, `accent`, `text`) are the chapter's `palette` in `data/levels/catalog.json`.
+- `ui/theme/main_theme.tres` supplies fonts, sizes, margins and corner radii as type variations, such as `PrimaryButton`, `BlockMotion` and `HPBar`. Set `theme_type_variation` instead of hard-coding colors.
+- **Its colors are not used at runtime.** `ChapterPalette` (`scenes/common/chapter_palette.gd`) copies the theme and replaces every color with a palette role from `STYLE_ROLES` / `COLOR_ROLES`. A new style or color in the theme needs a role there; `test_palette.gd` fails until it has one.
+- Screens set their chapter theme in `_enter_tree()` so children build in the right colors (the main menu, the first scene, does it in `_ready()` once the autoloads are loaded). Each level-select card wears its own chapter's theme.
+- Hand-drawn colors read roles from the theme type `Palette`: `get_theme_color(&"accent", &"Palette")`. Don't hard-code colors in scripts.
+- `test_palette.gd` also checks WCAG contrast for text, blocks and buttons in every chapter, so palette changes can't make text unreadable.
+- The theme and the SVGs in `art/` are the source files; no generator script is in the repo. The switch, radio and slider icons are drawn from SVG strings in `ChapterPalette`, because the engine defaults are white and icons can't be tinted by the theme.
 - The SVGs are drawn on a 64-unit viewBox at 128×128, so they rasterize at 2× for Retina.
 
 **Headless UI tests**

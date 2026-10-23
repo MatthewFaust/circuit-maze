@@ -24,6 +24,8 @@ func _ready() -> void:
 
 
 func open() -> void:
+	# Here, not in _ready: the main menu sets its chapter theme after its children are ready.
+	($Dim as ColorRect).color = get_theme_color(&"dim", &"Palette")
 	_volume.set_value_no_signal(float(Progress.get_setting("volume", 0.8)))
 	_sfx.set_pressed_no_signal(bool(Progress.get_setting("sfx", true)))
 	_reduce_motion.set_pressed_no_signal(bool(Progress.get_setting("reduce_motion", false)))

@@ -106,6 +106,10 @@ func _switch(node: Node, fade: bool = true) -> void:
 		return
 	_busy = true
 	var use_fade := fade and not reduce_motion()
+	# Fade through the background color of the screen being left.
+	var current := get_tree().current_scene as Control
+	if current != null:
+		_fade.color = current.get_theme_color(&"bg", &"Palette")
 	if use_fade:
 		var t := create_tween()
 		t.tween_property(_fade, "modulate:a", 1.0, FADE_TIME)

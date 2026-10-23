@@ -11,7 +11,13 @@ const LOCK := preload("res://art/ui/lock.svg")
 @onready var _scroll: ScrollContainer = %Scroll
 
 
+## The page uses the last chapter played; each chapter card uses its own colors.
+func _enter_tree() -> void:
+	theme = ChapterPalette.theme_for_level(Progress.data.last_level)
+
+
 func _ready() -> void:
+	($Bg as ColorRect).color = get_theme_color(&"bg", &"Palette")
 	_back.pressed.connect(Game.goto_main_menu)
 	var catalog := Game.catalog
 	var focus: Control = null
@@ -40,6 +46,7 @@ func _scroll_to(c: Control) -> void:
 ## {"panel": Control, "focus": the first unlocked unfinished level button or null}
 func _build_chapter(chapter: Dictionary, catalog: LevelCatalog) -> Dictionary:
 	var panel := PanelContainer.new()
+	panel.theme = ChapterPalette.theme_for_chapter(int(chapter["id"]))
 	panel.theme_type_variation = &"ChapterPanel"
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 10)
@@ -78,17 +85,19 @@ func _build_chapter(chapter: Dictionary, catalog: LevelCatalog) -> Dictionary:
 	row.add_theme_constant_override("v_separation", 12)
 	vbox.add_child(row)
 	var focus: Control = null
+	var empty_star := ChapterPalette.for_chapter(int(chapter["id"])).color("line_strong")
 	for id in ids:
 		var level := catalog.get_level(id)
 		var unlocked := Progress.data.is_unlocked(id, catalog)
-		var button := _level_button(level, unlocked)
+		var button := _level_button(level, unlocked, empty_star)
 		row.add_child(button)
 		if focus == null and unlocked and not Progress.data.is_completed(id):
 			focus = button
 	return {"panel": panel, "focus": focus}
 
 
-func _level_button(level: LevelData, unlocked: bool) -> Button:
+## empty_star: tint for unearned stars, in the chapter's colors.
+func _level_button(level: LevelData, unlocked: bool, empty_star: Color) -> Button:
 	var b := Button.new()
 	b.theme_type_variation = &"LevelButton"
 	b.custom_minimum_size = Vector2(176, 132)
@@ -120,7 +129,12 @@ func _level_button(level: LevelData, unlocked: bool) -> Button:
 	if unlocked:
 		var flags := Progress.data.star_flags(level.id)
 		for k in ["escape", "stamina", "blocks"]:
-			stars_row.add_child(_icon(STAR_ON if bool(flags[k]) else STAR_OFF, 24))
+			var earned := bool(flags[k])
+			var star := _icon(STAR_ON if earned else STAR_OFF, 24)
+			if not earned:
+				# A white outline, tinted to the chapter's border color.
+				star.modulate = empty_star
+			stars_row.add_child(star)
 	else:
 		stars_row.add_child(_icon(LOCK, 26))
 		b.modulate = Color(1, 1, 1, 0.6)

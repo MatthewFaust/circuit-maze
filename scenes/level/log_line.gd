@@ -2,10 +2,8 @@ class_name LogLine
 extends PanelContainer
 ## One line of feedback under the maze ("Bump! -15 HP", "Scanned 41 tiles").
 
-const COLORS := {
-	"info": Color(0.9, 0.92, 0.95), "good": Color(0.4, 0.95, 0.7),
-	"warn": Color(1.0, 0.82, 0.4), "bad": Color(1.0, 0.45, 0.5),
-}
+## Tones, as roles of the chapter palette.
+const TONES := ["info", "good", "warn", "bad"]
 
 var _label: Label
 
@@ -19,7 +17,8 @@ func _ready() -> void:
 
 func show_message(text: String, tone: String = "info") -> void:
 	_label.text = text
-	_label.add_theme_color_override("font_color", COLORS.get(tone, COLORS["info"]))
+	_label.add_theme_color_override("font_color",
+			get_theme_color(StringName(tone if TONES.has(tone) else "info"), &"Palette"))
 
 
 func clear() -> void:

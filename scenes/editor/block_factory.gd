@@ -32,7 +32,7 @@ static func build_section(ed: ProgramEditor, ref: String, nodes: Array) -> Contr
 	hint.add_theme_font_size_override("font_size", 14)
 	hint.text = "runs first" if is_main else "runs when you call %s()" % ref.substr(3)
 	if not is_main:
-		hint.add_theme_color_override("font_color", Color(1, 1, 1, 0.7))
+		hint.add_theme_color_override("font_color", Color(ed.get_theme_color(&"ink", &"Palette"), 0.7))
 	hint.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	row.add_child(hint)

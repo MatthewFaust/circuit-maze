@@ -112,7 +112,9 @@ res://
              result_dialog)  maze/ (maze_view, board_view, floor/mark/fog/fx layers, robot_view)
              editor/ (program_editor, block_factory, block_view, block_list_view, palette_item, block_styles, block_catalog,
              edit_history, code_view)
-  ui/theme/main_theme.tres    block colors by category: motion blue, control orange, sensing teal, functions purple, algorithms green
+  ui/theme/main_theme.tres    fonts, sizes and shapes; colors come from each chapter's palette (scenes/common/chapter_palette.gd).
+                              Blocks keep a hue per category (motion blue, control orange, sensing teal, functions purple,
+                              algorithms green), softened to pastels on each chapter's light background
   art/tiles  art/robot  art/ui  SVG drawn on a 64×64 viewBox but sized 128×128, so it rasterizes at 2× and stays sharp on Retina
   tests/run_tests.gd (extends SceneTree) + test_*.gd (no class_name in tests/)   tools/level_report.gd (pars and stats per level)
 ```

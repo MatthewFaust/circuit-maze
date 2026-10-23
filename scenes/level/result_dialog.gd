@@ -35,6 +35,7 @@ const FAILURES := {
 
 
 func _ready() -> void:
+	($Dim as ColorRect).color = get_theme_color(&"dim", &"Palette")
 	for b: Button in [_levels, _retry, _next]:
 		b.focus_mode = Control.FOCUS_NONE
 	_levels.pressed.connect(func() -> void:
@@ -52,7 +53,7 @@ func _ready() -> void:
 func show_success(level: LevelData, ev: Dictionary, has_next: bool) -> void:
 	var count := int(ev["star_count"])
 	_headline.text = ["Escaped!", "Escaped!", "Great run!", "Perfect!"][count]
-	_headline.add_theme_color_override("font_color", Color(0.4, 0.95, 0.7))
+	_headline.add_theme_color_override("font_color", get_theme_color(&"good", &"Palette"))
 	_build_stars(ev["stars"], true)
 	_stars.show()
 	var missing := PackedStringArray()
@@ -73,7 +74,7 @@ func show_success(level: LevelData, ev: Dictionary, has_next: bool) -> void:
 func show_failure(level: LevelData, ev: Dictionary, variant_name: String, code: String, message: String) -> void:
 	var f: Array = FAILURES.get(code, ["The robot didn't escape", ""])
 	_headline.text = str(f[0])
-	_headline.add_theme_color_override("font_color", Color(1, 0.45, 0.5))
+	_headline.add_theme_color_override("font_color", get_theme_color(&"bad", &"Palette"))
 	_stars.hide()
 	var where := " on %s" % variant_name if level.variants.size() > 1 and variant_name != "" else ""
 	_reason.text = message + where
@@ -97,6 +98,8 @@ func _build_stars(flags: Dictionary, animate: bool) -> void:
 		holder.custom_minimum_size = Vector2(72, 72)
 		var star := TextureRect.new()
 		star.texture = STAR_ON if on else STAR_OFF
+		if not on:
+			star.modulate = get_theme_color(&"line_strong", &"Palette")
 		star.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		star.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		star.set_anchors_preset(Control.PRESET_FULL_RECT)

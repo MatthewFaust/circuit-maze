@@ -18,6 +18,9 @@ signal closed
 func _ready() -> void:
 	_start.pressed.connect(close)
 	_start.focus_mode = Control.FOCUS_NONE
+	($Dim as ColorRect).color = get_theme_color(&"dim", &"Palette")
+	($Center/Panel/VBox/CSNote/CSBox/CSTitle as Label).add_theme_color_override("font_color",
+			get_theme_color(&"accent_strong", &"Palette"))
 
 
 func open(level: LevelData) -> void:

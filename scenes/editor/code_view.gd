@@ -2,8 +2,6 @@ class_name CodeView
 extends CodeEdit
 ## Read-only Python view of the program, with the running line highlighted.
 
-const RUN_LINE := Color(1.0, 0.82, 0.3, 0.22)
-
 var _line_of := {}
 var _highlighted := -1
 
@@ -16,17 +14,31 @@ func _ready() -> void:
 	context_menu_enabled = false
 	shortcut_keys_enabled = false
 	focus_mode = Control.FOCUS_NONE
+	_build_highlighter()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_THEME_CHANGED and is_node_ready():
+		_build_highlighter()
+
+
+## Syntax colors come from the chapter palette.
+func _build_highlighter() -> void:
 	var h := CodeHighlighter.new()
-	h.number_color = Color("#FFD166")
-	h.symbol_color = Color("#9AA4B8")
-	h.function_color = Color("#7FB5FF")
-	h.member_variable_color = Color("#E6EAF2")
+	h.number_color = _pal(&"code_number")
+	h.symbol_color = _pal(&"code_symbol")
+	h.function_color = _pal(&"code_function")
+	h.member_variable_color = _pal(&"text")
 	for kw in ["def", "for", "in", "range", "while", "if", "elif", "else", "not", "pass"]:
-		h.add_keyword_color(kw, Color("#FF7AB6"))
+		h.add_keyword_color(kw, _pal(&"code_keyword"))
 	for s: String in ProgramModel.SENSORS:
-		h.add_keyword_color(s, Color("#5EE6D8"))
-	h.add_color_region("#", "", Color("#5D6884"), true)
+		h.add_keyword_color(s, _pal(&"code_sensor"))
+	h.add_color_region("#", "", _pal(&"code_comment"), true)
 	syntax_highlighter = h
+
+
+func _pal(role: StringName) -> Color:
+	return get_theme_color(role, &"Palette")
 
 
 func show_program(p: Dictionary) -> void:
@@ -43,7 +55,7 @@ func highlight_node(id: int) -> void:
 		return
 	var line: int = _line_of[id]
 	if line < get_line_count():
-		set_line_background_color(line, RUN_LINE)
+		set_line_background_color(line, _pal(&"run_line"))
 		_highlighted = line
 		set_line_as_center_visible(line)
 

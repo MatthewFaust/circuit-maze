@@ -24,7 +24,7 @@ Main scene: `scenes/main_menu/main_menu.tscn`.
 
 | Control | What it does |
 |---|---|
-| Drag a palette block into the program | insert it where the yellow line shows |
+| Drag a palette block into the program | insert it where the colored line shows |
 | Click a palette block | add it to the end of the active section (click a section header to choose one) |
 | Drag a block back onto the palette (or the trash) | delete it; the × on a block does the same |
 | `Ctrl/Cmd+Z`, `Ctrl/Cmd+Shift+Z` | undo, redo |
@@ -73,7 +73,7 @@ data/levels/   catalog.json + one JSON file per level
 autoload/      Game (scene switching, dev options), Progress (save file), Sfx (generated sounds)
 scenes/        main_menu, level_select, level (screen, run controller, HUD, dialogs),
                maze (board drawing and animation), editor (drag-and-drop block editor)
-ui/theme/      main_theme.tres: all colors and fonts (editable in the Theme editor)
+ui/theme/      main_theme.tres: fonts, sizes and shapes (each chapter's colors come from its palette in catalog.json)
 art/           SVG tiles, robot and icons (drawn on a 64-unit grid, rasterized at 2x)
 tests/         headless test runner + suites      tools/level_report.gd  pars and stats per level
 ```

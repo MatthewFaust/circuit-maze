@@ -48,6 +48,8 @@ var _render_pending := false
 
 func _ready() -> void:
 	set_process(false)
+	(_lock_banner.get_child(0) as Label).add_theme_color_override("font_color",
+			get_theme_color(&"warn", &"Palette"))
 	_undo_button.pressed.connect(undo)
 	_redo_button.pressed.connect(redo)
 	_clear_button.pressed.connect(clear_program)
@@ -389,8 +391,8 @@ func _refresh_status() -> void:
 		text += "   ·   par %d" % level.par_blocks
 	_count_label.text = text
 	var over := level.block_limit > 0 and count > level.block_limit
-	_count_label.add_theme_color_override("font_color",
-			Color(1, 0.4, 0.4) if over else (Color(1, 0.82, 0.4) if _at_limit() else Color(0.9, 0.92, 0.95)))
+	var tone := &"bad" if over else (&"warn" if _at_limit() else &"text")
+	_count_label.add_theme_color_override("font_color", get_theme_color(tone, &"Palette"))
 	var full := _at_limit()
 	for item in _palette_items:
 		item.set_enabled(not _locked and not full)

@@ -1,8 +1,6 @@
 extends Control
 ## Title screen. Also routes command-line developer options (see Game).
 
-const FLOOR_TEX := preload("res://art/tiles/floor.svg")
-const STONE_TEX := preload("res://art/tiles/stone.svg")
 const BUSH_TEX := preload("res://art/tiles/bush.svg")
 const BACKDROP_CELL := 96.0
 
@@ -16,6 +14,9 @@ const BACKDROP_CELL := 96.0
 
 
 func _ready() -> void:
+	# In _ready, not _enter_tree: this is the first scene, and the autoloads
+	# load the catalog and the save file in their own _ready().
+	theme = ChapterPalette.theme_for_level(Progress.data.last_level)
 	if Game.route_dev_args():
 		return
 	for b: Button in [_play, _continue, _settings, _quit]:
@@ -30,6 +31,8 @@ func _ready() -> void:
 		_continue.pressed.connect(func() -> void: Game.goto_level(last))
 	else:
 		_continue.hide()
+	($Center/VBox/Subtitle as Label).add_theme_color_override("font_color",
+			get_theme_color(&"accent_strong", &"Palette"))
 	_settings.pressed.connect(_settings_dialog.call.bind("open"))
 	_quit.pressed.connect(func() -> void: get_tree().quit())
 	if OS.has_feature("web"):
@@ -42,24 +45,33 @@ func _ready() -> void:
 		t.tween_property(_logo, "position:y", _logo.position.y, 1.2).set_trans(Tween.TRANS_SINE)
 
 
-## A dim maze pattern behind the menu.
+## A faint maze pattern behind the menu.
 func _draw_backdrop() -> void:
+	var bg := get_theme_color(&"bg", &"Palette")
+	_backdrop.draw_rect(Rect2(Vector2.ZERO, _backdrop.size), bg)
+	var wall := StyleBoxFlat.new()
+	wall.bg_color = Color(get_theme_color(&"wall", &"Palette"), 0.7)
+	wall.set_corner_radius_all(14)
+	var walk := Color(get_theme_color(&"walk", &"Palette"), 0.3)
 	var cols := int(ceil(_backdrop.size.x / BACKDROP_CELL)) + 1
 	var rows := int(ceil(_backdrop.size.y / BACKDROP_CELL)) + 1
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 42
-	var dim := Color(1, 1, 1, 0.22)
+	var canvas := _backdrop.get_canvas_item()
 	for y in rows:
 		for x in cols:
 			var r := Rect2(Vector2(x, y) * BACKDROP_CELL, Vector2(BACKDROP_CELL, BACKDROP_CELL))
 			var roll := rng.randf()
 			var edge := x == 0 or y == 0 or x == cols - 1 or y == rows - 1
 			if edge or roll < 0.18:
-				_backdrop.draw_texture_rect(STONE_TEX, r, false, dim)
+				wall.draw(canvas, r.grow(-5))
 			else:
-				_backdrop.draw_texture_rect(FLOOR_TEX, r, false, dim)
+				_backdrop.draw_rect(r, walk)
 				if roll > 0.93:
-					_backdrop.draw_texture_rect(BUSH_TEX, r, false, dim)
-	# Darken the middle so the title stays readable.
+					_backdrop.draw_texture_rect(BUSH_TEX, r, false, Color(1, 1, 1, 0.35))
+	# A calm panel behind the title so it stays readable.
+	var panel := StyleBoxFlat.new()
+	panel.bg_color = Color(bg, 0.88)
+	panel.set_corner_radius_all(28)
 	var c := _backdrop.size / 2.0
-	_backdrop.draw_rect(Rect2(c - Vector2(420, 330), Vector2(840, 660)), Color(0.078, 0.094, 0.141, 0.82))
+	panel.draw(canvas, Rect2(c - Vector2(420, 330), Vector2(840, 660)))

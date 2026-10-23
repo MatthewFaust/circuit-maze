@@ -5,10 +5,6 @@ extends PanelContainer
 
 enum RunState { NORMAL, ACTIVE, ANCESTOR, ERROR }
 
-const ACTIVE_COLOR := Color(1.0, 0.88, 0.4)
-const ANCESTOR_COLOR := Color(1.0, 0.95, 0.75, 0.85)
-const ERROR_COLOR := Color(1.0, 0.36, 0.36)
-
 var node_id := -1
 var kind := ""
 var editor: ProgramEditor
@@ -46,13 +42,13 @@ func set_run_state(state: int) -> void:
 	sb.border_width_bottom = width + 1
 	match state:
 		RunState.ACTIVE:
-			sb.border_color = ACTIVE_COLOR
-			sb.shadow_color = Color(1.0, 0.85, 0.3, 0.55)
+			sb.border_color = get_theme_color(&"run_active", &"Palette")
+			sb.shadow_color = get_theme_color(&"run_glow", &"Palette")
 			sb.shadow_size = 10
 		RunState.ANCESTOR:
-			sb.border_color = ANCESTOR_COLOR
+			sb.border_color = get_theme_color(&"run_ancestor", &"Palette")
 		RunState.ERROR:
-			sb.border_color = ERROR_COLOR
-			sb.shadow_color = Color(1.0, 0.2, 0.2, 0.5)
+			sb.border_color = get_theme_color(&"error", &"Palette")
+			sb.shadow_color = get_theme_color(&"error_glow", &"Palette")
 			sb.shadow_size = 10
 	add_theme_stylebox_override("panel", sb)

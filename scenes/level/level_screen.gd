@@ -34,13 +34,21 @@ var _speed_buttons: Array[Button] = []
 @onready var _result: ResultDialog = %ResultDialog
 
 
-func _ready() -> void:
+## Before the children's _ready(), so they're built in the chapter's colors.
+func _enter_tree() -> void:
+	if level != null:
+		return
 	if level_id == "":
 		level_id = str(Game.dev.get("level", Game.current_level_id))
 	level = Game.catalog.get_level(level_id)
 	if level == null:
 		level = Game.catalog.get_level(Game.catalog.order[0])
 		level_id = level.id
+	theme = ChapterPalette.theme_for_chapter(level.chapter)
+
+
+func _ready() -> void:
+	($Bg as ColorRect).color = get_theme_color(&"bg", &"Palette")
 	Game.current_level_id = level_id
 	Progress.data.last_level = level_id
 
@@ -176,9 +184,9 @@ func _on_variant_started(i: int) -> void:
 func _on_variant_finished(i: int, summary: Dictionary) -> void:
 	_tabs.set_tab_icon(i, CHECK_ICON if bool(summary["won"]) else CROSS_ICON)
 	if bool(summary["won"]):
-		_maze.show_banner("ESCAPED!", Color(0.4, 0.95, 0.7))
+		_maze.show_banner("ESCAPED!", get_theme_color(&"good", &"Palette"))
 	else:
-		_maze.show_banner(_short_reason(str(summary["fail_code"])), Color(1, 0.45, 0.5))
+		_maze.show_banner(_short_reason(str(summary["fail_code"])), get_theme_color(&"bad", &"Palette"))
 
 
 func _on_run_finished(passed: bool, info: Dictionary) -> void:
