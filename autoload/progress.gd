@@ -55,6 +55,7 @@ func get_setting(key: String, default: Variant = null) -> Variant:
 
 
 func apply_settings() -> void:
+	ChapterPalette.dark_mode = bool(data.settings.get("dark_mode", false))
 	var volume: float = data.settings.get("volume", 0.8)
 	var sfx_on: bool = data.settings.get("sfx", true)
 	AudioServer.set_bus_volume_db(0, linear_to_db(maxf(volume, 0.0001)))

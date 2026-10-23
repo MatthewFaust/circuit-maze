@@ -11,7 +11,8 @@ const PALETTE_KEYS := ["background", "floor", "path", "accent", "text"]
 static var _default: LevelCatalog
 
 ## [{"id": int, "title", "subtitle", "intro", "objectives": PackedStringArray,
-##   "level_ids": PackedStringArray, "palette": {"name": String, <PALETTE_KEYS>: Color}}]
+##   "level_ids": PackedStringArray, "palette": {"name": String, <PALETTE_KEYS>: Color},
+##   "palette_dark": the same for dark mode}]
 var chapters: Array[Dictionary] = []
 var levels := {}
 var order := PackedStringArray()
@@ -55,6 +56,7 @@ static func load_from(path: String) -> LevelCatalog:
 			"objectives": LevelLoader.get_str_array(cd, "objectives", errs),
 			"level_ids": PackedStringArray(),
 			"palette": _read_palette(cd.get("palette"), errs),
+			"palette_dark": _read_palette(cd.get("palette_dark"), errs, "palette_dark"),
 		}
 		var ids: PackedStringArray = chapter["level_ids"]
 		var number := 0
@@ -82,17 +84,17 @@ static func load_from(path: String) -> LevelCatalog:
 	return cat
 
 
-static func _read_palette(raw: Variant, errs: Array[String]) -> Dictionary:
+static func _read_palette(raw: Variant, errs: Array[String], field: String = "palette") -> Dictionary:
 	var out := {"name": ""}
 	if typeof(raw) != TYPE_DICTIONARY:
-		errs.append("palette must be an object with %s" % ", ".join(PALETTE_KEYS))
+		errs.append("%s must be an object with %s" % [field, ", ".join(PALETTE_KEYS)])
 		return out
 	var d: Dictionary = raw
 	out["name"] = LevelLoader.get_str(d, "name", "", errs)
 	for key: String in PALETTE_KEYS:
 		var v: Variant = d.get(key)
 		if typeof(v) != TYPE_STRING or not Color.html_is_valid(v):
-			errs.append("palette.%s must be a color like \"#4FB286\"" % key)
+			errs.append("%s.%s must be a color like \"#4FB286\"" % [field, key])
 			continue
 		out[key] = Color.html(v)
 	return out

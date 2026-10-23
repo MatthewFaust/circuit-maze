@@ -210,21 +210,27 @@ const EXTRA_STYLES := {
 	"PrimaryButton/disabled": "Button/disabled",
 }
 
+## Dark mode (a setting). Screens read it when they build their theme.
+static var dark_mode := false
 static var _cache := {}
 
 var name := ""
+var dark := false
 ## Role name -> Color.
 var roles := {}
 
 
-## The palette for a chapter (1-based). Unknown chapters get chapter 1's.
-static func for_chapter(chapter_no: int) -> ChapterPalette:
+## The palette for a chapter (1-based), in the current mode unless dark is given.
+## Unknown chapters get chapter 1's.
+static func for_chapter(chapter_no: int, dark: Variant = null) -> ChapterPalette:
+	var is_dark: bool = dark_mode if dark == null else bool(dark)
+	var key := "palette_dark" if is_dark else "palette"
 	var catalog := LevelCatalog.get_default()
 	var info := catalog.chapter_info(chapter_no)
-	if info.is_empty() or (info["palette"] as Dictionary).size() < 1 + LevelCatalog.PALETTE_KEYS.size():
+	if info.is_empty() or (info[key] as Dictionary).size() < 1 + LevelCatalog.PALETTE_KEYS.size():
 		info = catalog.chapter_info(1)
-	var colors: Dictionary = info.get("palette", {})
-	return ChapterPalette.new(colors)
+	var colors: Dictionary = info.get(key, {})
+	return ChapterPalette.new(colors, is_dark)
 
 
 ## The palette of the chapter a level belongs to (chapter 1 for "").
@@ -239,11 +245,12 @@ static func theme_for_level(level_id: String) -> Theme:
 	return theme_for_chapter(level.chapter if level != null else 1)
 
 
-## The theme for a chapter, built once and shared.
+## The theme for a chapter in the current mode, built once and shared.
 static func theme_for_chapter(chapter_no: int) -> Theme:
-	if not _cache.has(chapter_no):
-		_cache[chapter_no] = for_chapter(chapter_no).build_theme()
-	return _cache[chapter_no]
+	var key := "%d:%s" % [chapter_no, "dark" if dark_mode else "light"]
+	if not _cache.has(key):
+		_cache[key] = for_chapter(chapter_no).build_theme()
+	return _cache[key]
 
 
 ## WCAG contrast ratio between two opaque colors (1 to 21).
@@ -258,9 +265,11 @@ static func _relative_luminance(c: Color) -> float:
 	return 0.2126 * l.r + 0.7152 * l.g + 0.0722 * l.b
 
 
-## colors: {"name", "background", "floor", "path", "accent", "text"}, as LevelCatalog reads them.
-func _init(colors: Dictionary = {}) -> void:
+## colors: {"name", "background", "floor", "path", "accent", "text"}, as LevelCatalog
+## reads them. p_dark: the colors are a dark palette (light text on a dark page).
+func _init(colors: Dictionary = {}, p_dark: bool = false) -> void:
 	name = str(colors.get("name", ""))
+	dark = p_dark
 	var bg: Color = colors.get("background", Color("#F2FAF5"))
 	var fl: Color = colors.get("floor", Color("#D6F0E0"))
 	var pa: Color = colors.get("path", Color("#A8DCC0"))
@@ -272,70 +281,136 @@ func _init(colors: Dictionary = {}) -> void:
 	r["path"] = pa
 	r["accent"] = ac
 	r["text"] = tx
+	r["line_soft"] = fl.lerp(pa, 0.4)
+	r["line"] = pa
+	r["hp"] = HP_COLOR
+	r["stamina"] = STAMINA_COLOR
+	r["info"] = tx
+	# The maze: walls in the floor color, walkable cells in the path color.
+	r["wall"] = fl
+	r["walk"] = pa
+	r["walk_line"] = pa.darkened(0.07)
+	r["visited"] = Color(ac, 0.45)
+	r["run_glow"] = Color(ac, 0.55)
+	r["run_ancestor"] = Color(ac, 0.8)
+	r["run_line"] = Color(ac, 0.25)
+	if dark:
+		_derive_dark(bg, fl, pa, ac, tx)
+	else:
+		_derive_light(bg, fl, pa, ac, tx)
+	var strong: Color = r["accent_strong"]
+	r["trail"] = Color(strong, 0.85)
+	r["run_active"] = strong
+	r["error"] = r["bad"]
+	r["error_glow"] = Color(r["bad"], 0.45)
+	r["accent_soft"] = ac.lerp(r["surface"], 0.7)
+	r["accent_wash"] = ac.lerp(r["surface"], 0.88)
+	r["code_symbol"] = r["muted"]
+	r["code_comment"] = r["faint"]
+	r["code_number"] = r["warn"]
+	r["dim"] = Color(r["outline"], 0.42 if not dark else 0.6)
+
+
+## Light mode: white-ish panels on the page, pastel blocks with dark labels.
+func _derive_light(bg: Color, fl: Color, pa: Color, ac: Color, tx: Color) -> void:
+	var r := roles
 	r["surface"] = bg.lerp(Color.WHITE, 0.7)
 	r["well"] = bg.lerp(fl, 0.5)
 	r["raised"] = fl
 	r["hover"] = fl.lerp(pa, 0.55)
-	r["line_soft"] = fl.lerp(pa, 0.4)
-	r["line"] = pa
 	r["line_strong"] = pa.lerp(tx, 0.25)
 	r["accent_hover"] = ac.lerp(Color.WHITE, 0.2)
 	r["accent_pressed"] = ac.darkened(0.12)
 	r["accent_edge"] = ac.darkened(0.3)
-	r["accent_soft"] = ac.lerp(r["surface"], 0.7)
-	r["accent_wash"] = ac.lerp(r["surface"], 0.88)
 	# An accent dark enough for thin lines and small marks on light panels.
-	var strong := ac
-	for i in 10:
-		if contrast(strong, r["surface"]) >= 3.0:
-			break
-		strong = strong.darkened(0.08)
-	r["accent_strong"] = strong
-	var dark := tx.darkened(0.5)
-	r["on_accent"] = dark if contrast(dark, ac) >= contrast(Color.WHITE, ac) else Color.WHITE
+	r["accent_strong"] = _until_contrast(ac, r["surface"], 3.0, false)
+	r["on_accent"] = _best_on(ac, [tx.darkened(0.5), Color.WHITE])
 	r["muted"] = tx.lerp(bg, 0.18)
 	r["faint"] = tx.lerp(bg, 0.55)
 	r["ink"] = tx.darkened(0.3)
 	r["shadow"] = Color(tx, 0.22)
 	r["tooltip"] = tx.darkened(0.15)
 	r["tooltip_text"] = r["surface"]
+	r["label_fill"] = r["surface"]
+	r["halo"] = r["surface"]
+	r["knob"] = r["surface"]
 	for kind: String in KIND_HUES:
 		var hue: Color = KIND_HUES[kind]
 		var soft := hue.lerp(ac, 0.12).lerp(Color.WHITE, 0.42)
 		r[kind] = soft
 		r[kind + "_edge"] = soft.darkened(0.16)
-	r["hp"] = HP_COLOR
-	r["stamina"] = STAMINA_COLOR
 	r["good"] = GOOD
 	r["warn"] = WARN
 	r["bad"] = BAD
-	r["info"] = tx
-	# The maze: walls in the paler floor color, walkable cells in the path color.
-	r["wall"] = fl
 	r["wall_top"] = fl.lerp(Color.WHITE, 0.45)
 	r["wall_edge"] = fl.darkened(0.14)
-	r["walk"] = pa
-	r["walk_line"] = pa.darkened(0.07)
-	r["trail"] = Color(strong, 0.85)
-	r["visited"] = Color(ac, 0.45)
 	r["fog"] = fl.lerp(tx, 0.5)
 	r["fog_dot"] = fl.lerp(tx, 0.3)
 	r["outline"] = tx.darkened(0.45)
-	r["dim"] = Color(r["outline"], 0.42)
-	# Run highlights on blocks and in the code view.
-	r["run_active"] = strong
-	r["run_glow"] = Color(ac, 0.55)
-	r["run_ancestor"] = Color(ac, 0.8)
-	r["run_line"] = Color(ac, 0.25)
-	r["error"] = BAD
-	r["error_glow"] = Color(BAD, 0.45)
-	# Python view syntax colors.
-	r["code_number"] = WARN
-	r["code_symbol"] = r["muted"]
 	r["code_function"] = Color("#1f5fbf")
 	r["code_keyword"] = Color("#a62a6b")
 	r["code_sensor"] = Color("#0e7068")
-	r["code_comment"] = r["faint"]
+
+
+## Dark mode: panels a step lighter than the page, deep block colors with light
+## labels, and light status and syntax colors.
+func _derive_dark(bg: Color, fl: Color, pa: Color, ac: Color, tx: Color) -> void:
+	var r := roles
+	r["surface"] = bg.lerp(fl, 0.55)
+	r["well"] = bg.lerp(fl, 0.2)
+	r["raised"] = fl.lerp(pa, 0.45)
+	r["hover"] = pa
+	r["line_strong"] = pa.lerp(tx, 0.3)
+	r["accent_hover"] = ac.lerp(Color.WHITE, 0.15)
+	r["accent_pressed"] = ac.darkened(0.15)
+	r["accent_edge"] = ac.darkened(0.4)
+	# Bright enough for thin lines and small marks on dark panels.
+	r["accent_strong"] = _until_contrast(ac, r["surface"], 3.0, true)
+	r["on_accent"] = _best_on(ac, [bg.darkened(0.5), Color.WHITE])
+	r["muted"] = tx.lerp(bg, 0.3)
+	r["faint"] = tx.lerp(bg, 0.55)
+	r["ink"] = tx.lerp(Color.WHITE, 0.5)
+	r["shadow"] = Color(0, 0, 0, 0.45)
+	r["tooltip"] = bg.darkened(0.45)
+	r["tooltip_text"] = tx
+	r["label_fill"] = tx
+	r["halo"] = bg.darkened(0.45)
+	r["knob"] = tx
+	for kind: String in KIND_HUES:
+		var hue: Color = KIND_HUES[kind]
+		# Deep enough that the light block labels stay readable.
+		var deep := _until_contrast(hue.lerp(ac, 0.12).lerp(bg, 0.2), r["ink"], 4.8, false)
+		r[kind] = deep
+		r[kind + "_edge"] = deep.darkened(0.3)
+	r["good"] = Color("#6fe0aa")
+	r["warn"] = Color("#f5c463")
+	r["bad"] = Color("#ff8597")
+	r["wall_top"] = fl.lerp(pa, 0.7)
+	r["wall_edge"] = fl.darkened(0.4)
+	r["fog"] = bg.darkened(0.55)
+	r["fog_dot"] = fl
+	r["outline"] = bg.darkened(0.6)
+	r["code_function"] = Color("#8fbfff")
+	r["code_keyword"] = Color("#ff8cc0")
+	r["code_sensor"] = Color("#6ee8da")
+
+
+## Darkens (or lightens) c until it has at least ratio contrast with other.
+static func _until_contrast(c: Color, other: Color, ratio: float, lighten: bool) -> Color:
+	for i in 16:
+		if contrast(c, other) >= ratio:
+			break
+		c = c.lightened(0.08) if lighten else c.darkened(0.08)
+	return c
+
+
+## Whichever candidate reads best on bg.
+static func _best_on(bg: Color, candidates: Array) -> Color:
+	var best: Color = candidates[0]
+	for c: Color in candidates:
+		if contrast(c, bg) > contrast(best, bg):
+			best = c
+	return best
 
 
 func color(role: String) -> Color:
@@ -394,7 +469,7 @@ func build_theme() -> Theme:
 func _add_icons(t: Theme) -> void:
 	var on := color("accent")
 	var off := color("line_strong")
-	var knob := color("surface")
+	var knob := color("knob")
 	var faint := color("line_soft")
 	for type in ["CheckButton"]:
 		t.set_icon("checked", type, _svg_icon(_switch_svg(on, knob, true)))

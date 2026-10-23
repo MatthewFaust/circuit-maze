@@ -8,7 +8,7 @@ extends Node
 ##   --intro (show the intro dialog)  --hints=N (open the hint card with N hints shown)
 ##   --result (evaluate and show the result)
 ##   --code (open the code view)  --screen=menu|select  --shot=PATH (save a PNG and quit)
-##   --unlock-all  --save=user://dev.cfg
+##   --unlock-all  --dark (dark mode for this run, not saved)  --save=user://dev.cfg
 
 const MAIN_MENU := "res://scenes/main_menu/main_menu.tscn"
 const LEVEL_SELECT := "res://scenes/level_select/level_select.tscn"
@@ -29,6 +29,8 @@ func _ready() -> void:
 	for e in catalog.errors:
 		push_error(e)
 	dev = parse_args(OS.get_cmdline_user_args())
+	if dev.has("dark"):
+		ChapterPalette.dark_mode = true
 	var layer := CanvasLayer.new()
 	layer.layer = 100
 	add_child(layer)

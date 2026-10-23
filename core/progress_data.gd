@@ -6,6 +6,7 @@ extends RefCounted
 const VERSION := 1
 const DEFAULT_SETTINGS := {
 	"speed": 1.0, "volume": 0.8, "sfx": true, "reduce_motion": false, "unlock_all": false,
+	"dark_mode": false,
 }
 
 ## id -> {"escape", "stamina", "blocks": bool, "best_blocks", "best_stamina",

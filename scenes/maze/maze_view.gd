@@ -78,7 +78,7 @@ func _ready() -> void:
 	_banner.theme_type_variation = &"HeroTitle"
 	_banner.add_theme_font_size_override("font_size", 56)
 	_banner.add_theme_constant_override("outline_size", 12)
-	_banner.add_theme_color_override("font_outline_color", _pal["surface"])
+	_banner.add_theme_color_override("font_outline_color", _pal["halo"])
 	_banner.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_banner.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_banner.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -91,13 +91,13 @@ func _ready() -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_THEME_CHANGED and _floor != null:
 		_read_palette()
-		_banner.add_theme_color_override("font_outline_color", _pal["surface"])
+		_banner.add_theme_color_override("font_outline_color", _pal["halo"])
 		for layer: Node2D in [_floor, _marks, _numbers, _fog]:
 			layer.queue_redraw()
 
 
 func _read_palette() -> void:
-	for role in ["surface", "wall", "wall_top", "wall_edge", "walk", "walk_line", "trail", "visited",
+	for role in ["halo", "label_fill", "wall", "wall_top", "wall_edge", "walk", "walk_line", "trail", "visited",
 			"fog", "fog_dot", "outline", "accent"]:
 		_pal[role] = get_theme_color(StringName(role), &"Palette")
 	_wall_box = StyleBoxFlat.new()
@@ -534,7 +534,7 @@ func _draw_numbers() -> void:
 		var sz := _font.get_string_size(label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
 		var pos := cell_center(g.cell_at(i)) + Vector2(-sz.x / 2.0, CELL * 0.36)
 		_numbers.draw_string_outline(_font, pos, label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, 8, _pal["outline"])
-		_numbers.draw_string(_font, pos, label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, _pal["surface"])
+		_numbers.draw_string(_font, pos, label, HORIZONTAL_ALIGNMENT_LEFT, -1, fs, _pal["label_fill"])
 
 
 func _draw_fog() -> void:

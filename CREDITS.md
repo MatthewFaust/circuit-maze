@@ -112,7 +112,7 @@ These have no image or sound files, but they are visuals and sounds that Claude 
 | **Board markers:** visited dots, breadcrumb trail, scan heat-map squares, fog | drawn with simple shapes by `scenes/maze/maze_view.gd` | None (AI-made) | AI-made, needs replacing |
 | **Particle bursts:** bump sparks, cut leaves, win burst, power-down smoke | `scenes/maze/maze_view.gd` (plain colored squares, no texture) | None (AI-made) | AI-made, needs replacing |
 | **Interface style:** panel and button shapes, borders | `ui/theme/main_theme.tres` (flat colored boxes, no images) | None (AI-made) | AI-made, needs replacing |
-| **Chapter color themes:** recolored interface, maze floor and walls, switch, radio and slider icons | `scenes/common/chapter_palette.gd`, palettes in `data/levels/catalog.json` | None (palette colors chosen by the project team) | Project-made |
+| **Chapter color themes (light and dark):** recolored interface, maze floor and walls, switch, radio and slider icons | `scenes/common/chapter_palette.gd`, palettes in `data/levels/catalog.json` | None (palette colors chosen by the project team) | Project-made |
 | **Sound effects** | synthesized when the game starts by `autoload/sfx.gd` (there are no audio files) | None (AI-made) | AI-made, needs replacing |
 
 The main menu background draws `bush.svg` over walls and floor in the chapter's colors, so it updates automatically when that tile is replaced.

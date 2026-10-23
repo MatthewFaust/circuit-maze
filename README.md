@@ -43,6 +43,8 @@ Main scene: `scenes/main_menu/main_menu.tscn`.
 
 Each star is kept separately as your best result, and one star unlocks the next level.
 
+**Colors**: each chapter has its own color theme, in a light and a dark version. Switch between them with **Settings → Dark mode** on the main menu; the choice is saved.
+
 ## Rules at a glance
 
 | Action | Stamina | Notes |
@@ -130,6 +132,8 @@ Pass these after `--` when launching:
 - `--autorun`: start running immediately
 - `--speed=0`: max speed
 - `--intro`: show the briefing dialog
+- `--hints=N`: open the hint card with N hints showing
+- `--dark`: use dark mode for this run, without saving it
 - `--result`: show the result dialog
 - `--code`: open the Python view
 - `--screen=select`: open the level select screen
