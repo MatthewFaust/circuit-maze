@@ -19,6 +19,15 @@ func _enter_tree() -> void:
 func _ready() -> void:
 	($Bg as ColorRect).color = get_theme_color(&"bg", &"Palette")
 	_back.pressed.connect(Game.goto_main_menu)
+	var garage := Button.new()
+	garage.name = "GarageButton"
+	garage.text = "Garage"
+	garage.theme_type_variation = &"ToolButton"
+	garage.focus_mode = Control.FOCUS_NONE
+	garage.tooltip_text = "Weapons, armor and skins for boss fights"
+	garage.pressed.connect(Game.goto_garage.bind("select"))
+	_total.get_parent().add_child(garage)
+	_total.get_parent().move_child(garage, _total.get_index() - 1)
 	var catalog := Game.catalog
 	var focus: Control = null
 	for chapter in catalog.chapters:

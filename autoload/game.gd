@@ -7,12 +7,14 @@ extends Node
 ##   --steps=N (run N steps instantly)  --autorun  --speed=1|2|4|0 (0 = max)
 ##   --intro (show the intro dialog)  --hints=N (open the hint card with N hints shown)
 ##   --result (evaluate and show the result)
-##   --code (open the Python view; --code=js for JavaScript)  --screen=menu|select  --shot=PATH (save a PNG and quit)
+##   --code (open the Python view; --code=js for JavaScript)  --screen=menu|select|garage  --tab=shop|equipment|wardrobe (garage)
+##   --shot=PATH (save a PNG and quit)
 ##   --unlock-all  --dark (dark mode for this run, not saved)  --save=user://dev.cfg
 
 const MAIN_MENU := "res://scenes/main_menu/main_menu.tscn"
 const LEVEL_SELECT := "res://scenes/level_select/level_select.tscn"
 const LEVEL_SCREEN := "res://scenes/level/level_screen.tscn"
+const GARAGE := "res://scenes/garage/garage.tscn"
 const FADE_TIME := 0.18
 
 var catalog: LevelCatalog
@@ -71,6 +73,9 @@ func route_dev_args() -> bool:
 	if str(dev.get("screen", "")) == "select":
 		goto_level_select(false)
 		return true
+	if str(dev.get("screen", "")) == "garage":
+		goto_garage("menu", false)
+		return true
 	if dev.has("shot"):
 		capture_and_quit(str(dev["shot"]))
 	return false
@@ -78,6 +83,13 @@ func route_dev_args() -> bool:
 
 func goto_main_menu() -> void:
 	_switch(load(MAIN_MENU).instantiate())
+
+
+## return_to: "menu" or "select", the screen the Garage's back button opens.
+func goto_garage(return_to: String = "menu", fade: bool = true) -> void:
+	var screen: Node = load(GARAGE).instantiate()
+	screen.set("return_to", return_to)
+	_switch(screen, fade)
 
 
 func goto_level_select(fade: bool = true) -> void:

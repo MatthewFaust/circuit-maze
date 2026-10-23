@@ -35,6 +35,19 @@ func _ready() -> void:
 	if not skin.is_empty() and ResourceLoader.exists(str(skin["texture"])):
 		_logo.texture = load(str(skin["texture"]))
 	_settings.pressed.connect(_settings_dialog.call.bind("open"))
+	# The Garage (shop, equipment, wardrobe) sits between Continue and Settings.
+	var garage := Button.new()
+	garage.name = "GarageButton"
+	garage.text = "Garage"
+	garage.custom_minimum_size = _settings.custom_minimum_size
+	garage.size_flags_horizontal = _settings.size_flags_horizontal
+	garage.focus_mode = Control.FOCUS_NONE
+	garage.tooltip_text = "Weapons, armor and skins for boss fights"
+	garage.pressed.connect(func() -> void:
+		Sfx.play(&"click")
+		Game.goto_garage("menu"))
+	_settings.add_sibling(garage)
+	_settings.get_parent().move_child(garage, _settings.get_index())
 	_settings_dialog.connect("appearance_changed", _apply_theme)
 	_quit.pressed.connect(func() -> void: get_tree().quit())
 	if OS.has_feature("web"):

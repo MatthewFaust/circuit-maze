@@ -6,6 +6,7 @@ extends "res://tests/suite_base.gd"
 const LEVEL_SCREEN := "res://scenes/level/level_screen.tscn"
 const MAIN_MENU := "res://scenes/main_menu/main_menu.tscn"
 const LEVEL_SELECT := "res://scenes/level_select/level_select.tscn"
+const GARAGE := "res://scenes/garage/garage.tscn"
 
 var _progress: Node
 var _saved_data: ProgressData
@@ -127,7 +128,7 @@ func _center(c: Control) -> Vector2:
 
 func test_every_screen_loads() -> void:
 	_use_temp_progress()
-	for path in [MAIN_MENU, LEVEL_SELECT]:
+	for path in [MAIN_MENU, LEVEL_SELECT, GARAGE]:
 		var s := await _open(path)
 		await _close(s)
 	var catalog := LevelCatalog.load_from(LevelCatalog.DEFAULT_PATH)
@@ -374,5 +375,36 @@ func test_boss_stage_and_skin() -> void:
 	check_eq(data.skin, "circuit_green", "and its skin is put on")
 	var result: ResultDialog = screen.find_child("ResultDialog", true, false)
 	check(result._unlocks.visible and result._unlocks.text.contains("Circuit Green"), "the result lists the unlock")
+	await _close(screen)
+	_restore_progress()
+
+
+
+## The Shop's Equip button equips an unlocked weapon, and boss fights use it.
+func test_garage_equips_weapons_used_in_boss_fights() -> void:
+	_use_temp_progress()
+	var data: ProgressData = _progress.get("data")
+	data.owned_weapons.append("loop_blaster")
+	var garage := await _open(GARAGE)
+	tree.root.gui_embed_subwindows = true
+	var equip: Button = null
+	for b: Button in garage.find_children("*", "Button", true, false):
+		if b.text == "Equip":
+			equip = b
+	if not check(equip != null, "an Equip button for the unlocked weapon"):
+		await _close(garage)
+		_restore_progress()
+		return
+	await _click(_center(equip))
+	check_eq(data.equipped_weapon, "loop_blaster", "the weapon is equipped")
+	var locked := garage.find_children("*", "Button", true, false).filter(
+			func(b: Button) -> bool: return b.text == "Locked")
+	check_eq(locked.size(), 3, "the other weapons show as locked")
+	(garage.find_child("TabWardrobe", true, false) as Button).emit_signal("pressed")
+	await _frames(2)
+	check(garage.find_child("Skin_starter_bot", true, false) != null, "the wardrobe lists the skins")
+	await _close(garage)
+	var screen := await _open(LEVEL_SCREEN, "1-B")
+	check_eq(int((screen.get("_loadout") as Dictionary)["damage"]), 1, "the boss fight uses the weapon")
 	await _close(screen)
 	_restore_progress()
