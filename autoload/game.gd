@@ -5,7 +5,8 @@ extends Node
 ##
 ## Options: --level=ID  --variant=N (1-based)  --program=solution|starter|empty
 ##   --steps=N (run N steps instantly)  --autorun  --speed=1|2|4|0 (0 = max)
-##   --intro (show the intro dialog)  --result (evaluate and show the result)
+##   --intro (show the intro dialog)  --hints=N (open the hint card with N hints shown)
+##   --result (evaluate and show the result)
 ##   --code (open the code view)  --screen=menu|select  --shot=PATH (save a PNG and quit)
 ##   --unlock-all  --save=user://dev.cfg
 

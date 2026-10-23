@@ -9,7 +9,7 @@ const SPEEDS := [1.0, 2.0, 4.0, 0.0]
 
 var level_id := ""
 var level: LevelData
-var _hint_index := 0
+var _hints: HintPanel
 var _tab_guard := false
 var _speed_buttons: Array[Button] = []
 
@@ -59,6 +59,9 @@ func _ready() -> void:
 	_tabs.visible = level.variants.size() > 1
 	_tabs.tab_changed.connect(_on_tab_changed)
 	_inspector.configure(level)
+	_hints = HintPanel.new()
+	_maze.add_child(_hints)
+	_hints.setup(level.hints, ProgramPrinter.block_text(ProgramParser.parse(level.solution_text)["program"]))
 
 	var program := Progress.data.get_program(level.id)
 	if program.is_empty():
@@ -265,12 +268,9 @@ func _on_intro_closed() -> void:
 	Progress.queue_save()
 
 
+## Opens the hint card, then shows one more hint per press; the last is the full solution.
 func _show_hint() -> void:
-	if level.hints.is_empty():
-		return
-	var i := _hint_index % level.hints.size()
-	_log.show_message("Hint %d/%d: %s" % [i + 1, level.hints.size(), _strip_bbcode(level.hints[i])], "warn")
-	_hint_index += 1
+	_hints.toggle_or_advance()
 
 
 func _short_reason(code: String) -> String:
@@ -322,6 +322,9 @@ func _apply_dev_options() -> void:
 		_code_button.button_pressed = true
 	if d.has("intro"):
 		_intro.open(level)
+	if d.has("hints"):
+		for i in clampi(int(str(d["hints"])), 1, level.hints.size()):
+			_hints.reveal_next()
 	if d.has("steps"):
 		_run.fast_forward(int(str(d["steps"])))
 	elif d.has("autorun"):

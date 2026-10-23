@@ -52,7 +52,7 @@ GODOT=/Users/alexander/Downloads/Godot.app/Contents/MacOS/Godot
 - It reports false errors for scripts that use the autoloads `Game`, `Progress` or `Sfx`. For those, rely on the test run: `test_ui.gd` loads every screen and every level.
 
 **Developer options:**
-- They go after `--`. Examples: `--variant=N` (1-based), `--steps=N`, `--autorun`, `--speed=0`, `--intro`, `--result`, `--code`, `--screen=select`, `--unlock-all`.
+- They go after `--`. Examples: `--variant=N` (1-based), `--steps=N`, `--autorun`, `--speed=0`, `--intro`, `--hints=N`, `--result`, `--code`, `--screen=select`, `--unlock-all`.
 - The full list is in the header of `autoload/game.gd`.
 - Always pass `--save=user://dev.cfg` so dev runs never touch the real progress file. That file is `user://progress.cfg`, in the custom user dir `RobotMazeAlgorithmEscape`.
 
@@ -124,6 +124,7 @@ These are `RefCounted` classes with `class_name`. They use no nodes and never re
   - every anti-solution fails, with `expect_fail_code` when one is given
   - replaying one map's action list fails the level, unless `checks.hardcode_must_fail` is false
   - with `checks.inline_must_fail`, inlining the function calls exceeds the block limit
+- **Hints:** exactly 3 per level (the test enforces it). They go from a nudge, to the strategy, to an explanation of the full solution. `HintPanel` prints the level's `solution` as blocks (`ProgramPrinter.block_text()`) under the third hint, so never write the program into the hint text; update `solution` instead.
 - **When a level fails, fix its map or its par, not `MazeRules`.** The rules are shared by all 22 levels.
 - Use `tools/level_report.gd` to find the right numbers.
 

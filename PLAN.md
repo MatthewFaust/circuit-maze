@@ -191,7 +191,7 @@ res://
 
 ## Levels: 22 total, one JSON file each
 Each level file contains:
-- `id`, `title`, `concept`, `intro`, `cs_note`, `hints[]`
+- `id`, `title`, `concept`, `intro`, `cs_note`, `hints[]`: exactly 3, from a nudge to the strategy to an explanation of the full solution. The hint card prints the `solution` program as blocks under the third hint, so the hint is always the tested solution.
 - `allowed{blocks, sensors, functions, not}`, `block_limit`, `par{blocks, stamina}`
 - `robot{stamina, hp}`, `rules{}` overrides, `fog`, `starter`
 - `solution`: the program that sets the par. It must earn all 3 stars.

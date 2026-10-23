@@ -5,7 +5,7 @@
   "new_blocks": ["spike_ahead"],
   "intro": "Two lanes, lots of spikes, one HP bar. Each lane alone has enough spikes to destroy you, so switch lanes whenever a spike is ahead. Which way is the other lane? That depends on which lane you're in.",
   "cs_note": "Sometimes the right action depends on [b]context[/b] (here, your lane), so decisions nest. The robot has no memory of its lane, but it can sense it: that's state you sense rather than store.",
-  "hints": ["In the top lane the wall is on your left; in the bottom lane it's on your right.", "if spike_ahead(): if path_left(): change lane to the left, else: change lane to the right."],
+  "hints": ["In the top lane the wall is on your left; in the bottom lane it's on your right.", "if spike_ahead(): if path_left(): change lane to the left, else: change lane to the right.", "Changing lanes takes three blocks: turn toward the other lane, move(), turn back to face east. If a spike is ahead and there's room on your left, you're in the bottom lane: turn_left, move, turn_right. Otherwise you're in the top lane: turn_right, move, turn_left. With no spike ahead, just move()."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut", "while", "if", "if_else"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit", "bush_ahead", "stone_ahead", "spike_ahead"], "functions": [], "not": true},
   "block_limit": 12,
   "par": {"blocks": 10, "stamina": 70},

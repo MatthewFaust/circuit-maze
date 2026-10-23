@@ -12,7 +12,8 @@
   "cs_note": "Any rule that only looks at its surroundings can be trapped in a loop. [b]Depth-first search[/b] adds memory: a visited set, plus a stack of breadcrumbs. move() pushes, backtrack() pops; going as deep as possible and then backing up is exactly LIFO.",
   "hints": [
     "Remember where you've been: prefer tiles you have never visited.",
-    "If nothing new is ahead, left or right, backtrack()."
+    "If nothing new is ahead, left or right, backtrack().",
+    "This is depth-first search. While a neighbour is unvisited, go to it: check left, then ahead, then right. A turn doesn't move; the next pass sees the new tile ahead and moves. When all neighbours are visited you're at a dead end, so backtrack() steps back along your breadcrumbs and the next branch gets its turn. The island can't trap you."
   ],
   "allowed": {
     "blocks": [

@@ -5,7 +5,7 @@
   "new_blocks": [],
   "intro": "The same step, three times. And each step is itself a repeat. Put a repeat inside a repeat.",
   "cs_note": "[b]Nested loops multiply[/b]: an outer repeat 3 around an inner repeat 4 runs the inner body 12 times. That's why two nested loops over n items cost about n² steps.",
-  "hints": ["One stair is: 4 moves east, turn left, 2 moves north, turn right.", "The robot wins the moment it reaches the exit, even halfway through a loop."],
+  "hints": ["One stair is: 4 moves east, turn left, 2 moves north, turn right.", "Put one stair inside [b]repeat 3 times[/b]. Inside the stair, use a repeat 4 for the moves east and a repeat 2 for the moves north.", "A repeat inside a repeat: the outer repeat 3 runs the whole stair three times, and each pass runs the inner repeats in full, so the robot makes 3 × 4 = 12 moves east in total. That's 7 blocks, exactly the limit. Check that the outer count really says 3."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat"], "sensors": [], "functions": [], "not": false},
   "block_limit": 7,
   "par": {"blocks": 7, "stamina": 23},

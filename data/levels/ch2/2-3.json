@@ -5,7 +5,7 @@
   "new_blocks": ["path_left", "path_right"],
   "intro": "Follow the road wherever it bends. Going straight when you can, and otherwise turning the way the road goes, works on every one of these maps.",
   "cs_note": "[b]Nested conditionals[/b] form a decision tree: can I go straight? If not, can I go left? Every leaf of the tree needs an action, or the robot freezes.",
-  "hints": ["When the way ahead is blocked, there is exactly one open side.", "if path_ahead(): move(), else check path_left() to choose which way to turn."],
+  "hints": ["When the way ahead is blocked, there is exactly one open side.", "if path_ahead(): move(), else check path_left() to choose which way to turn.", "Inside while not at_exit(), put an if … else on path_ahead() with move() in its first mouth. In its else mouth, put a second if … else on path_left(): turn_left() first, turn_right() in its else. A turn doesn't move the robot; the next pass of the loop walks the new way."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut", "while", "if", "if_else"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit", "bush_ahead"], "functions": [], "not": true},
   "block_limit": 6,
   "par": {"blocks": 6, "stamina": 63},

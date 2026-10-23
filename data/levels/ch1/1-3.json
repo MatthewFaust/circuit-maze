@@ -5,7 +5,7 @@
   "new_blocks": [],
   "intro": "The safe road is long and your stamina is short. Spikes cost [b]25 HP[/b] each, and a repair kit gives back [b]30[/b]. Sometimes you pay in health.",
   "cs_note": "Most problems trade one resource for another: time vs. memory in real programs, stamina vs. HP here. Before you run, add up what each plan costs.",
-  "hints": ["Count the stamina the top route needs: every move and every turn costs 1.", "Walk straight through: 100 - 25 - 25 + 30 - 25 - 25 = 30 HP left."],
+  "hints": ["Count the stamina the top route needs: every move and every turn costs 1.", "Walk straight through: 100 - 25 - 25 + 30 - 25 - 25 = 30 HP left.", "The safe road around the top needs more stamina than the robot has, so take the spikes. Six move() blocks cross four spikes and the repair kit: you lose 70 HP, get 30 back, and arrive with 30 HP after spending only 6 stamina."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right"], "sensors": [], "functions": [], "not": false},
   "block_limit": 0,
   "par": {"blocks": 6, "stamina": 6},

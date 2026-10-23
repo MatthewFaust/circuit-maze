@@ -5,7 +5,7 @@
   "new_blocks": [],
   "intro": "Two mirror-image mazes, one small battery. A three-way fork: only one arm leads out, and the first tiles of the left and right arms look identical. DFS has to guess. Thinking is cheaper than walking.",
   "cs_note": "DFS's cost depends on luck: here about 11 or about 100 stamina, depending on which arm it tries first. BFS pays a fixed price to examine every tile, then walks the optimal route. Paying for computation to save movement is a classic trade-off.",
-  "hints": ["Run your DFS on both mazes and compare the costs.", "Use the program from Ripple."],
+  "hints": ["Run your DFS on both mazes and compare the costs.", "DFS has to guess at the fork and pays for every wrong arm it walks. Use the program from Ripple instead.", "scan() once, then while not at_exit(): if closer_ahead(), move(); else if closer_left(), turn_left(); else turn_right(). The scan costs 5 stamina up front, but the robot then walks straight down the correct arm, which fits on the small battery where exploring the wrong arms doesn't."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "while", "if", "if_else", "backtrack", "scan"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit", "unvisited_ahead", "unvisited_left", "unvisited_right", "closer_ahead", "closer_left", "closer_right"], "functions": [], "not": true},
   "block_limit": 12,
   "par": {"blocks": 7, "stamina": 32},

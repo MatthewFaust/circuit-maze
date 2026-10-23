@@ -5,7 +5,7 @@
   "new_blocks": ["scan_weighted", "bush_ahead", "cut"],
   "intro": "Shortcuts have tolls. The middle road is the shortest but full of bushes; the top road is long; the bottom road has one bush. [b]scan()[/b] counts tiles. [b]scan_weighted()[/b] counts stamina: a bush costs 4 (cut + move).",
   "cs_note": "[b]Dijkstra's algorithm[/b] is BFS with a priority queue: the cheapest tile comes out first, not the oldest one. Fewest tiles is not the same as least cost, which is why maps apps weigh roads by travel time.",
-  "hints": ["Use the BFS follower from Ripple, but scan with scan_weighted().", "On the cheapest road you'll meet a bush: if bush_ahead(), cut before you move."],
+  "hints": ["Use the BFS follower from Ripple, but scan with scan_weighted().", "On the cheapest road you'll meet a bush: if bush_ahead(), cut before you move.", "scan_weighted() counts stamina instead of tiles, so a bush counts as 4 and the cheapest route is the road with a single bush. Follow the closer tiles as in Ripple. In the closer_ahead() branch, put a plain [b]if bush_ahead()[/b] with cut() inside it just above move(): cut the bush if there is one, then step forward."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "cut", "while", "if", "if_else", "backtrack", "scan", "scan_weighted"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit", "bush_ahead", "unvisited_ahead", "unvisited_left", "unvisited_right", "closer_ahead", "closer_left", "closer_right"], "functions": [], "not": true},
   "block_limit": 12,
   "par": {"blocks": 9, "stamina": 56},

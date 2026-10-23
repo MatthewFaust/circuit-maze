@@ -5,7 +5,7 @@
   "new_blocks": ["cut"],
   "intro": "Shears cost [b]3[/b] stamina, legs cost [b]1[/b]. [b]cut[/b] clears the bush right in front of you. You have exactly enough stamina for the cheapest route, so shop around.",
   "cs_note": "[b]Optimization[/b] means comparing the cost of the alternatives. Cutting through b bushes costs 4b + 1; walking around costs a few extra moves and turns. A greedy \"always cut\" or \"never cut\" rule loses here.",
-  "hints": ["Price each obstacle separately: the thick hedge and the single bush.", "Walk around the hedge, but cut the single bush."],
+  "hints": ["Price each obstacle separately: the thick hedge and the single bush.", "Walk around the hedge, but cut the single bush.", "Cutting costs 3 stamina and moving costs 1. Through the hedge is 3 cuts and 4 moves (13); the path over it is 4 turns and 6 moves (10), so go around. Cutting the single bush is 1 cut and 2 moves (5); the loop over it is 4 turns and 6 moves (10), so cut. That adds up to exactly your 20 stamina."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut"], "sensors": [], "functions": [], "not": false},
   "block_limit": 0,
   "par": {"blocks": 14, "stamina": 20},

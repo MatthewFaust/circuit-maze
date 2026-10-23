@@ -153,5 +153,9 @@ func test_starters_and_fog_rules() -> void:
 				check(errs.is_empty(), "%s starter uses blocks that aren't allowed: %s" % [level.id, str(errs)])
 		if level.fog:
 			check(not level.shows_scan(), "%s: fog levels can't allow scan" % level.id)
-		check(level.intro != "" and level.cs_note != "" and not level.hints.is_empty(),
-				"%s needs intro, cs_note and hints" % level.id)
+		check(level.intro != "" and level.cs_note != "", "%s needs intro and cs_note" % level.id)
+		# Hints go from a nudge to the strategy to the full solution (the hint
+		# card shows the solution program under the last one).
+		check_eq(level.hints.size(), 3, "%s hint count" % level.id)
+		for h in level.hints:
+			check(h.strip_edges() != "", "%s has an empty hint" % level.id)

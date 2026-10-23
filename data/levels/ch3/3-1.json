@@ -5,7 +5,7 @@
   "new_blocks": ["call:A"],
   "intro": "Four boulders, irregular gaps, and the sensors are offline. The dodge around each boulder is always the same, but the gaps between them aren't, so a single repeat can't do it. Teach the robot the dodge once in [b]define A[/b], then call [b]A[/b] wherever you need it.",
   "cs_note": "Loops capture repetition in a row; [b]functions[/b] capture repetition anywhere. Naming a chunk of work once and reusing it is the heart of DRY: Don't Repeat Yourself.",
-  "hints": ["The dodge: step forward, go up, across two, back down, step forward.", "Put the whole 10-step move-dodge-move in A. Main is just moves and calls."],
+  "hints": ["The dodge: step forward, go up, across two, back down, step forward.", "Put the whole 10-step move-dodge-move in A. Main is just moves and calls.", "Build the dodge once in the [b]define A()[/b] section, then drag [b]A()[/b] from the Functions palette into main wherever a boulder is, with plain move() blocks for the gaps. Written out without A, the four dodges alone would take 40 blocks, far over the limit of 24."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat"], "sensors": [], "functions": ["A"], "not": false},
   "block_limit": 24,
   "par": {"blocks": 20, "stamina": 45},

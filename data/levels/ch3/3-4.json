@@ -5,7 +5,7 @@
   "new_blocks": [],
   "intro": "Walk east until the wall, then north [i]the same distance[/i], then step into the exit on your right. The decoy pockets look exactly like the exit, you have no variables, and you can't afford to peek into every pocket.",
   "cs_note": "Each pending function call is a [b]stack frame[/b]. If A moves and then calls itself, every step east leaves a frame waiting; when the calls return, each frame replays one move north. The call stack is memory.",
-  "hints": ["A function can call itself. What should A do when the way ahead is blocked? That's the base case.", "def A(): if path_ahead(): move, A, move; else: turn_left."],
+  "hints": ["A function can call itself. What should A do when the way ahead is blocked? That's the base case.", "Inside A: if path_ahead(), then move(), A(), move(). Otherwise turn_left(). That's the whole function.", "Each call of A takes one step east, then waits on the [b]call stack[/b] with one move() still to do. At the wall, the base case turns left. Now every waiting call finishes its second move(), heading north: exactly as many steps as you went east. Main then turns right and steps into the exit."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut", "while", "if", "if_else"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit", "bush_ahead", "stone_ahead", "spike_ahead"], "functions": ["A", "B"], "not": true},
   "block_limit": 0,
   "par": {"blocks": 9, "stamina": 33},

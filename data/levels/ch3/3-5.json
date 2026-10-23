@@ -5,7 +5,7 @@
   "new_blocks": ["call:C"],
   "intro": "Loops are offline and your call stack holds only [b]30[/b] frames. Somewhere in this tree of corridors is the exit. Explore smart: a call that goes one tile deeper must also bring you back.",
   "cs_note": "[b]Tree recursion[/b] keeps only the current branch on the stack, so its depth is the height of the tree, not the length of the walk. A recursive wall follower (tail recursion) adds a frame for every step and overflows.",
-  "hints": ["Let A(): if there's a path ahead, step in, explore every direction from there, then step back out.", "B can be the step back: turn around, move, turn around."],
+  "hints": ["Let A(): if there's a path ahead, step in, explore every direction from there, then step back out.", "B can be the step back: turn around, move, turn around.", "After stepping in, A explores ahead, turns left and explores, turns right twice and explores, then turns left to face forward again, and B steps back out. Every call ends where it started, facing the same way. With no path ahead, A does nothing: that's the base case. The run ends the moment the robot reaches the exit."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "if", "if_else"], "sensors": ["path_ahead"], "functions": ["A", "B", "C"], "not": true},
   "rules": {"max_call_depth": 30},
   "block_limit": 18,

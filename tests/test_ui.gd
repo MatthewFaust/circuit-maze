@@ -287,3 +287,33 @@ func test_typed_repeat_count_applies_on_run_and_check() -> void:
 		(screen.find_child("ResultDialog", true, false) as Control).hide()
 	await _close(screen)
 	_restore_progress()
+
+
+## The Hint button opens the card, reveals one hint per press, and the last hint
+## shows the level's solution as blocks; one more press closes the card.
+func test_hint_card_reveals_three_hints_then_solution() -> void:
+	_use_temp_progress()
+	var screen := await _open(LEVEL_SCREEN, "1-5")
+	(screen.find_child("IntroDialog", true, false) as Control).hide()
+	var level: LevelData = screen.get("level")
+	var card: HintPanel = null
+	for c in screen.find_children("*", "HintPanel", true, false):
+		card = c
+	if not check(card != null, "the level screen has a hint card"):
+		return
+	check(not card.visible, "hidden until asked")
+	var button: Button = screen.find_child("HintButton", true, false)
+	tree.root.gui_embed_subwindows = true
+	for n in [1, 2, 3]:
+		await _click(_center(button))
+		check(card.visible, "open after press %d" % n)
+		check_eq(card.shown_count(), n, "hints shown after press %d" % n)
+	var solution := ProgramPrinter.block_text(ProgramParser.parse(level.solution_text)["program"])
+	var texts := PackedStringArray()
+	for r: RichTextLabel in card.find_children("*", "RichTextLabel", true, false):
+		texts.append(r.get_parsed_text())
+	check(texts.has(solution), "the last hint shows the solution program")
+	await _click(_center(button))
+	check(not card.visible, "a press with every hint shown closes the card")
+	await _close(screen)
+	_restore_progress()

@@ -33,6 +33,48 @@ static func render(p: Dictionary) -> Dictionary:
 	return {"text": "\n".join(lines), "line_of": line_of}
 
 
+## The program as the block editor shows it: main first, then each function
+## that has blocks, with "repeat N times", "while ...", "if ..." / "else" and
+## calls as "A()". Used for the full-solution hint.
+static func block_text(p: Dictionary) -> String:
+	var lines := PackedStringArray()
+	var fns: Dictionary = p.get("functions", {})
+	var names: Array = fns.keys().filter(func(f: String) -> bool: return not (fns[f] as Array).is_empty())
+	names.sort()
+	var depth := 0
+	if not names.is_empty():
+		lines.append("Program (main):")
+		depth = 1
+	_emit_blocks(p.get("main", []), depth, lines)
+	for fname: String in names:
+		lines.append("define %s():" % fname)
+		_emit_blocks(fns[fname], 1, lines)
+	return "\n".join(lines)
+
+
+static func _emit_blocks(list: Array, depth: int, lines: PackedStringArray) -> void:
+	var prefix := INDENT.repeat(depth)
+	if list.is_empty():
+		lines.append(prefix + "(empty)")
+		return
+	for node: Dictionary in list:
+		var t: String = node["type"]
+		match t:
+			"call":
+				lines.append(prefix + str(node["fn"]) + "()")
+			"repeat":
+				lines.append(prefix + "repeat %d times" % int(node["count"]))
+				_emit_blocks(node["body"], depth + 1, lines)
+			"while", "if", "if_else":
+				lines.append(prefix + ("while " if t == "while" else "if ") + cond_text(node["cond"]))
+				_emit_blocks(node["body"], depth + 1, lines)
+				if t == "if_else":
+					lines.append(prefix + "else")
+					_emit_blocks(node["else_body"], depth + 1, lines)
+			_:
+				lines.append(prefix + t + "()")
+
+
 static func cond_text(c: Dictionary) -> String:
 	var negate: bool = c.get("negate", false)
 	return ("not " if negate else "") + str(c.get("sensor", "?")) + "()"

@@ -5,7 +5,7 @@
   "new_blocks": [],
   "intro": "Put one hand on the wall and never let go: if you can turn toward that hand, do it; otherwise go straight; otherwise turn away. It works in any maze whose walls are all connected. Both hands work here, but one is cheaper.",
   "cs_note": "In a maze with no loops, [b]wall following[/b] is really a depth-first traversal that walks every corridor at most twice. It's correct only because the walls are all connected; keep that assumption in mind.",
-  "hints": ["Right-hand rule: if path_right(): turn right and move; elif path_ahead(): move; else: turn left.", "For the stamina star, try the mirror image: the left-hand rule."],
+  "hints": ["Right-hand rule: if path_right(): turn right and move; elif path_ahead(): move; else: turn left.", "For the stamina star, try the mirror image: the left-hand rule.", "Left-hand rule: if path_left(), turn_left() and move(); else if path_ahead(), move(); else turn_right(). Turning toward an open left side first keeps your left hand on the wall all the way to the exit. Both hands escape every maze here, but the left hand gets there sooner."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "while", "if", "if_else"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit"], "functions": [], "not": true},
   "block_limit": 8,
   "par": {"blocks": 7, "stamina": 105},

@@ -34,6 +34,7 @@ Main scene: `scenes/main_menu/main_menu.tscn`.
 | `1` `2` `3` `4` | speed 1x, 2x, 4x, max |
 | **Check** | test every map instantly, without animation |
 | **Hint** / `H`, **Python** / `C`, **Briefing** | hints, the program as Python code, the level intro |
+| **Hint**, pressed again | each level has 3 hints: what to notice, the strategy, then the full solution as blocks. Each press shows the next one; once all three are showing, a press closes the card |
 
 **Stars**:
 - ★ escaped every map

@@ -5,7 +5,7 @@
   "new_blocks": ["repeat"],
   "intro": "Twenty-six instructions, eight blocks. Do the math. [b]repeat[/b] runs the blocks inside it as many times as you say. The path also needs more stamina than you have, so grab the battery on the way.",
   "cs_note": "A [b]loop[/b] says \"do this N times\" instead of writing it N times. Batteries refill stamina but never above the maximum, so picking one up when you're nearly full wastes some of it.",
-  "hints": ["Drop blocks inside the repeat block's mouth to loop them.", "Three straight runs: 10 east, 6 north, 8 west."],
+  "hints": ["Drop blocks inside the repeat block's mouth to loop them.", "Three straight runs: 10 east, 6 north, 8 west.", "Use one [b]repeat[/b] per straight run, with a single move() inside each, and set its count by clicking the number and typing it. A turn_left() goes between the runs. The battery on the way north refills your stamina, which is why 20 stamina covers a 26-step route."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat"], "sensors": [], "functions": [], "not": false},
   "block_limit": 8,
   "par": {"blocks": 8, "stamina": 26},

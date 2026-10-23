@@ -109,6 +109,14 @@ func test_printer_output() -> void:
 	check_eq(ProgramPrinter.to_text(p), expected, "printed text")
 
 
+## The full-solution hint prints programs the way the block editor shows them.
+func test_block_text() -> void:
+	var p := _parse("def A():\n    move()\nrepeat 2:\n    A()\nwhile not at_exit():\n    if bush_ahead():\n        cut()\n    elif path_left():\n        turn_left()")
+	var expected := "Program (main):\n    repeat 2 times\n        A()\n    while not at_exit()\n        if bush_ahead()\n            cut()\n        else\n            if path_left()\n                turn_left()\ndefine A():\n    move()"
+	check_eq(ProgramPrinter.block_text(p), expected, "block text with a function")
+	check_eq(ProgramPrinter.block_text(_parse("move()\nturn_left()")), "move()\nturn_left()", "no functions: no headers")
+
+
 func test_printer_line_map() -> void:
 	var p := _parse("def A():\n    move()\nA()\nwhile path_ahead():\n    move()")
 	var r := ProgramPrinter.render(p)

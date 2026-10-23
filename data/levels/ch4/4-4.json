@@ -5,7 +5,7 @@
   "new_blocks": ["scan", "closer_ahead", "closer_left", "closer_right"],
   "intro": "Ping the maze. [b]scan()[/b] floods outward from the exit, one ring at a time, and writes each tile's distance on the floor. Then walk downhill: [b]closer_ahead()[/b] is true when that step brings you one tile nearer.",
   "cs_note": "[b]Breadth-first search[/b] uses a queue (first in, first out), so it labels tiles in order of distance. Walking downhill on those numbers follows a shortest path: the same \"flow field\" trick that steers crowds of enemies in strategy games.",
-  "hints": ["scan() first, then loop until you're at the exit.", "If closer_ahead(): move; elif closer_left(): turn left; else: turn right."],
+  "hints": ["scan() first, then loop until you're at the exit.", "If closer_ahead(): move; elif closer_left(): turn left; else: turn right.", "scan() writes every tile's distance to the exit on the floor. Then only walk downhill: if the tile ahead is closer, move(); otherwise turn left if that side is closer, or else turn right. Every move takes you one step nearer, so you follow a shortest path. Put scan() above the while, not inside it: one scan is enough, and each costs 5 stamina."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "while", "if", "if_else", "backtrack", "scan"], "sensors": ["path_ahead", "path_left", "path_right", "at_exit", "unvisited_ahead", "unvisited_left", "unvisited_right", "closer_ahead", "closer_left", "closer_right"], "functions": [], "not": true},
   "block_limit": 10,
   "par": {"blocks": 7, "stamina": 40},

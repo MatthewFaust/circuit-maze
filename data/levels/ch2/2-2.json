@@ -5,7 +5,7 @@
   "new_blocks": ["if", "if_else", "bush_ahead"],
   "intro": "The bushes are in different places on every map. Look before you leap: [b]if/else[/b] checks a sensor and runs exactly one of its two branches.",
   "cs_note": "A [b]conditional[/b] picks one branch. Cutting on every step would also clear the way, but it costs 4 stamina per tile; checking first is free. Conditions buy efficiency.",
-  "hints": ["Keep going until you're at the exit: while not at_exit().", "Inside the loop: if a bush is ahead, cut it, otherwise move."],
+  "hints": ["Keep going until you're at the exit: while not at_exit().", "Inside the loop: if a bush is ahead, cut it, otherwise move.", "Use the [b]if … else[/b] block, which has two mouths. Each pass of the loop does exactly one thing: cut the bush in front, or step forward. The while keeps going however many bushes a map has. To make \"not at_exit()\", click the [b]not[/b] toggle on the while block."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut", "while", "if", "if_else"], "sensors": ["path_ahead", "at_exit", "bush_ahead"], "functions": [], "not": true},
   "block_limit": 5,
   "par": {"blocks": 4, "stamina": 53},

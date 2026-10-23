@@ -5,7 +5,7 @@
   "new_blocks": ["call:B"],
   "intro": "The same trick facing east, south, west and north. A function uses [i]relative[/i] moves, so it works whichever way the robot faces. Which chunk is worth naming?",
   "cs_note": "Relative moves make a function [b]portable[/b]: it doesn't care which way you face. Picking the right chunk to abstract is the real skill: a slightly bigger chunk can make the rest of the program much simpler.",
-  "hints": ["The thing that repeats isn't just the dodge. Look one tile wider on each side.", "Each side of the square is A, A, then a right turn."],
+  "hints": ["The thing that repeats isn't just the dodge. Look one tile wider on each side.", "Each side of the square is A, A, then a right turn.", "A is the same move-dodge-move as in Copy, Paste, Regret. It uses only relative turns, so it works facing any direction. A repeat 3 times of A, A, turn_right() walks three sides of the square; then A, turn_right(), move() and a last A finish the path to the exit."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat"], "sensors": [], "functions": ["A", "B"], "not": false},
   "block_limit": 21,
   "par": {"blocks": 19, "stamina": 85},

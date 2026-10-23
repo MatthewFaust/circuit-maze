@@ -5,7 +5,7 @@
   "new_blocks": ["move"],
   "intro": "Your robot knows exactly one trick. Drag [b]move[/b] into the program (or just click it) once for every step, then press [b]Run[/b].",
   "cs_note": "A program is a [b]sequence[/b]: instructions run top to bottom, exactly once each. The computer does what you wrote, not what you meant.",
-  "hints": ["Count the floor tiles between the robot and the exit.", "The exit is four steps away: four move blocks."],
+  "hints": ["Count the floor tiles between the robot and the exit.", "The exit is four steps away: four move blocks.", "Each move() steps one tile in the direction the robot faces, and the robot already faces the exit. Click [b]move()[/b] four times (a click adds the block at the end of the program), then press [b]Run[/b]."],
   "allowed": {"blocks": ["move"], "sensors": [], "functions": [], "not": false},
   "block_limit": 0,
   "par": {"blocks": 4, "stamina": 4},

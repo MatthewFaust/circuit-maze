@@ -5,7 +5,7 @@
   "new_blocks": ["while", "path_ahead", "at_exit", "not"],
   "intro": "Three corridors, one program. They have different lengths, so counting won't save you. [b]while[/b] keeps repeating its body as long as its condition is true. Your program has to pass all three maps.",
   "cs_note": "A [b]while loop[/b] runs until its condition becomes false. Checking a sensor is free, but a loop whose condition never changes runs forever. Each map is a [b]test case[/b]: code that passes one test isn't necessarily correct.",
-  "hints": ["Use the tabs above the maze to look at every map before you write code.", "while path_ahead(): move() walks until the wall. Then turn and do it again."],
+  "hints": ["Use the tabs above the maze to look at every map before you write code.", "while path_ahead(): move() walks until the wall. Then turn and do it again.", "Every map is a corridor east and then a corridor north, only with different lengths. The first [b]while path_ahead()[/b] with a move() inside walks east to the wall, whatever its length. turn_left() faces north, and a second while walks up to the exit, where the run ends."],
   "allowed": {"blocks": ["move", "turn_left", "turn_right", "repeat", "cut", "while"], "sensors": ["path_ahead", "at_exit"], "functions": [], "not": true},
   "block_limit": 5,
   "par": {"blocks": 5, "stamina": 31},

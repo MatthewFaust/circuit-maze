@@ -6,8 +6,9 @@
   "intro": "Fog! You can only see the tiles right around the robot, so you can't plan a route by looking. Neither could Theseus. Trust the algorithm: your DFS from Island Trap works on any maze.",
   "cs_note": "DFS always finds the exit if there is one, because it never visits a tile twice and backs up only when it's stuck. But it finds [i]an[/i] exit path, not the shortest one: watch how long the breadcrumb stack gets.",
   "hints": [
-    "The same program as in Island Trap.",
-    "Try different orders of ahead/left/right for the stamina star."
+    "Your DFS from Island Trap works here unchanged, even in the fog.",
+    "Try different orders of ahead/left/right for the stamina star.",
+    "Check ahead first, then right, then left: if unvisited_ahead(), move(); else if unvisited_right(), turn_right(); else if unvisited_left(), turn_left(); else backtrack(). DFS reaches every open tile, so the fog can't hide the exit from it. The order only decides which branches it tries first, and here going straight first wastes the fewest steps."
   ],
   "allowed": {
     "blocks": [
