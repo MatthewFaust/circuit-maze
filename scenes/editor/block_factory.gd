@@ -105,6 +105,9 @@ static func build_block(ed: ProgramEditor, node: Dictionary, depth: int) -> Bloc
 		spin.custom_minimum_size = Vector2(84, 0)
 		spin.set_value_no_signal(int(node["count"]))
 		spin.value_changed.connect(func(value: float) -> void: ed.set_param(id, "count", int(value)))
+		# SpinBox only applies typed text in a deferred call after editing ends,
+		# so Run would read the old count. Apply it the moment focus leaves.
+		spin.get_line_edit().focus_exited.connect(spin.apply)
 		spin.tooltip_text = "How many times to repeat"
 		_widget(ed, v, spin)
 		header.add_child(spin)

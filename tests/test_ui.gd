@@ -234,3 +234,43 @@ func test_full_run_records_stars() -> void:
 	check_eq(data.stars("2-2"), 3, "three stars recorded")
 	await _close(screen)
 	_restore_progress()
+
+
+## Types a repeat count without pressing Enter: Run and Check must still use it.
+func test_typed_repeat_count_applies_on_run_and_check() -> void:
+	_use_temp_progress()
+	var screen := await _open(LEVEL_SCREEN, "1-4")
+	var editor: ProgramEditor = screen.find_child("ProgramEditor", true, false)
+	var run: RunController = screen.find_child("RunController", true, false)
+	(screen.find_child("IntroDialog", true, false) as Control).hide()
+	var level: LevelData = screen.get("level")
+	var p: Dictionary = ProgramParser.parse(level.solution_text)["program"]
+	((p["main"] as Array)[0] as Dictionary)["count"] = 2
+	for action in ["run", "check"]:
+		editor.set_program(p)
+		await _frames(3)
+		var spin: SpinBox = editor._lists[0].block_views[0].widgets[0]
+		var le := spin.get_line_edit()
+		le.grab_focus()
+		le.edit()
+		le.text = "10"
+		if action == "run":
+			run.set_speed(0.0)
+			run.run()
+			for i in 600:
+				if run.state == RunController.State.FINISHED:
+					break
+				await tree.process_frame
+			check_eq(run.state, RunController.State.FINISHED, "run finished")
+			var summary: Dictionary = run.results.get(0, {})
+			check(bool(summary.get("won", false)), "Run used the typed count (got %s)" % str(summary.get("fail_code", "")))
+			run.reset()
+		else:
+			(screen.find_child("ResultDialog", true, false) as Control).hide()
+			screen.call("_check_all")
+			var data: ProgressData = _progress.get("data")
+			check_eq(data.stars("1-4"), 3, "Check used the typed count")
+		var main: Array = editor.get_program_copy()["main"]
+		check_eq(int((main[0] as Dictionary)["count"]), 10, "%s: the model holds the typed count" % action)
+	await _close(screen)
+	_restore_progress()

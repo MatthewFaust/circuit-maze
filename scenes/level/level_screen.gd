@@ -96,6 +96,8 @@ func _ready() -> void:
 
 
 func _go_back() -> void:
+	# Applies a half-typed repeat count before saving.
+	get_viewport().gui_release_focus()
 	_save_program()
 	Progress.save()
 	Game.goto_level_select()
@@ -204,6 +206,8 @@ func _show_run_result(passed: bool, info: Dictionary, ev: Dictionary) -> void:
 func _check_all() -> void:
 	if _run.is_active():
 		return
+	# Applies a half-typed repeat count, as Run does.
+	get_viewport().gui_release_focus()
 	var program := _editor.get_program_copy()
 	var ev := LevelEvaluator.evaluate(level, program)
 	if not bool(ev["valid"]):
