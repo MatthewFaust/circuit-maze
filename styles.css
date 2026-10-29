@@ -142,3 +142,67 @@ h1, h2 { margin: 0; font-size: clamp(24px, 2.1vw, 29px); line-height: 1.15; lett
   .dialog-inner { padding: 21px; }
 }
 @media (prefers-reduced-motion: reduce) { .robot { transition: none; } }
+
+
+/* Custom pixel-art tiles and four-direction cat sprites. */
+.tile.grass {
+  background-color: #cbd1cc;
+  background-image: url("./images/floor.png");
+  background-size: 110% 110%;
+  background-position: center;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+}
+.tile.goal {
+  background-color: #cbd1cc;
+  background-image: none;
+}
+.flag {
+  position: absolute;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  bottom: auto;
+  background: url("./images/goal.png") center / 110% 110% no-repeat;
+  image-rendering: pixelated;
+}
+.flag::before { content: none; }
+.robot {
+  position: absolute;
+  z-index: 2;
+  width: 85%;
+  height: 85%;
+  top: auto;
+  bottom: 14%;
+  left: 7.5%;
+  border: none;
+  border-radius: 0;
+  background: url("./images/cat-up.png") center bottom / contain no-repeat;
+  image-rendering: pixelated;
+  transition: none;
+}
+.robot::before, .robot::after { content: none; }
+.robot.facing-north {
+  transform: none;
+  background-image: url("./images/cat-up.png");
+}
+.robot.facing-east {
+  transform: none;
+  background-image: url("./images/cat-right.png");
+}
+.robot.facing-south {
+  transform: none;
+  background-image: url("./images/cat-down.png");
+}
+.robot.facing-west {
+  transform: none;
+  background-image: url("./images/cat-left.png");
+}
+
+/* Raise only the side-view cats; keep front/back at 14%. */
+.robot.facing-east,
+.robot.facing-west {
+  bottom: 19%;
+}
