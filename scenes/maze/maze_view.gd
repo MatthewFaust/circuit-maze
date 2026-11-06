@@ -131,6 +131,11 @@ func set_robot_look(skin: Texture2D, armor: Texture2D, weapon: Texture2D) -> voi
 	if skin != null:
 		_robot_body.texture = skin
 	RobotGear.dress_sprite(_robot_body, armor, weapon)
+	# Fit every selected skin to the same cell-relative size.
+	var skin_size := _robot_body.texture.get_size()
+	if skin_size.x > 0.0 and skin_size.y > 0.0:
+		var fit := CELL * 0.90 / maxf(skin_size.x, skin_size.y)
+		_robot_body.scale = Vector2.ONE * fit
 
 
 ## Rebuilds the board for a fresh world (new variant, reset).
@@ -329,11 +334,13 @@ func _add_boss(b: Dictionary) -> Node2D:
 	var body := Sprite2D.new()
 	body.name = "Body"
 	body.texture = boss_texture if boss_texture != null else OBJECT_TEX[Tiles.SPIKE]
-	body.scale = Vector2(s, s)
+	var texture_size := body.texture.get_size()
+	var fit_scale := CELL * 0.80 / maxf(texture_size.x, texture_size.y)
+	body.scale = Vector2.ONE * fit_scale * s
 	node.add_child(body)
 	var bar := Node2D.new()
 	bar.name = "Bar"
-	bar.position = Vector2(0, -CELL * 0.5 * s - 8.0)
+	bar.position = Vector2(0, -CELL * 0.5 * 0.80 * s - 8.0)
 	bar.draw.connect(_draw_boss_bar.bind(bar, node))
 	node.add_child(bar)
 	_objects.add_child(node)
@@ -451,14 +458,17 @@ func _add_sprite(cell: Vector2i, t: int) -> void:
 	var s := Sprite2D.new()
 	s.texture = OBJECT_TEX[t]
 	s.position = cell_center(cell)
+	var tex_size := s.texture.get_size()
+	s.scale = Vector2.ONE * (CELL * (0.95 if t == Tiles.EXIT else 0.8) / maxf(tex_size.x, tex_size.y))
 	_objects.add_child(s)
 	_sprites[cell] = s
 	if Game.reduce_motion():
 		return
 	if t == Tiles.EXIT:
+		var base_scale := s.scale
 		var tw := s.create_tween().set_loops()
-		tw.tween_property(s, "scale", Vector2(1.06, 1.06), 0.8).set_trans(Tween.TRANS_SINE)
-		tw.tween_property(s, "scale", Vector2.ONE, 0.8).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(s, "scale", base_scale * 1.06, 0.8).set_trans(Tween.TRANS_SINE)
+		tw.tween_property(s, "scale", base_scale, 0.8).set_trans(Tween.TRANS_SINE)
 		_idle_tweens.append(tw)
 	elif t == Tiles.BATTERY or t == Tiles.REPAIR:
 		var tw := s.create_tween().set_loops()
