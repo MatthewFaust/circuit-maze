@@ -1,15 +1,15 @@
 class_name RobotGear
 extends RefCounted
-## How the equipped gear sits on the robot: the weapon mounted at the front-top
-## corner (the robot faces east), the armor as a badge on its back. Offsets are
+## Equipped gear stacks vertically, armor above weapon, close to the lower-left side. Offsets are
 ## in the robot texture's 128 px space, from its center. The maze, the Garage
 ## preview and the main-menu logo all dress the robot through here.
 
 const ROBOT_PX := 128.0
-const WEAPON_OFFSET := Vector2(30, -34)
-const WEAPON_SCALE := 0.42
-const ARMOR_OFFSET := Vector2(-44, 18)
-const ARMOR_SCALE := 0.38
+const WEAPON_OFFSET := Vector2(-39, 40)
+const WEAPON_SCALE := 0.303
+const ARMOR_OFFSET := Vector2(-43, 10)
+const ARMOR_SCALE := 0.275
+const ARMOR_TARGET_PX := 37.5  # Visible armor size in the robot's 128px coordinate space
 
 
 ## The equipped look: {"skin", "armor", "weapon"} textures (null for none).
@@ -25,8 +25,15 @@ static func look(data: ProgressData) -> Dictionary:
 ## Adds (or replaces) "Armor" and "Weapon" child sprites on the robot's body
 ## sprite, so they turn and flash with it.
 static func dress_sprite(body: Sprite2D, armor: Texture2D, weapon: Texture2D) -> void:
-	_sprite(body, "Armor", armor, ARMOR_OFFSET, ARMOR_SCALE)
-	_sprite(body, "Weapon", weapon, WEAPON_OFFSET, WEAPON_SCALE)
+	# Match the Garage layout using proportions of the actual skin texture.
+	# This matters when a skin SVG is not 128x128.
+	var skin_side := ROBOT_PX
+	if body.texture != null:
+		var skin_size := body.texture.get_size()
+		skin_side = maxf(skin_size.x, skin_size.y)
+	var k := skin_side / ROBOT_PX
+	_sprite(body, "Armor", armor, ARMOR_OFFSET * k, ARMOR_SCALE, ARMOR_TARGET_PX * k)
+	_sprite(body, "Weapon", weapon, WEAPON_OFFSET * k, WEAPON_SCALE, ROBOT_PX * WEAPON_SCALE * k)
 
 
 ## The same for a TextureRect showing the robot (it must not be a container).
@@ -35,7 +42,7 @@ static func dress_rect(rect: TextureRect, armor: Texture2D, weapon: Texture2D) -
 	_rect(rect, "Weapon", weapon, WEAPON_OFFSET, WEAPON_SCALE)
 
 
-static func _sprite(body: Sprite2D, node_name: String, tex: Texture2D, offset: Vector2, s: float) -> void:
+static func _sprite(body: Sprite2D, node_name: String, tex: Texture2D, offset: Vector2, s: float, target_px: float) -> void:
 	var old := body.get_node_or_null(node_name)
 	if old != null:
 		body.remove_child(old)
@@ -46,7 +53,10 @@ static func _sprite(body: Sprite2D, node_name: String, tex: Texture2D, offset: V
 	sp.name = node_name
 	sp.texture = tex
 	sp.position = offset
-	sp.scale = Vector2(s, s)
+	var dimensions := tex.get_size()
+	var side := maxf(dimensions.x, dimensions.y)
+	var actual_scale := target_px / side if side > 0.0 else s
+	sp.scale = Vector2.ONE * actual_scale
 	body.add_child(sp)
 
 
@@ -82,6 +92,8 @@ static func _place_all(rect: TextureRect) -> void:
 			continue
 		var r := child as TextureRect
 		var side := ROBOT_PX * float(r.get_meta(&"gear_scale")) * k
+		if r.name == "Armor":
+			side = ARMOR_TARGET_PX * k
 		r.size = Vector2(side, side)
 		r.position = rect.size / 2.0 + Vector2(r.get_meta(&"gear_offset")) * k - r.size / 2.0
 
